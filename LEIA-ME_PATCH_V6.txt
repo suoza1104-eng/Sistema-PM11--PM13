@@ -1,0 +1,39 @@
+PM13 - PATCH V6 UNIFICADO - PRIORÍMETRO COMPACTO / MULTICOLAGEM
+Data: 19/08/2026
+
+Este patch já contempla o conteúdo do V5 + os ajustes desta rodada.
+
+PRIORÍMETRO - TELA
+- Remove a coluna Equipamento da grade.
+- Mantém ID + Descrição do Item como identificação fixa.
+- Compacta as colunas de critérios S/N.
+- Ctrl+C copia a linha de origem e mantém contorno tracejado.
+- Após copiar, clique em vários destinos ou clique/segure/arraste para selecionar várias linhas.
+- Ctrl+V cola os critérios em todos os destinos selecionados.
+- A origem nunca é sobrescrita pela própria colagem.
+- Ctrl+Z/Ctrl+Y continuam usando o histórico global do projeto.
+
+EXPORTAÇÃO INDIVIDUAL DO PRIORÍMETRO
+- Remove coluna Equipamento.
+- Coluna A: ITENS = identificador do item.
+- Coluna B: ITEM = descrição do item.
+- Critérios S/N ficam mais estreitos.
+- Mantém listas suspensas 1-5, 1/2/3/4/6/8 e S/N.
+- Mantém legenda lateral.
+
+EXPORTAÇÃO DO PROJETO COMPLETO
+- Inclui nova aba Priorímetro.
+- Coluna A: ITENS = identificador.
+- Coluna B: ITEM = descrição.
+- Inclui os 15 critérios do priorímetro.
+- Possui listas suspensas e layout compacto.
+
+INSTALAÇÃO
+1. Faça backup de data/pm13.db.
+2. Clique em Encerrar Sistema.
+3. Extraia este ZIP sobre a pasta raiz do PM13.
+4. Confirme a substituição dos arquivos.
+5. Inicie novamente pelo INICIAR_PM13.bat.
+6. Pressione Ctrl+F5 no navegador.
+
+O ZIP não contém banco de dados.

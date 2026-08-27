@@ -1,0 +1,20 @@
+PM13 - PATCH V6.1 - Seleção do Priorímetro
+
+Correções:
+1. Clique simples após Ctrl+C seleciona somente a linha clicada.
+2. Seleção por arraste só inicia após movimento real do mouse, evitando dupla seleção acidental.
+3. Cliques adicionais continuam acumulando destinos para Ctrl+V em massa.
+4. Arrastar sobre várias linhas continua selecionando múltiplos destinos.
+5. Botão "Limpar seleção" recebeu fundo branco e texto escuro na barra de ações.
+6. Versões de cache de CSS/JS atualizadas.
+
+Arquivos:
+- static/index.html
+- static/css/app.css
+- static/js/priorimeter.js
+
+Instalação:
+- Encerrar Sistema
+- Extrair sobre a pasta raiz do PM13 e substituir os arquivos
+- Iniciar o sistema
+- Ctrl+F5 no navegador

@@ -1,0 +1,36 @@
+PM13 - PATCH V5 UNIFICADO - PRIORÍMETRO SAP
+============================================
+
+Este patch é cumulativo sobre a rodada V4: mantém as correções de importação/exportação,
+capacidade sem Equipes e acrescenta a nova tela Priorímetro SAP.
+
+INSTALAÇÃO
+1) Faça backup de data/pm13.db.
+2) Clique em "Encerrar Sistema".
+3) Extraia este ZIP sobre a pasta raiz do PM13, preservando a estrutura de pastas.
+4) Confirme a substituição dos arquivos.
+5) Inicie novamente pelo INICIAR_PM13.bat.
+6) No navegador, use Ctrl+F5.
+
+NÃO contém banco de dados.
+A migração cria automaticamente a tabela item_priorimeter no banco existente.
+
+PRIORÍMETRO
+- Uma linha automática para cada item do projeto (sem duplicar o item).
+- Probabilidade de Falha: 1,2,3,4,5.
+- Impacto da Manutenção: 1,2,3,4,6,8.
+- Demais critérios: S/N, conforme planilha priorim.xlsx fornecida.
+- Edição célula a célula.
+- Seleção múltipla + "Editar em massa".
+- Ctrl+C copia todos os critérios da linha ativa.
+- A linha copiada fica com contorno tracejado.
+- Selecione o destino e use Ctrl+V. Com múltiplas linhas marcadas, cola em todas.
+- Ctrl+Z / Ctrl+Y utilizam o histórico global do projeto e desfazem/refazem a colagem e edições.
+- Esc cancela o estado de cópia.
+- Exportar XLSX gera o leiaute corporativo do priorímetro, incluindo legendas e listas de validação.
+- Itens novos aparecem automaticamente no Priorímetro ainda vazios.
+- Filtro Ativos/Inativos/Todos e pesquisa por ID/equipamento/descrição.
+
+OBSERVAÇÃO SOBRE NOTA/SCORING
+A planilha fornecida não contém fórmula de cálculo da nota. O sistema não inventa uma regra;
+armazena/exporta os critérios preenchidos. Uma fórmula SAP poderá ser adicionada depois se for definida.

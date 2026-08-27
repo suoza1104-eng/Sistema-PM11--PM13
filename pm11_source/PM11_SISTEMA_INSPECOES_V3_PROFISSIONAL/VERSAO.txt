@@ -1,0 +1,5 @@
+PM11 V3.0 PROFISSIONAL
+Build: 2026.08.20-pm11-v3-profissional
+Base visual e de UX: PM13 fornecido pelo usuário
+Porta local: 8766
+Banco: data/pm11.db

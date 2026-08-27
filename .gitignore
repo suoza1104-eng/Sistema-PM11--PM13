@@ -1,0 +1,20 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+env/
+venv/
+*.zip
+.vscode/
+.claude/
+.ds_store
+Thumbs.db
+scratch/
+
+# Database files & Backups
+*.db
+*.sqlite
+*.sqlite3
+data/
+backups/

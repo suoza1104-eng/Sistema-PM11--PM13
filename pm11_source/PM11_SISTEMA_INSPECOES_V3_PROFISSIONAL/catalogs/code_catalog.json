@@ -1,0 +1,100 @@
+{
+  "centers": [
+    {
+      "code": "C",
+      "description": "Usiminas Cubatão"
+    },
+    {
+      "code": "G",
+      "description": "Unigal"
+    },
+    {
+      "code": "U",
+      "description": "Usiminas Ipatinga"
+    }
+  ],
+  "processes": [
+    {
+      "code": "R",
+      "description": "Redução"
+    },
+    {
+      "code": "A",
+      "description": "Aciaria"
+    },
+    {
+      "code": "Q",
+      "description": "Laminação a Quente"
+    },
+    {
+      "code": "F",
+      "description": "Laminação a Frio"
+    },
+    {
+      "code": "E",
+      "description": "Energia e Transporte"
+    },
+    {
+      "code": "I",
+      "description": "Instrumentação e Automação"
+    },
+    {
+      "code": "M",
+      "description": "Manutenção Central"
+    }
+  ],
+  "types": [
+    {
+      "code": "I",
+      "description": "Inspeção"
+    },
+    {
+      "code": "L",
+      "description": "Lubrificação"
+    },
+    {
+      "code": "P",
+      "description": "Preditiva"
+    },
+    {
+      "code": "E",
+      "description": "Espoleta"
+    },
+    {
+      "code": "R",
+      "description": "Reparo por Oferta"
+    },
+    {
+      "code": "O",
+      "description": "Operação"
+    },
+    {
+      "code": "C",
+      "description": "Calibração"
+    }
+  ],
+  "lines": [
+    {
+      "code": "ST1",
+      "description": "Sinterização 1"
+    },
+    {
+      "code": "ST2",
+      "description": "Sinterização 2"
+    },
+    {
+      "code": "ST3",
+      "description": "Sinterização 3"
+    },
+    {
+      "code": "CQ2",
+      "description": "Coqueria 2"
+    }
+  ],
+  "subareas": [
+    {
+      "code": "DFS",
+      "description": "Desenfornadeiras"
+    }
+  ]
+}

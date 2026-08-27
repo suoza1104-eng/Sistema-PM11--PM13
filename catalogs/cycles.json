@@ -1,0 +1,128 @@
+[
+  {
+    "code": "01D",
+    "cycle": 1,
+    "unit": "DIA",
+    "text": "DIÁRIA",
+    "horizon": 100
+  },
+  {
+    "code": "02D",
+    "cycle": 2,
+    "unit": "DIA",
+    "text": "DOIS DIAS",
+    "horizon": 100
+  },
+  {
+    "code": "03D",
+    "cycle": 3,
+    "unit": "DIA",
+    "text": "3 DIAS",
+    "horizon": 100
+  },
+  {
+    "code": "01S",
+    "cycle": 1,
+    "unit": "SMS",
+    "text": "1 SEMANA",
+    "horizon": 100
+  },
+  {
+    "code": "02S",
+    "cycle": 2,
+    "unit": "SMS",
+    "text": "DUAS SEMANAS",
+    "horizon": 50
+  },
+  {
+    "code": "03S",
+    "cycle": 3,
+    "unit": "SMS",
+    "text": "3 SEMANAS",
+    "horizon": 65
+  },
+  {
+    "code": "01M",
+    "cycle": 4,
+    "unit": "SMS",
+    "text": "4 SEMANAS = 1M",
+    "horizon": 80
+  },
+  {
+    "code": "06S",
+    "cycle": 6,
+    "unit": "SMS",
+    "text": "6 SEMANAS",
+    "horizon": 83
+  },
+  {
+    "code": "02M",
+    "cycle": 9,
+    "unit": "SMS",
+    "text": "9 SEMANAS = 2M",
+    "horizon": 89
+  },
+  {
+    "code": "03M",
+    "cycle": 13,
+    "unit": "SMS",
+    "text": "TRIMESTRAL = 3M",
+    "horizon": 92
+  },
+  {
+    "code": "04M",
+    "cycle": 17,
+    "unit": "SMS",
+    "text": "17 SEMANAS = 4M",
+    "horizon": 94
+  },
+  {
+    "code": "06M",
+    "cycle": 26,
+    "unit": "SMS",
+    "text": "SEMESTRAL = 26S",
+    "horizon": 96
+  },
+  {
+    "code": "09M",
+    "cycle": 39,
+    "unit": "SMS",
+    "text": "9 MESES = 39S",
+    "horizon": 97
+  },
+  {
+    "code": "01A",
+    "cycle": 52,
+    "unit": "SMS",
+    "text": "ANUAL",
+    "horizon": 98
+  },
+  {
+    "code": "18M",
+    "cycle": 78,
+    "unit": "SMS",
+    "text": "18 MESES = 78S",
+    "horizon": 99
+  },
+  {
+    "code": "02A",
+    "cycle": 104,
+    "unit": "SMS",
+    "text": "2 ANOS",
+    "horizon": 99
+  },
+  {
+    "code": "03A",
+    "cycle": 156,
+    "unit": "SMS",
+    "text": "3 ANOS",
+    "horizon": 99
+  },
+  {
+    "code": "04A",
+    "cycle": 208,
+    "unit": "SMS",
+    "text": "4 ANOS",
+    "horizon": 99
+  }
+]

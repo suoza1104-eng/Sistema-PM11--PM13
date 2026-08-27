@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PM11 Siderurgia - Sistema de Planos e Ordens de Inspeção</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css?v=3.0.0">
+</head>
+<body>
+<div id="app-layout">
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+      <span class="logo-text">PM11 <span>Local</span></span>
+      <button id="sidebar-toggle" class="btn-icon" title="Recolher menu"><svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg></button>
+    </div>
+    <nav class="sidebar-menu">
+      <a href="#dashboard" class="menu-item active" data-view="dashboard"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14H5v-4h5v4zm0-6H5V7h5v4zm9 6h-7v-4h7v4zm0-6h-7V7h7v4z"/></svg><span>Visão Geral</span></a>
+      <a href="#plans" class="menu-item" data-view="plans"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg><span>Planos</span></a>
+      <a href="#items" class="menu-item" data-view="items"><svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg><span>Itens</span></a>
+      <a href="#characteristics" class="menu-item" data-view="characteristics"><svg viewBox="0 0 24 24"><path d="M9 11H7v2h2v-2zm0-4H7v2h2V7zm0 8H7v2h2v-2zm8-4h-6v2h6v-2zm0-4h-6v2h6V7zm0 8h-6v2h6v-2zM19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg><span>Características</span></a>
+      <a href="#balance" class="menu-item" data-view="balance"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg><span>Balanceamento</span></a>
+      <a href="#templates" class="menu-item" data-view="templates"><svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/></svg><span>Biblioteca de Padrões</span></a>
+      <a href="#projects" class="menu-item" data-view="projects"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.53c-.26-.81-1-1.4-1.9-1.4h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg><span>Projetos</span></a>
+      <a href="#io" class="menu-item" data-view="io"><svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg><span>Importar / Exportar</span></a>
+      <a href="#settings" class="menu-item" data-view="settings"><svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg><span>Configurações</span></a>
+    </nav>
+    <div class="sidebar-footer">
+      <button id="btn-shutdown" class="btn btn-danger btn-block"><svg viewBox="0 0 24 24"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/></svg><span>Encerrar Sistema</span></button>
+    </div>
+  </aside>
+  <main id="main-content">
+    <header id="top-bar">
+      <div class="header-left">
+        <button id="menu-toggle-btn" class="btn-icon header-mobile-only"><svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg></button>
+        <div class="project-info-badge"><span class="badge-label">PROJETO ATIVO</span><h2 id="active-project-name">Carregando...</h2></div>
+      </div>
+      <div class="header-right">
+        <div class="history-controls" role="group">
+          <button id="btn-global-undo" class="btn btn-outline history-action-btn" disabled><svg viewBox="0 0 24 24"><path d="M7.5 5.5 3 10l4.5 4.5V11H14a5 5 0 0 1 5 5v3h2v-3a7 7 0 0 0-7-7H7.5V5.5z"/></svg><span>Desfazer</span></button>
+          <button id="btn-global-redo" class="btn btn-outline history-action-btn" disabled><svg viewBox="0 0 24 24"><path d="m16.5 5.5 4.5 4.5-4.5 4.5V11H10a5 5 0 0 0-5 5v3H3v-3a7 7 0 0 1 7-7h6.5V5.5z"/></svg><span>Refazer</span></button>
+        </div>
+        <div class="header-indicator"><span class="indicator-label">CARTEIRA</span><strong id="active-project-items">0 itens</strong></div>
+        <div class="header-indicator"><span class="indicator-label">STATUS DB</span><span id="db-status-dot" class="status-dot green"></span><strong id="db-status-text">Conectado</strong></div>
+        <button id="btn-switch-project-top" class="btn btn-outline"><svg viewBox="0 0 24 24"><path d="M19 8l-4 4h3c0 3.31-2.69 6-6 6-1.01 0-1.97-.25-2.8-.7l-1.46 1.46C8.97 19.54 10.43 20 12 20c4.42 0 8-3.58 8-8h3l-4-4zM6 12c0-3.31 2.69-6 6-6 1.01 0 1.97.25 2.8.7l1.46-1.46C15.03 4.46 13.57 4 12 4c-4.42 0-8 3.58-8 8H1l4 4 4-4H6z"/></svg>Trocar Projeto</button>
+      </div>
+    </header>
+    <div class="content-wrapper"><section id="view" class="content-section"></section></div>
+  </main>
+</div>
+
+<div id="loader" class="loader-overlay hidden"><div class="loader-spinner"></div><p id="loader-text">Processando...</p></div>
+<div id="toast-wrap" class="toast-container"></div>
+<div id="modal-backdrop" class="modal-overlay hidden"><div id="modal" class="modal-container"><div class="modal-header"><div><h2 id="modal-title">Editar</h2><p id="modal-subtitle" class="subtitle"></p></div><button id="modal-close" class="btn-icon">×</button></div><div id="modal-body" class="modal-body"></div><div id="modal-actions" class="modal-footer"></div></div></div>
+
+<script src="js/api.js?v=3.0.0"></script>
+<script src="js/ui.js?v=3.0.0"></script>
+<script src="js/projects.js?v=3.0.0"></script>
+<script src="js/dashboard.js?v=3.0.0"></script>
+<script src="js/plans.js?v=3.0.0"></script>
+<script src="js/items.js?v=3.0.0"></script>
+<script src="js/characteristics.js?v=3.0.0"></script>
+<script src="js/balance.js?v=3.0.0"></script>
+<script src="js/templates.js?v=3.0.0"></script>
+<script src="js/io.js?v=3.0.0"></script>
+<script src="js/settings.js?v=3.0.0"></script>
+<script src="js/app.js?v=3.0.0"></script>
+</body></html>

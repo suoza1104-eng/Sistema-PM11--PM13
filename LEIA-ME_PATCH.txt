@@ -1,0 +1,48 @@
+PM13 — PATCH EXPORTAÇÃO DO BALANCEAMENTO
+
+Objetivo
+--------
+Mantém as abas já existentes do relatório de balanceamento e acrescenta uma nova aba:
+
+  "Paradas + Efetivos"
+
+A nova aba mantém as PARADAS distribuídas horizontalmente. Para cada parada é criado o bloco:
+
+  ITEM / ID | PLANO | PARADA N | Mecânico | Horas | Soldador | Horas | Eletricista | Horas
+
+A coluna PARADA N mantém o detalhamento da ordem (descrição, equipamento/local, ciclo e carga HH).
+As colunas Mecânico/Soldador/Eletricista usam os campos de efetivo já cadastrados no item;
+as colunas Horas usam os respectivos campos de horas de cada especialidade.
+
+Abas preservadas
+----------------
+1. Resumo
+2. Ordens por Parada
+
+Nova aba
+--------
+3. Paradas + Efetivos
+
+Instalação
+----------
+1. Feche o PM13.
+2. Faça uma cópia de segurança do arquivo atual core/export_service.py.
+3. Copie a pasta "core" deste patch para a pasta raiz do PM13.
+4. Confirme a substituição de core/export_service.py.
+5. Inicie o PM13 normalmente.
+6. Na tela Balanceamento, use o mesmo botão de exportação do relatório.
+
+Não é necessário alterar banco de dados, app.py, HTML ou JavaScript.
+
+Compatibilidade
+---------------
+Patch elaborado sobre a versão do PM13 presente em "Planos PM13-PM11(3).zip".
+
+Validação executada
+-------------------
+- compilação Python: OK
+- geração do XLSX: OK
+- workbook reconhecido com 3 abas: OK
+- aba original "Ordens por Parada" preservada: OK
+- nova aba com dois blocos de parada testados: OK
+- Item/ID, Plano, descrição da ordem, MEC, SOL, ELE e respectivas horas: OK

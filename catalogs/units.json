@@ -1,0 +1,1846 @@
+[
+  {
+    "code": "%",
+    "description": "Porcentagem"
+  },
+  {
+    "code": "% CH4",
+    "description": "% do limite explosividade CH4"
+  },
+  {
+    "code": "% H2",
+    "description": "% do limite explosividade H2"
+  },
+  {
+    "code": "% O2",
+    "description": "% O2 porcentagem de Oxigênio"
+  },
+  {
+    "code": "1/M2",
+    "description": "1 / metro quadrado"
+  },
+  {
+    "code": "1/cm3",
+    "description": "1/centímetro cúbico"
+  },
+  {
+    "code": "1/m3",
+    "description": "1/metro cúbico"
+  },
+  {
+    "code": "1/min",
+    "description": "1/Minute"
+  },
+  {
+    "code": "G",
+    "description": "Aceleração gravidade"
+  },
+  {
+    "code": "Acre",
+    "description": "Acre"
+  },
+  {
+    "code": "ADM",
+    "description": "Adimensional"
+  },
+  {
+    "code": "A",
+    "description": "Ampère"
+  },
+  {
+    "code": "Adc",
+    "description": "Ampere - corrente continua"
+  },
+  {
+    "code": "AAC",
+    "description": "Ampere Corrente Alternada"
+  },
+  {
+    "code": "Ampola",
+    "description": "Ampola"
+  },
+  {
+    "code": "anos",
+    "description": "Ano"
+  },
+  {
+    "code": "API",
+    "description": "API"
+  },
+  {
+    "code": "val",
+    "description": "Artigo de valor"
+  },
+  {
+    "code": "BLD",
+    "description": "BALDE"
+  },
+  {
+    "code": "bar",
+    "description": "Bar"
+  },
+  {
+    "code": "BA",
+    "description": "BARRA"
+  },
+  {
+    "code": "BR",
+    "description": "Barril"
+  },
+  {
+    "code": "Bq/kg",
+    "description": "Becquereis/quilograma"
+  },
+  {
+    "code": "BT",
+    "description": "BLISTER"
+  },
+  {
+    "code": "BL",
+    "description": "Bloco"
+  },
+  {
+    "code": "BB",
+    "description": "Bombona"
+  },
+  {
+    "code": "bpm",
+    "description": "bpm"
+  },
+  {
+    "code": "BTU/h",
+    "description": "British termic unit (BTU) hora"
+  },
+  {
+    "code": "CADA",
+    "description": "Cada"
+  },
+  {
+    "code": "caixa",
+    "description": "Caixa"
+  },
+  {
+    "code": "CxPapl",
+    "description": "Caixa de papelão"
+  },
+  {
+    "code": "CAIXT.",
+    "description": "Caixote"
+  },
+  {
+    "code": "cal",
+    "description": "calorias"
+  },
+  {
+    "code": "cal/g",
+    "description": "Calorias por grama"
+  },
+  {
+    "code": "Cd",
+    "description": "Candela"
+  },
+  {
+    "code": "car",
+    "description": "Cartela"
+  },
+  {
+    "code": "cv",
+    "description": "Cavalos"
+  },
+  {
+    "code": "CST",
+    "description": "Ceintistoke"
+  },
+  {
+    "code": "cgiodo",
+    "description": "Centigramas de iodo pro grama"
+  },
+  {
+    "code": "cl",
+    "description": "Centilitro"
+  },
+  {
+    "code": "cm",
+    "description": "Centímetro"
+  },
+  {
+    "code": "cm3",
+    "description": "Centímetro cúbico"
+  },
+  {
+    "code": "cmH2O",
+    "description": "Centimetro de coluna d' agua"
+  },
+  {
+    "code": "cm/min",
+    "description": "Centimetro por minuto"
+  },
+  {
+    "code": "cm2",
+    "description": "Centímetro quadrado"
+  },
+  {
+    "code": "cm3/s",
+    "description": "Centímetros cúbicos/segundo"
+  },
+  {
+    "code": "cmHg",
+    "description": "Centímetros de mercúrio"
+  },
+  {
+    "code": "cm/h",
+    "description": "Centímetros/hora"
+  },
+  {
+    "code": "cm/s",
+    "description": "Centímetros/segundo"
+  },
+  {
+    "code": "CT",
+    "description": "Cento"
+  },
+  {
+    "code": "CI",
+    "description": "CILINDRO"
+  },
+  {
+    "code": "M-1",
+    "description": "Coeficiente de absorção de luz"
+  },
+  {
+    "code": "% IACS",
+    "description": "Condutividade Elétrica"
+  },
+  {
+    "code": "CJ",
+    "description": "CONJUNTO"
+  },
+  {
+    "code": "NAS",
+    "description": "Contagem de particulas"
+  },
+  {
+    "code": "ISO",
+    "description": "Contagem de particulas iso"
+  },
+  {
+    "code": "DAM3",
+    "description": "Decâmetro Cúbico"
+  },
+  {
+    "code": "dB",
+    "description": "decibeis"
+  },
+  {
+    "code": "dB(A)",
+    "description": "Decibéis"
+  },
+  {
+    "code": "dB(C)",
+    "description": "Decibéis"
+  },
+  {
+    "code": "dB-NEN",
+    "description": "Decibéis NEN"
+  },
+  {
+    "code": "dm",
+    "description": "Decímetro"
+  },
+  {
+    "code": "dm3",
+    "description": "Decímetro cúbico"
+  },
+  {
+    "code": "Gauss",
+    "description": "densidade de fluxo magnetico"
+  },
+  {
+    "code": "Dias",
+    "description": "Dia"
+  },
+  {
+    "code": "DPR",
+    "description": "Dia PRT"
+  },
+  {
+    "code": "DVP",
+    "description": "Dia/Vagão PRT"
+  },
+  {
+    "code": "dial/m",
+    "description": "Dial por Minuto"
+  },
+  {
+    "code": "DDPM",
+    "description": "Dígito Dial por Minuto"
+  },
+  {
+    "code": "dn/cm2",
+    "description": "dina por centímetro quadrado"
+  },
+  {
+    "code": "HB",
+    "description": "Dureza Brinell"
+  },
+  {
+    "code": "HRA",
+    "description": "Dureza Rockwell A"
+  },
+  {
+    "code": "HRB",
+    "description": "Dureza Rockwell B"
+  },
+  {
+    "code": "HRC",
+    "description": "Dureza Rockwell C"
+  },
+  {
+    "code": "HS",
+    "description": "Dureza Shore"
+  },
+  {
+    "code": "HV",
+    "description": "Dureza Vickers"
+  },
+  {
+    "code": "dúzia",
+    "description": "Dúzia"
+  },
+  {
+    "code": "GSE",
+    "description": "Energia da vibração"
+  },
+  {
+    "code": "ES",
+    "description": "ESTOJO"
+  },
+  {
+    "code": "f/cc",
+    "description": "f/cc"
+  },
+  {
+    "code": "°F",
+    "description": "Fahrenheit"
+  },
+  {
+    "code": "F",
+    "description": "Farad"
+  },
+  {
+    "code": "far",
+    "description": "Fardo(s)"
+  },
+  {
+    "code": "Fat",
+    "description": "Fator"
+  },
+  {
+    "code": "f/cm³",
+    "description": "Fibra por centimetro cúbico"
+  },
+  {
+    "code": "F/pas",
+    "description": "Fios por passo"
+  },
+  {
+    "code": "F/per",
+    "description": "Fios por perna"
+  },
+  {
+    "code": "FM",
+    "description": "Fixo Mensal"
+  },
+  {
+    "code": "FL",
+    "description": "Folha"
+  },
+  {
+    "code": "A1Q",
+    "description": "Formato A1 equivalente"
+  },
+  {
+    "code": "FR",
+    "description": "Frasco"
+  },
+  {
+    "code": "GL",
+    "description": "Galão"
+  },
+  {
+    "code": "gal us",
+    "description": "Galão EUA"
+  },
+  {
+    "code": "GPH US",
+    "description": "Galões por hora (US)"
+  },
+  {
+    "code": "GPMEUA",
+    "description": "Galões por milha (US)"
+  },
+  {
+    "code": "gpm",
+    "description": "Galões por minuto"
+  },
+  {
+    "code": "Garraf",
+    "description": "Garrafa"
+  },
+  {
+    "code": "gcl/N3",
+    "description": "Gcal por normal met.cúbico"
+  },
+  {
+    "code": "gcal/t",
+    "description": "Gcal por tonelada"
+  },
+  {
+    "code": "GBY",
+    "description": "Gigabyte"
+  },
+  {
+    "code": "GCAL",
+    "description": "Gigacaloria"
+  },
+  {
+    "code": "GHz",
+    "description": "Gigahertz"
+  },
+  {
+    "code": "GJ",
+    "description": "Gigajoule"
+  },
+  {
+    "code": "GOhm",
+    "description": "Gigaohm"
+  },
+  {
+    "code": "g",
+    "description": "Grama"
+  },
+  {
+    "code": "g InAt",
+    "description": "Grama - ingrediente ativo"
+  },
+  {
+    "code": "grg/l",
+    "description": "Grama IngrAtivo / litro"
+  },
+  {
+    "code": "GAU",
+    "description": "Grama ouro"
+  },
+  {
+    "code": "g/cm3",
+    "description": "Grama por centimetro cubico"
+  },
+  {
+    "code": "g/cm2",
+    "description": "Grama por centimetro quadrado"
+  },
+  {
+    "code": "g/dl",
+    "description": "Grama por decilitro"
+  },
+  {
+    "code": "g/gCR",
+    "description": "Grama por grama de creatinina"
+  },
+  {
+    "code": "g/Nm3",
+    "description": "Grama por normal metro cúbico"
+  },
+  {
+    "code": "gr/cm3",
+    "description": "Grama/centímetro cúbico"
+  },
+  {
+    "code": "g/ml",
+    "description": "Gramas por milimetro"
+  },
+  {
+    "code": "g/hg",
+    "description": "Gramas/hectograma"
+  },
+  {
+    "code": "g/l",
+    "description": "Gramas/litros"
+  },
+  {
+    "code": "g/m3",
+    "description": "Gramas/metro cúbico"
+  },
+  {
+    "code": "g/m2",
+    "description": "Gramas/metro quadrado"
+  },
+  {
+    "code": "g/mol",
+    "description": "Gramas/mol"
+  },
+  {
+    "code": "g/kg",
+    "description": "Gramas/quilogramas"
+  },
+  {
+    "code": "°C",
+    "description": "Grau centígrado"
+  },
+  {
+    "code": "monom",
+    "description": "Grau de polimerização"
+  },
+  {
+    "code": "ºE",
+    "description": "Grau Engler"
+  },
+  {
+    "code": "grau",
+    "description": "Graus"
+  },
+  {
+    "code": "ha",
+    "description": "Hectares"
+  },
+  {
+    "code": "hl",
+    "description": "Hectolitro"
+  },
+  {
+    "code": "hPa",
+    "description": "Hectopascal"
+  },
+  {
+    "code": "HENRY",
+    "description": "HENRY"
+  },
+  {
+    "code": "Hz",
+    "description": "Hertz (1/segundo)"
+  },
+  {
+    "code": "HD",
+    "description": "Homem Dia"
+  },
+  {
+    "code": "HH",
+    "description": "Homem Hora"
+  },
+  {
+    "code": "HM",
+    "description": "Homem Mês"
+  },
+  {
+    "code": "HE",
+    "description": "Hora Extra"
+  },
+  {
+    "code": "HI",
+    "description": "Hora Improdutiva"
+  },
+  {
+    "code": "HO",
+    "description": "Hora Ociosa"
+  },
+  {
+    "code": "h",
+    "description": "Horas"
+  },
+  {
+    "code": "HR/L",
+    "description": "Horas por Litro"
+  },
+  {
+    "code": "hr",
+    "description": "Horas PP"
+  },
+  {
+    "code": "hp",
+    "description": "Horse Power"
+  },
+  {
+    "code": "ICO",
+    "description": "Índice de cul-off"
+  },
+  {
+    "code": "irpm",
+    "description": "irpm"
+  },
+  {
+    "code": "yd",
+    "description": "Jardas"
+  },
+  {
+    "code": "yd3",
+    "description": "Jardas cúbicas"
+  },
+  {
+    "code": "yd2",
+    "description": "Jardas quadradas"
+  },
+  {
+    "code": "JG",
+    "description": "Jogo"
+  },
+  {
+    "code": "J",
+    "description": "Joule"
+  },
+  {
+    "code": "J/mol",
+    "description": "Joule/mole"
+  },
+  {
+    "code": "J/kg",
+    "description": "Joules/quilograma"
+  },
+  {
+    "code": "K",
+    "description": "Kelvin"
+  },
+  {
+    "code": "K/min",
+    "description": "Kelvin/minuto"
+  },
+  {
+    "code": "K/s",
+    "description": "Kelvin/segundo"
+  },
+  {
+    "code": "Kgfm",
+    "description": "kg força m²"
+  },
+  {
+    "code": "kgfm",
+    "description": "kg força m²"
+  },
+  {
+    "code": "kgw/kg",
+    "description": "kg ingrediente ativo / kg"
+  },
+  {
+    "code": "KGU",
+    "description": "KG ÚMIDO"
+  },
+  {
+    "code": "KCN",
+    "description": "KILO CAL POR NORMAL M³"
+  },
+  {
+    "code": "KCT",
+    "description": "KILO CAL POR TONELAGEM"
+  },
+  {
+    "code": "kA",
+    "description": "Kiloampere"
+  },
+  {
+    "code": "KBY",
+    "description": "Kilobyte"
+  },
+  {
+    "code": "kca/kg",
+    "description": "Kilocal por quilograma"
+  },
+  {
+    "code": "Kcal",
+    "description": "Kilocaloria"
+  },
+  {
+    "code": "Kcal/h",
+    "description": "Kilocaloria por hora"
+  },
+  {
+    "code": "kg/ton",
+    "description": "Kilograma / tonelada"
+  },
+  {
+    "code": "kmol",
+    "description": "Kilomol"
+  },
+  {
+    "code": "kN",
+    "description": "Kilonewton"
+  },
+  {
+    "code": "kPa",
+    "description": "Kilopascal"
+  },
+  {
+    "code": "kVA",
+    "description": "Kilovoltampere"
+  },
+  {
+    "code": "kWh/t",
+    "description": "Kilowatt hora por tonelada"
+  },
+  {
+    "code": "LA",
+    "description": "Lata"
+  },
+  {
+    "code": "lb",
+    "description": "Libra EUA"
+  },
+  {
+    "code": "Psi",
+    "description": "Libra por polegada quadrada"
+  },
+  {
+    "code": "psi",
+    "description": "Libra por polegada quadrada"
+  },
+  {
+    "code": "l",
+    "description": "Litro"
+  },
+  {
+    "code": "LKm",
+    "description": "litros / km"
+  },
+  {
+    "code": "l/ckm",
+    "description": "Litros por 100 km"
+  },
+  {
+    "code": "L/hr.",
+    "description": "Litros por hora"
+  },
+  {
+    "code": "l/m3",
+    "description": "Litros por metro cúbico"
+  },
+  {
+    "code": "l/min",
+    "description": "Litros/minuto"
+  },
+  {
+    "code": "l/m_.s",
+    "description": "Litros/molsegundo"
+  },
+  {
+    "code": "lux",
+    "description": "lux"
+  },
+  {
+    "code": "m/s175",
+    "description": "m/s¹·75"
+  },
+  {
+    "code": "Maiúsc",
+    "description": "Maiúsculas"
+  },
+  {
+    "code": "Mcal/h",
+    "description": "Mcal/h"
+  },
+  {
+    "code": "MVAR",
+    "description": "Mega voltampere reativo"
+  },
+  {
+    "code": "MBY",
+    "description": "Megabyte"
+  },
+  {
+    "code": "Mcal/t",
+    "description": "Megacal por tonelada"
+  },
+  {
+    "code": "MHz",
+    "description": "Megahertz"
+  },
+  {
+    "code": "MJ",
+    "description": "Megajoule"
+  },
+  {
+    "code": "MN",
+    "description": "Meganewton"
+  },
+  {
+    "code": "MOhm",
+    "description": "Megaohm"
+  },
+  {
+    "code": "MPa",
+    "description": "Megapascal"
+  },
+  {
+    "code": "MV",
+    "description": "Megavolt"
+  },
+  {
+    "code": "TCP",
+    "description": "Megavoltampere"
+  },
+  {
+    "code": "MW.h",
+    "description": "Megawatt hora"
+  },
+  {
+    "code": "IV",
+    "description": "Megawatts"
+  },
+  {
+    "code": "Meses",
+    "description": "Mes"
+  },
+  {
+    "code": "MESH",
+    "description": "MESH"
+  },
+  {
+    "code": "m3/Nd3",
+    "description": "Met.cúbico/Normal dec. cubico"
+  },
+  {
+    "code": "m",
+    "description": "Metro"
+  },
+  {
+    "code": "mca",
+    "description": "metro coluna d'agua"
+  },
+  {
+    "code": "m3",
+    "description": "Metro cúbico"
+  },
+  {
+    "code": "M³/km",
+    "description": "Metro Cúbico por quilometro"
+  },
+  {
+    "code": "m3/t",
+    "description": "Metro cúbico por tonelada"
+  },
+  {
+    "code": "m3/h",
+    "description": "Metro cúbico/hora"
+  },
+  {
+    "code": "m3/m3",
+    "description": "Metro cúbico/metro cúbico"
+  },
+  {
+    "code": "m3/s",
+    "description": "Metro cúbico/segundo"
+  },
+  {
+    "code": "m2",
+    "description": "Metro quadrado"
+  },
+  {
+    "code": "m/s",
+    "description": "Metro/segundo"
+  },
+  {
+    "code": "m/s2",
+    "description": "Metro/segundo quadrado"
+  },
+  {
+    "code": "m/s²",
+    "description": "Metro/segundo quadrado"
+  },
+  {
+    "code": "m.b_/s",
+    "description": "Metro-bar/segundo"
+  },
+  {
+    "code": "m.Pa/s",
+    "description": "Metropascal/segundo"
+  },
+  {
+    "code": "m3/min",
+    "description": "Metros cubicos por minuto"
+  },
+  {
+    "code": "mpm",
+    "description": "metros por minuto"
+  },
+  {
+    "code": "m2/s",
+    "description": "Metros quadrados/segundo"
+  },
+  {
+    "code": "m/h",
+    "description": "Metros/hora"
+  },
+  {
+    "code": "m/min",
+    "description": "Metros/minuto"
+  },
+  {
+    "code": "MICRA",
+    "description": "Micra"
+  },
+  {
+    "code": "µ m/m",
+    "description": "micro mol por mol"
+  },
+  {
+    "code": "mUI/ml",
+    "description": "Micro Unid. Interna/ mililitro"
+  },
+  {
+    "code": "µA",
+    "description": "Microampère"
+  },
+  {
+    "code": "µAdc",
+    "description": "Microampere corrente continua"
+  },
+  {
+    "code": "µF",
+    "description": "Microfarad"
+  },
+  {
+    "code": "ug/dL",
+    "description": "Micrograma por decilitro"
+  },
+  {
+    "code": "ug/L",
+    "description": "Micrograma por litro"
+  },
+  {
+    "code": "mcg/mL",
+    "description": "Micrograma/ 100 mililitro"
+  },
+  {
+    "code": "mcg/dl",
+    "description": "Micrograma/ decilitro"
+  },
+  {
+    "code": "mcg/g",
+    "description": "Micrograma/ grama"
+  },
+  {
+    "code": "mcg/gC",
+    "description": "Micrograma/ Grama de Creatina"
+  },
+  {
+    "code": "mcg/l",
+    "description": "Micrograma/ litro"
+  },
+  {
+    "code": "ug/gCR",
+    "description": "Micrograma/grama de creatinina"
+  },
+  {
+    "code": "µg/l",
+    "description": "Micrograma/litro"
+  },
+  {
+    "code": "µg/m3",
+    "description": "Microgramas/metro cúbico"
+  },
+  {
+    "code": "µl",
+    "description": "Microlitro"
+  },
+  {
+    "code": "µm",
+    "description": "Micrometro"
+  },
+  {
+    "code": "µohm",
+    "description": "Micro-ohm"
+  },
+  {
+    "code": "µin",
+    "description": "Micro-polegada"
+  },
+  {
+    "code": "MICRON",
+    "description": "Micros"
+  },
+  {
+    "code": "µs",
+    "description": "Microsegundos"
+  },
+  {
+    "code": "us/div",
+    "description": "microsegundos por divisao"
+  },
+  {
+    "code": "µS/cm",
+    "description": "Microsiemens por centímetro"
+  },
+  {
+    "code": "µVac",
+    "description": "Microvolt corrente alternada"
+  },
+  {
+    "code": "m6",
+    "description": "Mil metros quadrados"
+  },
+  {
+    "code": "mtn",
+    "description": "Mil toneladas"
+  },
+  {
+    "code": "MILS",
+    "description": "Milesimo por polegada"
+  },
+  {
+    "code": "mg/Nm3",
+    "description": "milgrama normal m³"
+  },
+  {
+    "code": "milha",
+    "description": "Milha"
+  },
+  {
+    "code": "MPG US",
+    "description": "Milhas por galão (US)"
+  },
+  {
+    "code": "milha2",
+    "description": "Milhas quadradas"
+  },
+  {
+    "code": "mil",
+    "description": "Milheiro"
+  },
+  {
+    "code": "m/mm3",
+    "description": "milhoes por mlimetro cubico"
+  },
+  {
+    "code": "mAdc",
+    "description": "Miliamper corrente continua"
+  },
+  {
+    "code": "mA",
+    "description": "Miliampère"
+  },
+  {
+    "code": "mbar",
+    "description": "Milibares"
+  },
+  {
+    "code": "mEq/l",
+    "description": "Miliequivalente/ litro"
+  },
+  {
+    "code": "mF",
+    "description": "Milifarad"
+  },
+  {
+    "code": "mg",
+    "description": "Miligrama"
+  },
+  {
+    "code": "mg/24h",
+    "description": "Miligrama/ 24h"
+  },
+  {
+    "code": "mg/dl",
+    "description": "Miligrama/ decilitro"
+  },
+  {
+    "code": "mg/cm2",
+    "description": "Miligrama/centímetro quadrado"
+  },
+  {
+    "code": "mg/g",
+    "description": "Miligrama/grama"
+  },
+  {
+    "code": "mg/gCR",
+    "description": "Miligrama/grama de creatinina"
+  },
+  {
+    "code": "mg/l",
+    "description": "Miligrama/litro"
+  },
+  {
+    "code": "mgKOH",
+    "description": "Miligramas koh por grama"
+  },
+  {
+    "code": "mg/m3",
+    "description": "Miligramas/metro cúbico"
+  },
+  {
+    "code": "mg/m³",
+    "description": "Miligramas/metro cúbico"
+  },
+  {
+    "code": "mg/kg",
+    "description": "Miligramas/quilograma"
+  },
+  {
+    "code": "mJ",
+    "description": "Milijoules"
+  },
+  {
+    "code": "ml",
+    "description": "Mililitro"
+  },
+  {
+    "code": "mlw",
+    "description": "Mililitro - ingrediente ativo"
+  },
+  {
+    "code": "ml/min",
+    "description": "Mililitro/ minuto"
+  },
+  {
+    "code": "ml/m3",
+    "description": "Mililitro/metro cúbico"
+  },
+  {
+    "code": "mm",
+    "description": "Milímetro"
+  },
+  {
+    "code": "mmca",
+    "description": "milimetro coluna d'agua"
+  },
+  {
+    "code": "mmHg",
+    "description": "Milimetro coluna de mercurio"
+  },
+  {
+    "code": "mm3",
+    "description": "Milímetro cúbico"
+  },
+  {
+    "code": "mm/s2",
+    "description": "milimetro p/segundo²"
+  },
+  {
+    "code": "mm/a",
+    "description": "Milímetro/ano"
+  },
+  {
+    "code": "mm/h",
+    "description": "Milímetro/hora"
+  },
+  {
+    "code": "mm/min",
+    "description": "Milimetros por minuto"
+  },
+  {
+    "code": "mm2",
+    "description": "Milímetros quadrados"
+  },
+  {
+    "code": "mm2/s",
+    "description": "Milímetros quadrados/segundo"
+  },
+  {
+    "code": "mm/s",
+    "description": "Milímetros/segundos"
+  },
+  {
+    "code": "mmol/l",
+    "description": "Milimol/ litro"
+  },
+  {
+    "code": "mmol/g",
+    "description": "Milimol/grama"
+  },
+  {
+    "code": "mmol",
+    "description": "Milimole"
+  },
+  {
+    "code": "m_/kg",
+    "description": "Milimoles/quilograma"
+  },
+  {
+    "code": "mN/m",
+    "description": "Milinewton/metro"
+  },
+  {
+    "code": "mPa.s",
+    "description": "Milipascal/segundos"
+  },
+  {
+    "code": "ms",
+    "description": "Milisegundos"
+  },
+  {
+    "code": "ms/div",
+    "description": "Milisegundos por divisão"
+  },
+  {
+    "code": "MSI",
+    "description": "Milisiemens"
+  },
+  {
+    "code": "mS/cm",
+    "description": "MiliSiemens por centimetro"
+  },
+  {
+    "code": "mSv",
+    "description": "Milisivert"
+  },
+  {
+    "code": "mT",
+    "description": "Mili-tesla"
+  },
+  {
+    "code": "mV",
+    "description": "Milivolts"
+  },
+  {
+    "code": "mW",
+    "description": "Miliwatts"
+  },
+  {
+    "code": "mMol/l",
+    "description": "Millimol por litro"
+  },
+  {
+    "code": "MR/H",
+    "description": "Milliroentgen"
+  },
+  {
+    "code": "min",
+    "description": "Minuto"
+  },
+  {
+    "code": "Mol/l",
+    "description": "Mol por litro"
+  },
+  {
+    "code": "mol/m3",
+    "description": "Mol por metro cúbico"
+  },
+  {
+    "code": "mol",
+    "description": "Mole"
+  },
+  {
+    "code": "mol/kg",
+    "description": "Moles/quilograma"
+  },
+  {
+    "code": "nA",
+    "description": "Nanoampere"
+  },
+  {
+    "code": "nF",
+    "description": "Nanofarad"
+  },
+  {
+    "code": "ng/dl",
+    "description": "Nanograma/ decilitro"
+  },
+  {
+    "code": "ng/ml",
+    "description": "Nanograma/ mililitro"
+  },
+  {
+    "code": "nm",
+    "description": "Nanômetro"
+  },
+  {
+    "code": "NT",
+    "description": "Nano-segundos"
+  },
+  {
+    "code": "nS",
+    "description": "Nanosiemens"
+  },
+  {
+    "code": "N",
+    "description": "Newton"
+  },
+  {
+    "code": "N/m",
+    "description": "Newton/metro"
+  },
+  {
+    "code": "N/mm2",
+    "description": "Newton/milímetro quadrado"
+  },
+  {
+    "code": "Nm3/d",
+    "description": "Nomal metro cúbico por dia"
+  },
+  {
+    "code": "NDAM3",
+    "description": "Normal Decâmetro Cúbico"
+  },
+  {
+    "code": "Nm3",
+    "description": "Normal metro cúbico"
+  },
+  {
+    "code": "Nm3/h",
+    "description": "Normal metro cúbico por hora"
+  },
+  {
+    "code": "Nm3/mi",
+    "description": "Normal metro cúbico por minuto"
+  },
+  {
+    "code": "Nm3/t",
+    "description": "Normal metro cúbico/ tonelada"
+  },
+  {
+    "code": "PRS",
+    "description": "Núm.de pessoas"
+  },
+  {
+    "code": "Ohm",
+    "description": "Ohm"
+  },
+  {
+    "code": "oz",
+    "description": "Onça"
+  },
+  {
+    "code": "foz us",
+    "description": "Onça líquida EUA"
+  },
+  {
+    "code": "pacote",
+    "description": "Pacote"
+  },
+  {
+    "code": "PG",
+    "description": "Pagina"
+  },
+  {
+    "code": "palete",
+    "description": "Palete"
+  },
+  {
+    "code": "PAR",
+    "description": "Par"
+  },
+  {
+    "code": "Parada",
+    "description": "Parada"
+  },
+  {
+    "code": "ppb(m)",
+    "description": "Partes por bilhão (massa)"
+  },
+  {
+    "code": "ppb",
+    "description": "Partes por bilhões"
+  },
+  {
+    "code": "PPM",
+    "description": "partes por milhão"
+  },
+  {
+    "code": "ppm",
+    "description": "Partes por milhão"
+  },
+  {
+    "code": "ppm(m)",
+    "description": "Partes por milhão (massa)"
+  },
+  {
+    "code": "ppm(V)",
+    "description": "Partes por milhão (volume)"
+  },
+  {
+    "code": "ppt(V)",
+    "description": "Partes por trilhão (volume)"
+  },
+  {
+    "code": "ppb(V)",
+    "description": "Parts per billion (volume)"
+  },
+  {
+    "code": "ppt",
+    "description": "Parts per trilhão"
+  },
+  {
+    "code": "ppt(m)",
+    "description": "Parts per trillion (massa)"
+  },
+  {
+    "code": "Pa",
+    "description": "Pascal"
+  },
+  {
+    "code": "Pa.s",
+    "description": "Pascal-segundo"
+  },
+  {
+    "code": "PSG",
+    "description": "Passageiro Mês"
+  },
+  {
+    "code": "pé3",
+    "description": "Pé cúbico"
+  },
+  {
+    "code": "PEÇ",
+    "description": "Peça"
+  },
+  {
+    "code": "%O",
+    "description": "Permilagem"
+  },
+  {
+    "code": "Pés",
+    "description": "Pés"
+  },
+  {
+    "code": "pé2",
+    "description": "Pés quadrados"
+  },
+  {
+    "code": "pC",
+    "description": "PICO COULOMB"
+  },
+  {
+    "code": "pF",
+    "description": "Picofarad"
+  },
+  {
+    "code": "pg/ml",
+    "description": "Picograma/ mililitro"
+  },
+  {
+    "code": "ps",
+    "description": "Picosegundo"
+  },
+  {
+    "code": "pt us",
+    "description": "Pinta líquida EUA"
+  },
+  {
+    "code": "KcalNm",
+    "description": "Poder calorifico"
+  },
+  {
+    "code": "Pol",
+    "description": "Polegada (inch)"
+  },
+  {
+    "code": "Pol3",
+    "description": "Polegadas cúbicas"
+  },
+  {
+    "code": "Pol2",
+    "description": "Polegadas quadradas"
+  },
+  {
+    "code": "P",
+    "description": "Pontos"
+  },
+  {
+    "code": "p/c",
+    "description": "Por campo"
+  },
+  {
+    "code": "%(m)",
+    "description": "Porcentagem (massa)"
+  },
+  {
+    "code": "%(V)",
+    "description": "Porcentagem (volume)"
+  },
+  {
+    "code": "% Vol.",
+    "description": "Porcentagem do Volume"
+  },
+  {
+    "code": "Rh",
+    "description": "Portencial de cromo"
+  },
+  {
+    "code": "pH",
+    "description": "Portencial de hidrogenio"
+  },
+  {
+    "code": "PTE",
+    "description": "Pote"
+  },
+  {
+    "code": "SV",
+    "description": "Prestação de Serviço"
+  },
+  {
+    "code": "%O(V)",
+    "description": "Propç.por mil (volume)"
+  },
+  {
+    "code": "%O(m)",
+    "description": "Proporção por mil (massa)"
+  },
+  {
+    "code": "pulsos",
+    "description": "pulsos"
+  },
+  {
+    "code": "kV/mm",
+    "description": "Qilolvolt por milimetro"
+  },
+  {
+    "code": "PC",
+    "description": "Quantidade de peças"
+  },
+  {
+    "code": "qt us",
+    "description": "Quarto, líquido EUA"
+  },
+  {
+    "code": "kP",
+    "description": "Quilo Pound"
+  },
+  {
+    "code": "kbar",
+    "description": "Quilobar"
+  },
+  {
+    "code": "kBq/kg",
+    "description": "Quilobecquereis/quilograma"
+  },
+  {
+    "code": "kcal/g",
+    "description": "Quilocaloria por grama"
+  },
+  {
+    "code": "kg",
+    "description": "Quilograma"
+  },
+  {
+    "code": "kgreag",
+    "description": "Quilograma - ingrediente ativo"
+  },
+  {
+    "code": "Kgfcm2",
+    "description": "Quilograma força por cm2"
+  },
+  {
+    "code": "kgfcm2",
+    "description": "Quilograma força por cm2"
+  },
+  {
+    "code": "Kgfmm2",
+    "description": "Quilograma força por mm2"
+  },
+  {
+    "code": "kgfmm2",
+    "description": "Quilograma força por mm2"
+  },
+  {
+    "code": "kg/h",
+    "description": "Quilograma por hora"
+  },
+  {
+    "code": "kg/dm3",
+    "description": "Quilogramas/decímetro cúbico"
+  },
+  {
+    "code": "kg/m3",
+    "description": "Quilogramas/metro cúbico"
+  },
+  {
+    "code": "kg/m2",
+    "description": "Quilogramas/metro quadrado"
+  },
+  {
+    "code": "kg/mol",
+    "description": "Quilogramas/mol"
+  },
+  {
+    "code": "kg/kg",
+    "description": "Quilogramas/quilogramas"
+  },
+  {
+    "code": "kg/s",
+    "description": "Quilogramas/segundo"
+  },
+  {
+    "code": "kHz",
+    "description": "Quilohertz"
+  },
+  {
+    "code": "kJ",
+    "description": "Quilojoule"
+  },
+  {
+    "code": "kJ/mol",
+    "description": "Quilojoule/mole"
+  },
+  {
+    "code": "kJ/kg",
+    "description": "Quilojoules/quilograma"
+  },
+  {
+    "code": "Km",
+    "description": "Quilômetro"
+  },
+  {
+    "code": "km2",
+    "description": "Quilômetro quadrado"
+  },
+  {
+    "code": "KM/L",
+    "description": "Quilômetros por Litro"
+  },
+  {
+    "code": "km/h",
+    "description": "Quilômetros/hora"
+  },
+  {
+    "code": "kOhm",
+    "description": "Quilo-ohm"
+  },
+  {
+    "code": "kt",
+    "description": "Quilotoneladas"
+  },
+  {
+    "code": "KVAR",
+    "description": "Quilovaltampere reativo"
+  },
+  {
+    "code": "kVdc",
+    "description": "quilovolt - corrente continua"
+  },
+  {
+    "code": "kV",
+    "description": "Quilovolts"
+  },
+  {
+    "code": "kW",
+    "description": "Quilowatt"
+  },
+  {
+    "code": "kW.h",
+    "description": "Quilowatts/hora."
+  },
+  {
+    "code": "GLB",
+    "description": "R$ Global"
+  },
+  {
+    "code": "rad",
+    "description": "Radiano"
+  },
+  {
+    "code": "R$/t",
+    "description": "Reais por tonelada"
+  },
+  {
+    "code": "Recip.",
+    "description": "Recipiente"
+  },
+  {
+    "code": "rolo",
+    "description": "Rolo"
+  },
+  {
+    "code": "rph",
+    "description": "Rotações por hora"
+  },
+  {
+    "code": "rpm",
+    "description": "Rotações por minuto"
+  },
+  {
+    "code": "Saco",
+    "description": "Saco"
+  },
+  {
+    "code": "s",
+    "description": "Segundo"
+  },
+  {
+    "code": "Sems.",
+    "description": "Semanas"
+  },
+  {
+    "code": "S",
+    "description": "Siemens"
+  },
+  {
+    "code": "A/V",
+    "description": "Siemens por metro"
+  },
+  {
+    "code": "ddd",
+    "description": "Substituir por DIA"
+  },
+  {
+    "code": "tambor",
+    "description": "Tambor"
+  },
+  {
+    "code": "TD",
+    "description": "Tesla"
+  },
+  {
+    "code": "Tit",
+    "description": "Titulação"
+  },
+  {
+    "code": "tMP/tS",
+    "description": "tMP/100tST"
+  },
+  {
+    "code": "t",
+    "description": "Tonelada"
+  },
+  {
+    "code": "t/m2h",
+    "description": "Tonelada / metro quadrado hora"
+  },
+  {
+    "code": "TR",
+    "description": "Tonelada de refrigeração"
+  },
+  {
+    "code": "td/m2",
+    "description": "Tonelada dia por metro quadrad"
+  },
+  {
+    "code": "tf",
+    "description": "Tonelada força"
+  },
+  {
+    "code": "TNP",
+    "description": "TONELADA PÓ ALUMINIO"
+  },
+  {
+    "code": "T/h",
+    "description": "Tonelada por hora"
+  },
+  {
+    "code": "TNU",
+    "description": "TONELADA ÚMIDA"
+  },
+  {
+    "code": "TKM",
+    "description": "Tonelada x Km"
+  },
+  {
+    "code": "t EUA",
+    "description": "Toneladas EUA"
+  },
+  {
+    "code": "to/dia",
+    "description": "toneladas por dia"
+  },
+  {
+    "code": "to/mês",
+    "description": "Toneladas por mês"
+  },
+  {
+    "code": "t/m3",
+    "description": "Toneladas/metro cúbico"
+  },
+  {
+    "code": "TN'",
+    "description": "TONELAGEM UMIDA CARVAO"
+  },
+  {
+    "code": "TN.",
+    "description": "TONELAGEM UMIDA MOINHA"
+  },
+  {
+    "code": "um.",
+    "description": "Um."
+  },
+  {
+    "code": "zpl",
+    "description": "Un. Planej. LIS."
+  },
+  {
+    "code": "UI/l",
+    "description": "Unid. Internacional por litro"
+  },
+  {
+    "code": "UI/ml",
+    "description": "Unid. Internacional/ mililitro"
+  },
+  {
+    "code": "UM",
+    "description": "Unidade"
+  },
+  {
+    "code": "UN",
+    "description": "Unidade"
+  },
+  {
+    "code": "AM",
+    "description": "Unidade de Amostra"
+  },
+  {
+    "code": "UA",
+    "description": "Unidade de atividade"
+  },
+  {
+    "code": "unm",
+    "description": "Unidade monetária"
+  },
+  {
+    "code": "UA/ml",
+    "description": "Unidades Arbitrárias/mililitro"
+  },
+  {
+    "code": "UE",
+    "description": "Unidades enzima"
+  },
+  {
+    "code": "UE/ml",
+    "description": "Unidades enzima/mililitro"
+  },
+  {
+    "code": "U/L",
+    "description": "Unidades/ litro"
+  },
+  {
+    "code": "VB",
+    "description": "Verba Mensal"
+  },
+  {
+    "code": "VG",
+    "description": "Viagem"
+  },
+  {
+    "code": "VGM",
+    "description": "Viagem Mês"
+  },
+  {
+    "code": "SSU",
+    "description": "Viscosidade Saybolt"
+  },
+  {
+    "code": "V",
+    "description": "Volt"
+  },
+  {
+    "code": "Vac",
+    "description": "Volt corrente alternada"
+  },
+  {
+    "code": "Vdc",
+    "description": "Volt corrente continua"
+  },
+  {
+    "code": "VA",
+    "description": "Voltampere"
+  },
+  {
+    "code": "V/div",
+    "description": "volts por divisão"
+  },
+  {
+    "code": "VL",
+    "description": "Volume"
+  },
+  {
+    "code": "VLs",
+    "description": "Volumes"
+  },
+  {
+    "code": "W",
+    "description": "Watt"
+  }
+]

@@ -1,0 +1,64 @@
+PM13 - PATCH CONSOLIDADO IMPORT/EXPORT V3
+=========================================
+
+Este V3 substitui o V2 e inclui todas as correcoes anteriores de importacao/exportacao,
+mais a garantia de round-trip dos campos de especialidade ELE/MEC/SOL.
+
+NOVO NO V3
+----------
+1. Se a aba ITENS possuir as colunas auxiliares cinza:
+   - ELE EFETIVO (apagar)
+   - ELE HORAS (apagar)
+   - MEC EFETIVO (apagar)
+   - MEC HORAS (apagar)
+   - SOL EFETIVO (apagar)
+   - SOL HORAS (apagar)
+   os valores sao lidos e gravados no item exatamente como vieram da planilha.
+
+2. Se essas colunas NAO existirem, a importacao corporativa continua funcionando
+   normalmente e desconsidera os campos auxiliares.
+
+3. Reconhecimento dos cabecalhos auxiliares ficou tolerante a:
+   - maiusculas/minusculas;
+   - espacos extras;
+   - quebras de linha;
+   - espaco antes/depois de parenteses e barra;
+   - variacoes EFETIVO ELE / ELE EFETIVO etc.
+
+4. Garantia transacional:
+   se as colunas cinza forem detectadas e os valores nao forem preservados no banco,
+   a importacao e cancelada e ocorre ROLLBACK. O sistema nao conclui silenciosamente
+   uma importacao deixando ELE/MEC/SOL zerados.
+
+5. Logs do servidor agora mostram durante a previa e gravacao:
+   helper_especialidade_linhas=<n>
+   helper_especialidade_nao_zero=<n>
+   helper_especialidade_colunas=<nomes>
+
+EXEMPLO ESPERADO NO LOG
+-----------------------
+IMPORT PREVIA OK ... helper_especialidade_linhas=114 helper_especialidade_nao_zero=114
+IMPORT GRAVACAO INICIO ... helper_especialidade_linhas=114 helper_especialidade_nao_zero=114
+IMPORT GRAVACAO OK ...
+
+CONTEUDO CONSOLIDADO DO V2 MANTIDO
+-----------------------------------
+- T(H) como duracao em horas na aba ITENS;
+- colunas cinza ELE/MEC/SOL e STATUS (apagar);
+- reimportacao preservando ATIVO/INATIVO;
+- round-trip Exportar -> Importar;
+- renumeracao segura em Adicionar e Unificar;
+- protecao contra planilhas infladas/milhoes de linhas;
+- erro visivel em planilhas inseguras;
+- logs ampliados no servidor;
+- correcao do Excel/Balanceamento com formulas excessivas;
+- ajuste automatico das larguras de colunas;
+- exportacao de efetivo/horas corretos nas operacoes SAP.
+
+INSTALACAO
+----------
+1. Faca backup de data/pm13.db.
+2. Clique em Encerrar Sistema.
+3. Extraia este ZIP sobre a pasta do PM13 e confirme a substituicao.
+4. Inicie novamente pelo INICIAR_PM13.bat.
+5. No navegador use Ctrl+F5.

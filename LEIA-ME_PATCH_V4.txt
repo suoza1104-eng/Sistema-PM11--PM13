@@ -1,0 +1,74 @@
+PM13 - PATCH UNIFICADO V4
+Importacao/Exportacao segura + capacidade por pessoa sem Equipes
+Data: 19/08/2026
+
+OBJETIVO
+Este patch consolida o V3 de importacao/exportacao e substitui o conceito operacional de Equipes/Turnos por uma unica regra de capacidade no nivel do projeto.
+
+1) NOVA REGRA DE CAPACIDADE
+Na tela Configuracoes do Projeto existem agora:
+- Horas trabalhadas por pessoa (padrao: 9,1 h)
+- Tool Time (%) (padrao: 100%)
+
+Formula oficial:
+HH disponivel por pessoa = Horas trabalhadas por pessoa x Tool Time / 100
+HH disponivel na parada = Efetivo TOTAL informado no Balanceamento x HH disponivel por pessoa
+
+Exemplo:
+5 eletricistas no dia 1 + 4 no dia 2 = informar 9 eletricistas no Balanceamento.
+Com 9,1 h e Tool Time 100%: 9 x 9,1 = 81,9 HH disponiveis na parada.
+Com Tool Time 80%: 9 x 9,1 x 0,80 = 65,52 HH.
+
+IMPORTANTE: o efetivo do Balanceamento e o TOTAL da parada. O sistema nao multiplica esse efetivo novamente por quantidade de dias/turnos.
+
+2) EQUIPES / TURNOS
+- Tela Equipes removida do menu e do fluxo de uso.
+- Campo Equipe removido da tela de Itens e dos filtros ativos do Balanceamento.
+- Configuracao antiga de turnos deixou de participar dos calculos.
+- O Balanceamento e o Balanceamento Automatico ignoram work_teams/shifts e usam somente Horas por Pessoa + Tool Time.
+- Novos projetos nao criam mais turnos legados.
+- Ao duplicar projeto, shifts/work_teams legados nao sao copiados e team_id nao e propagado.
+
+Por seguranca, tabelas/colunas antigas de Equipes e Turnos permanecem fisicamente no banco apenas para compatibilidade historica e para nao destruir dados de backups antigos. Elas nao sao usadas na regra de capacidade.
+
+3) IMPORTACAO / EXPORTACAO CONSOLIDADA (V3 INCLUIDO)
+Na aba ITENS da exportacao:
+- T(H) = duracao real da atividade em horas.
+- ELE EFETIVO (apagar) / ELE HORAS (apagar)
+- MEC EFETIVO (apagar) / MEC HORAS (apagar)
+- SOL EFETIVO (apagar) / SOL HORAS (apagar)
+- STATUS (apagar)
+As colunas auxiliares ficam cinza e podem ser apagadas antes da carga corporativa.
+Ao reimportar pelo PM13, se existirem, elas sao reconhecidas e tem prioridade para reconstruir os valores separados de ELE/MEC/SOL e status. Se nao existirem, a importacao segue normalmente sem elas.
+
+4) ROUND-TRIP E IDS
+- Exportar projeto do PM13 e importar em outro projeto no modo Incrementar/Unificar preserva T(H), cargas ELE/MEC/SOL, status, operacoes e textos longos.
+- IDs de origem repetidos no projeto destino nao sobrescrevem itens existentes: os novos itens sao renumerados e os vinculos de operacoes/textos acompanham o novo ID.
+- Se itens forem rejeitados na validacao, a importacao e bloqueada antes de gerar placeholders conflitantes.
+
+5) PLANILHAS INFLADAS / MAIS DE 1 MILHAO DE LINHAS
+- Leitura XLSX em streaming.
+- Celulas apenas formatadas sao ignoradas.
+- Limites preventivos impedem consumo excessivo de memoria.
+- Linhas contendo somente campos residuais (por exemplo, apenas Centro de Trabalho) nao viram itens.
+- Arquivos com volume anormal recebem erro visivel orientando limpar linhas/colunas excedentes no Excel.
+
+6) LOGS / RASTREIO
+A tela preta do servidor recebe logs detalhados para:
+- cabecalhos, previa e gravacao de importacao;
+- exportacoes;
+- configuracao de capacidade;
+- previa/aplicacao do balanceamento automatico, incluindo similaridade, varreduras, estrategia, geografia e capacidades;
+- timeouts e tracebacks de falha.
+
+7) INSTALACAO
+1. Faca backup de data/pm13.db.
+2. No PM13 clique em Encerrar Sistema.
+3. Extraia este ZIP sobre a pasta raiz do PM13 mantendo a estrutura de pastas.
+4. Confirme a substituicao dos arquivos.
+5. Execute INICIAR_PM13.bat novamente.
+6. No navegador pressione Ctrl+F5.
+7. Abra Configuracoes e confirme Horas por Pessoa = 9,1 e Tool Time = 100% (ou ajuste conforme a realidade).
+
+O PATCH NAO CONTEM data/pm13.db e nao substitui o seu banco.
+Na primeira inicializacao, a migracao adiciona automaticamente os novos campos de capacidade aos projetos existentes com os padroes 9,1 h e 100%.

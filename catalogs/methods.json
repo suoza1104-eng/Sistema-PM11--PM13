@@ -1,0 +1,1946 @@
+[
+  {
+    "code": "ALINHAOP",
+    "description": "Alinhamento Óptico"
+  },
+  {
+    "code": "AMOSTRAR",
+    "description": "Amostrar"
+  },
+  {
+    "code": "AMPERIM",
+    "description": "Amperímetro"
+  },
+  {
+    "code": "ANALISE",
+    "description": "Análise"
+  },
+  {
+    "code": "AUDICAO",
+    "description": "Audição"
+  },
+  {
+    "code": "BALANCA",
+    "description": "Balança"
+  },
+  {
+    "code": "BOLHOM",
+    "description": "Bolhometro"
+  },
+  {
+    "code": "CALCULO",
+    "description": "Cálculo"
+  },
+  {
+    "code": "CALFOLGA",
+    "description": "Calibrador De Folga"
+  },
+  {
+    "code": "CALIBRAD",
+    "description": "Calibrador"
+  },
+  {
+    "code": "CALIBRE",
+    "description": "Calibre"
+  },
+  {
+    "code": "CANETVIB",
+    "description": "Caneta Vibração"
+  },
+  {
+    "code": "CAPACIM",
+    "description": "Capacimetro"
+  },
+  {
+    "code": "CELCARGA",
+    "description": "Célula de carga"
+  },
+  {
+    "code": "COLMANOM",
+    "description": "Coluna Manométrica"
+  },
+  {
+    "code": "COMPASSO",
+    "description": "Compasso"
+  },
+  {
+    "code": "CONDUTIM",
+    "description": "Condutímetro"
+  },
+  {
+    "code": "CONDUTIV",
+    "description": "Condutivímetro"
+  },
+  {
+    "code": "COSFIM",
+    "description": "Cosfímetro"
+  },
+  {
+    "code": "CRONOM",
+    "description": "Cronômetro"
+  },
+  {
+    "code": "DDESCONT",
+    "description": "Detector de Descontinuidade"
+  },
+  {
+    "code": "DECANTA",
+    "description": "Decantação"
+  },
+  {
+    "code": "DECIBELI",
+    "description": "Decibelímetro"
+  },
+  {
+    "code": "DEFLEXIM",
+    "description": "Deflexímetro"
+  },
+  {
+    "code": "DENSIM",
+    "description": "Densímetro"
+  },
+  {
+    "code": "DETECGAS",
+    "description": "Detector Gás"
+  },
+  {
+    "code": "DINAMOM",
+    "description": "Dinamômetro"
+  },
+  {
+    "code": "DRENAR",
+    "description": "Drenar"
+  },
+  {
+    "code": "DUCTER",
+    "description": "Ducter"
+  },
+  {
+    "code": "DUROM",
+    "description": "Durometro"
+  },
+  {
+    "code": "ESCALA",
+    "description": "Escala"
+  },
+  {
+    "code": "ESCALIM",
+    "description": "Escalímetro"
+  },
+  {
+    "code": "ESPATULA",
+    "description": "Espátula"
+  },
+  {
+    "code": "ESPSABAO",
+    "description": "Espuma - Água E Sabão"
+  },
+  {
+    "code": "ESQUADRO",
+    "description": "Esquadro"
+  },
+  {
+    "code": "ESTETOSC",
+    "description": "Estetoscópio"
+  },
+  {
+    "code": "EXPLOSIM",
+    "description": "Explosimetro"
+  },
+  {
+    "code": "FERRMAN",
+    "description": "Ferramenta manual"
+  },
+  {
+    "code": "FLUXOST",
+    "description": "Fluxostato"
+  },
+  {
+    "code": "FONTEPAD",
+    "description": "Fonte Padrão"
+  },
+  {
+    "code": "FREQUENC",
+    "description": "Frequencímetro"
+  },
+  {
+    "code": "GABARITO",
+    "description": "Gabarito"
+  },
+  {
+    "code": "GASPAD",
+    "description": "Gás Padrão"
+  },
+  {
+    "code": "GAUSSIM",
+    "description": "Gaussímetro"
+  },
+  {
+    "code": "GI-1",
+    "description": "GRAXA LÍTIO/ÓLEO MINERAL NLGI 2EP"
+  },
+  {
+    "code": "GI-10",
+    "description": "GRAXA COMP. LÍTIO/ÓLEO MIN. NLGI 1EP"
+  },
+  {
+    "code": "GI-100",
+    "description": "GRAXA COMP. LÍTIO/ÓLEO MIN. NLGI 1EP"
+  },
+  {
+    "code": "GI-101",
+    "description": "GRAXA COMP. LITIO/ÓLEO MIN. MOS2 2EP"
+  },
+  {
+    "code": "GI-102",
+    "description": "GRAXA POLIURÉIA/ÓLEO MIN. NLGI 2"
+  },
+  {
+    "code": "GI-103",
+    "description": "GRAXA LÍTIO/ÓLEO MIN. MOS2 NLGI 2EP"
+  },
+  {
+    "code": "GI-104",
+    "description": "GRAXA TECNOGEAR - TECNOLUB"
+  },
+  {
+    "code": "GI-105",
+    "description": "GRAXA FLUORETADA NLGI 2"
+  },
+  {
+    "code": "GI-106",
+    "description": "GRAXA POLITEK G 500 - UPS"
+  },
+  {
+    "code": "GI-107",
+    "description": "GRAXA BENTONE/ÓLEO SINTÉTICO NLGI 2EP"
+  },
+  {
+    "code": "GI-108",
+    "description": "GRAXA POLIREX HTM - UPS"
+  },
+  {
+    "code": "GI-109",
+    "description": "GRAXA VED LUB 540 - UPS"
+  },
+  {
+    "code": "GI-11",
+    "description": "GRAXA COMP. CÁLCIO/ÓLEO MIN. NLGI 2EP"
+  },
+  {
+    "code": "GI-110",
+    "description": "GRAXA COPASLIP 21301 - WALTER"
+  },
+  {
+    "code": "GI-111",
+    "description": "GRAXA BENTONE/PAO GRAF./MOS2 NLGI 1EP"
+  },
+  {
+    "code": "GI-112",
+    "description": "GRAXA HT1000"
+  },
+  {
+    "code": "GI-113",
+    "description": "GRAXA MKL"
+  },
+  {
+    "code": "GI-114",
+    "description": "GRAXA GGR01"
+  },
+  {
+    "code": "GI-115",
+    "description": "GRAXA ALVANIA R2"
+  },
+  {
+    "code": "GI-116",
+    "description": "GRAXA AE 1740"
+  },
+  {
+    "code": "GI-117",
+    "description": "GRAXA EPRO"
+  },
+  {
+    "code": "GI-118",
+    "description": "GRAXA LÍTIO E SABÃO/POLIME-ÓLEO MI NLGI1"
+  },
+  {
+    "code": "GI-119",
+    "description": "GRAXA AGIP GRMU-EP0"
+  },
+  {
+    "code": "GI-12",
+    "description": "GRAXA POLIURÉIA/ÓLEO MINERAL NLGI 1EP"
+  },
+  {
+    "code": "GI-120",
+    "description": "GRAXA POLIURÉIA/NLGI 3"
+  },
+  {
+    "code": "GI-121",
+    "description": "GRAXA PETROLEO/ADITIVOS NLGI2"
+  },
+  {
+    "code": "GI-122",
+    "description": "GRAXA COMPLEXO LÍTIO NLGI2/ÓLEO SIN PTFE"
+  },
+  {
+    "code": "GI-123",
+    "description": "GRAXA LITIO E BISSULF MOLIBD NLGI2 / PTF"
+  },
+  {
+    "code": "GI-124",
+    "description": "GRAXA LÍTIO/ÓLEO MINERAL NLGI 2"
+  },
+  {
+    "code": "GI-125",
+    "description": "GRAXA COMP. LÍTIO-CÁLCIO MIN/VEG NLGI 0"
+  },
+  {
+    "code": "GI-126",
+    "description": "GRAXA LÍTIO/OLEO MIN EP NGLI 00"
+  },
+  {
+    "code": "GI-13",
+    "description": "GRAXA POLIURÉIA/ÓLEO MINERAL NLGI 0EP"
+  },
+  {
+    "code": "GI-14",
+    "description": "GRAXA BENTONE/ÓLEO MIN. MOS2 NLGI 00"
+  },
+  {
+    "code": "GI-15",
+    "description": "GRAXA BENTONE/ÓLEO MIN. MOS2 NLGI 2"
+  },
+  {
+    "code": "GI-16",
+    "description": "GRAXA LÍTIO-CÁLCIO/ÓLEO MIN. NLGI 2EP"
+  },
+  {
+    "code": "GI-17",
+    "description": "GRAXA COMP. CÁLCIO/ÓLEO MIN. NLGI 2EP"
+  },
+  {
+    "code": "GI-18",
+    "description": "GRAXA BENTONE MOS2/PTFE NLGI 0"
+  },
+  {
+    "code": "GI-19",
+    "description": "GRAXA COMP. LÍTIO/ÓLEO MIN.NLGI 2EP"
+  },
+  {
+    "code": "GI-2",
+    "description": "GRAXA LÍTIO-CÁLCIO/ÓLEO MIN. NLGI 2EP"
+  },
+  {
+    "code": "GI-20",
+    "description": "GRAXA POLIURÉIA/ÓLEO MIN. NLGI 2EP"
+  },
+  {
+    "code": "GI-21",
+    "description": "GRAXA VEDANTE UPS 555 - UPS"
+  },
+  {
+    "code": "GI-22",
+    "description": "GRAXA BENTONE/ÓLEO MIN. MOS2 NLGI 00"
+  },
+  {
+    "code": "GI-23",
+    "description": "GRAXA BENTONE SEMI SINT. NLGI 2"
+  },
+  {
+    "code": "GI-24",
+    "description": "GRAXA UPS GREASE 585 TFM - UPS"
+  },
+  {
+    "code": "GI-25",
+    "description": "GRAXA BENTONE/MOS2 NLGI 2"
+  },
+  {
+    "code": "GI-26",
+    "description": "GRAXA BENTONE/GRAFITE, NOS2 NLGI 2"
+  },
+  {
+    "code": "GI-27",
+    "description": "GRAXA FLUORADA/PTFE NLGI 1"
+  },
+  {
+    "code": "GI-28",
+    "description": "GRAXA COMP. BÁRIO/ÓLEO MIN. NLGI 2/3EP"
+  },
+  {
+    "code": "GI-29",
+    "description": "GRAXA LÍTIO/ÓLEO MINERAL NLGI 3"
+  },
+  {
+    "code": "GI-3",
+    "description": "GRAXA COMP. LÍTIO/ÓLEO MIN. NLGI 2EP"
+  },
+  {
+    "code": "GI-30",
+    "description": "GRAXA LÍTIO/ÓLEO MIN. MOS2 NLGI 2"
+  },
+  {
+    "code": "GI-31",
+    "description": "GRAXA SINTÉTICA/MOS2 NLGI 2"
+  },
+  {
+    "code": "GI-32",
+    "description": "GRAXA ROTO GLIDE (NLGI 3) - ATLAS COPCO"
+  },
+  {
+    "code": "GI-33",
+    "description": "GRAXA VEDANTE DE SILICONE"
+  },
+  {
+    "code": "GI-34",
+    "description": "GRAXA COMP. BÁRIO/ÓLEO MIN. NLGI 2EP"
+  },
+  {
+    "code": "GI-35",
+    "description": "GRAXA SINTÉTICA/MOS2 NLGI 1"
+  },
+  {
+    "code": "GI-36",
+    "description": "GRAXA COMP. ALUMÍNIO PREMALUBE - NCH"
+  },
+  {
+    "code": "GI-37",
+    "description": "GRAXA BENTONE/ÓLEO MIN. MOS2 NLGI 00"
+  },
+  {
+    "code": "GI-38",
+    "description": "GRAXA DE TEFLON ADERNETE EM SPRAY"
+  },
+  {
+    "code": "GI-39",
+    "description": "GRAXA P/N-HW005 - DYNAMIC SISTEM INC"
+  },
+  {
+    "code": "GI-4",
+    "description": "GRAXA BENTONE/ÓLEO MINERAL NLGI 1"
+  },
+  {
+    "code": "GI-40",
+    "description": "GRAXA VARILUB AH 70-222 BR - KLUBER"
+  },
+  {
+    "code": "GI-41",
+    "description": "GRAXA POLIUR./ÓLEO SEMI- SINT. NLGI 1EP"
+  },
+  {
+    "code": "GI-42",
+    "description": "GRAXA LÍTIO/ÓLEO MINERAL MOS2 NLGI 2EP"
+  },
+  {
+    "code": "GI-43",
+    "description": "GRAXA BENTONE/SILICONE VEDANTE NLGI 0"
+  },
+  {
+    "code": "GI-44",
+    "description": "GRAXA BENTONE/ÓLEO MINERAL MOS2 NLGI 2"
+  },
+  {
+    "code": "GI-45",
+    "description": "GRAXA AMBER EP GREASE 5572 - BELRAY"
+  },
+  {
+    "code": "GI-46",
+    "description": "GRAXA COMP. CÁLCIO SULF./ÓLEO MIN. 1EP"
+  },
+  {
+    "code": "GI-47",
+    "description": "GRAXA COMP. CÁLCIO SULF./ÓLEO MIN. 2EP"
+  },
+  {
+    "code": "GI-48",
+    "description": "GRAXA COMP. CÁLCIO SULF./ÓLEO MIN. 0EP"
+  },
+  {
+    "code": "GI-49",
+    "description": "GRAXA UREA GREASE 1 - COSMO"
+  },
+  {
+    "code": "GI-5",
+    "description": "GRAXA CÁLCIO/ÓLEO MINERAL NLGI 2"
+  },
+  {
+    "code": "GI-50",
+    "description": "GRAXA MOLYKOTE HVG - DOW CORNING"
+  },
+  {
+    "code": "GI-51",
+    "description": "GRAXA MOLYKOTE 976V-5.3OZ - DOW CORNING"
+  },
+  {
+    "code": "GI-52",
+    "description": "GRAXA BENTONE/ÓLEO MINERAL MOS2"
+  },
+  {
+    "code": "GI-53",
+    "description": "GRAXA CÁLCIO/ÓLEO MINERAL NLGI 2"
+  },
+  {
+    "code": "GI-54",
+    "description": "GRAXA LÍTIO-CÁLCIO/ÓLEO MIN. NLGI 1EP"
+  },
+  {
+    "code": "GI-55",
+    "description": "GRAXA LÍTIO/ÓLEO MINERAL NLGI 1EP"
+  },
+  {
+    "code": "GI-56",
+    "description": "GRAXA LÍTIO/ÓLEO MINERAL NLGI 2EP"
+  },
+  {
+    "code": "GI-57",
+    "description": "GRAXA BENTONE/ÓLEO MINERAL MOS2 NLGI 2"
+  },
+  {
+    "code": "GI-58",
+    "description": "GRAXA BENTONE/ÓLEO MINERAL NLGI 2EP"
+  },
+  {
+    "code": "GI-59",
+    "description": "GRAXA LÍTIO-CÁLCIO/ÓLEO MIN. GRAF. NLGI"
+  },
+  {
+    "code": "GI-6",
+    "description": "GRAXA LÍTIO/ÓLEO MIN. MOS2 NLGI 2"
+  },
+  {
+    "code": "GI-60",
+    "description": "GRAXA LÍTIO-CÁLCIO/ÓLEO MIN. NLGI 2EP"
+  },
+  {
+    "code": "GI-61",
+    "description": "GRAXA LÍTIO/ÓLEO MIN. ADESIVA NLGI 1"
+  },
+  {
+    "code": "GI-62",
+    "description": "GRAXA LÍTIO/ÓLEO MINERAL NLGI 0EP"
+  },
+  {
+    "code": "GI-63",
+    "description": "GRAXA LÍTIO/ÓLEO MINERAL NLGI 3"
+  },
+  {
+    "code": "GI-64",
+    "description": "GRAXA LÍTIO/ÓLEO MINERAL NLGI 1EP"
+  },
+  {
+    "code": "GI-65",
+    "description": "GRAXA LÍTIO/ÓLEO MINERAL NLGI 2/3EP"
+  },
+  {
+    "code": "GI-66",
+    "description": "GRAXA LÍTIO/ÓLEO MINERAL NLGI 2EP"
+  },
+  {
+    "code": "GI-67",
+    "description": "GRAXA MRFW - FL BRASIL"
+  },
+  {
+    "code": "GI-68",
+    "description": "GRAXA COMP. LÍTIO/ÓLEO MIN. MOS2 EP"
+  },
+  {
+    "code": "GI-69",
+    "description": "GRAXA LÍTIO/ÓLEO MINERAL MOS2 NLGI 2EP"
+  },
+  {
+    "code": "GI-7",
+    "description": "GRAXA LÍTIO/ÓLEO MIN. NLGI 1EP"
+  },
+  {
+    "code": "GI-70",
+    "description": "GRAXA PEH423702 - FL BRASIL"
+  },
+  {
+    "code": "GI-71",
+    "description": "GRAXA PEH423702/00 - FL BRASIL"
+  },
+  {
+    "code": "GI-72",
+    "description": "GRAXA LÍTIO / ÓLEO MIN. MoS2 NLGI 0"
+  },
+  {
+    "code": "GI-73",
+    "description": "GRAXA GRAFILUB-EGW - GRAFPONT"
+  },
+  {
+    "code": "GI-74",
+    "description": "GRAXA COMP. LÍTIO/ÓLEO MIN. TEFLON 2/3EP"
+  },
+  {
+    "code": "GI-75",
+    "description": "GRAXA JOSLYN DC-111 - JOSLYN HI-VOLTAGE"
+  },
+  {
+    "code": "GI-76",
+    "description": "GRAXA COMP. BÁRIO/ÓLEO SINTETICO NLGI 2"
+  },
+  {
+    "code": "GI-77",
+    "description": "GRAXA POLIURÉIA/ÓLEO SINTET. NLGI 2/1EP"
+  },
+  {
+    "code": "GI-78",
+    "description": "GRAXA VARILUB AH70222 BR - KLUBER"
+  },
+  {
+    "code": "GI-79",
+    "description": "GRAXA LÍTIO/ÓLEO MIN. GRAF./MOS2 NLGI 1E"
+  },
+  {
+    "code": "GI-8",
+    "description": "GRAXA LÍTIO/ÓLEO MIN. 10% MOS2 NLGI 1"
+  },
+  {
+    "code": "GI-80",
+    "description": "GRAXA DAIKA SEAL - KROSAKI"
+  },
+  {
+    "code": "GI-81",
+    "description": "GRAXA VEDANTE KPV-1 - LACERDA"
+  },
+  {
+    "code": "GI-82",
+    "description": "GRAXA COMPOSTO H-5 - GRAAF"
+  },
+  {
+    "code": "GI-83",
+    "description": "GRAXA LOCK-CEASE 6180 - NCH"
+  },
+  {
+    "code": "GI-84",
+    "description": "GRAXA NEVALMET GRASE - MAGNUS"
+  },
+  {
+    "code": "GI-85",
+    "description": "GRAXA COMP. LÍTIO/ÓLEO SINT. NLGI 00EP"
+  },
+  {
+    "code": "GI-86",
+    "description": "GRAXA CM COMPOUND - MOLYBRAS"
+  },
+  {
+    "code": "GI-87",
+    "description": "GRAXA AFS AEROSL - MOLYGRAFIT"
+  },
+  {
+    "code": "GI-88",
+    "description": "GRAXA GHF-2 - MOLYGRAFIT"
+  },
+  {
+    "code": "GI-89",
+    "description": "GRAXA GL-0 - MOLYGRAFIT"
+  },
+  {
+    "code": "GI-9",
+    "description": "GRAXA FLUORADA/PTFE NLGI 2"
+  },
+  {
+    "code": "GI-90",
+    "description": "GRAXA GL-2 - MOLYGRAFIT"
+  },
+  {
+    "code": "GI-91",
+    "description": "GRAXA GRC-00 - MOLYGRAFIT"
+  },
+  {
+    "code": "GI-92",
+    "description": "GHRAXA LÍTIO/ÓLEO SILICONE NLGI 2"
+  },
+  {
+    "code": "GI-93",
+    "description": "GRAXA VEDANTE SINTÉTICA NLGI 6"
+  },
+  {
+    "code": "GI-94",
+    "description": "GRAXA BENTONE/ÓLEO MIN. MOS2 NLGI 2"
+  },
+  {
+    "code": "GI-95",
+    "description": "GRAXA FLA 90 - ITW"
+  },
+  {
+    "code": "GI-96",
+    "description": "GRAXA MG - ITW"
+  },
+  {
+    "code": "GI-97",
+    "description": "GRAXA COMP. LÍTIO/ÓLEO MIN. NLGI 2EP"
+  },
+  {
+    "code": "GI-98",
+    "description": "GRAXA MAXLUB 12846 - PROMAX"
+  },
+  {
+    "code": "GI-99",
+    "description": "GRAXA ROTO GLIDE - ATLAS COPCO"
+  },
+  {
+    "code": "GM-7",
+    "description": "GRAXA LUBRIFICANTE CABO AÇO/ENG. ABERTA"
+  },
+  {
+    "code": "GONIOM",
+    "description": "Goniômetro"
+  },
+  {
+    "code": "GRAMINHO",
+    "description": "Graminho"
+  },
+  {
+    "code": "HASTEPAD",
+    "description": "Haste Padrão"
+  },
+  {
+    "code": "HIGROM",
+    "description": "higrômetro"
+  },
+  {
+    "code": "HIPOT",
+    "description": "Hipot"
+  },
+  {
+    "code": "HORIM",
+    "description": "Horímetro"
+  },
+  {
+    "code": "IHM",
+    "description": "Interface Homem Máquina"
+  },
+  {
+    "code": "IMAGTERM",
+    "description": "Imageador Térmico"
+  },
+  {
+    "code": "LAMPESTR",
+    "description": "Lâmpada Estroboscópica"
+  },
+  {
+    "code": "LD-1",
+    "description": "GRAFITE CPO FINO PRETO GT 2000"
+  },
+  {
+    "code": "LD-10",
+    "description": "PERMA 6M"
+  },
+  {
+    "code": "LD-11",
+    "description": "VASELINA"
+  },
+  {
+    "code": "LD-12",
+    "description": "GRAFILUB-EGW"
+  },
+  {
+    "code": "LD-13",
+    "description": "ROCOL AS"
+  },
+  {
+    "code": "LD-14",
+    "description": "PERMA 1M"
+  },
+  {
+    "code": "LD-15",
+    "description": "OUTROS"
+  },
+  {
+    "code": "LD-2",
+    "description": "GRAFITE FINO GRANULOMETRIA 140 MESH"
+  },
+  {
+    "code": "LD-3",
+    "description": "GRAFITE LAMELA NACIONAL GFI-0680-X"
+  },
+  {
+    "code": "LD-4",
+    "description": "GRAFITE BASTAO D 25,00MM X 300,00MM"
+  },
+  {
+    "code": "LD-5",
+    "description": "GRAFITE BASTAO D 3/4 IN X 300,00MM"
+  },
+  {
+    "code": "LD-6",
+    "description": "GRAFITE BASTAO DIAMETRO 3/4IN C.LORENA"
+  },
+  {
+    "code": "LD-7",
+    "description": "GRAFITE BASTAO OCTOGONAL 19,0 X 250,00MM"
+  },
+  {
+    "code": "LD-8",
+    "description": "GRAFITE BASTAO OCTOGONAL 19,4 X 201,60MM"
+  },
+  {
+    "code": "LD-9",
+    "description": "PERMA 3M"
+  },
+  {
+    "code": "LINHA",
+    "description": "Linha"
+  },
+  {
+    "code": "LIQPENET",
+    "description": "Liquido Penetrante"
+  },
+  {
+    "code": "LUPA",
+    "description": "Lupa"
+  },
+  {
+    "code": "LUXIMETR",
+    "description": "Luxímetro"
+  },
+  {
+    "code": "MANOM",
+    "description": "Manômetro"
+  },
+  {
+    "code": "MANUAL",
+    "description": "Manual"
+  },
+  {
+    "code": "MARTELO",
+    "description": "Martelo"
+  },
+  {
+    "code": "MEDKWH",
+    "description": "Medidor de Energia"
+  },
+  {
+    "code": "MEDPO",
+    "description": "Medidor De PO"
+  },
+  {
+    "code": "MEDPRESS",
+    "description": "Medidor De Pressão"
+  },
+  {
+    "code": "MEDVAZAO",
+    "description": "Medidor De Vazão"
+  },
+  {
+    "code": "MEGOM",
+    "description": "Megômetro"
+  },
+  {
+    "code": "MICROM",
+    "description": "Micrometro"
+  },
+  {
+    "code": "MICROSCO",
+    "description": "Microscópio"
+  },
+  {
+    "code": "MOTOSCOP",
+    "description": "Motoscópio"
+  },
+  {
+    "code": "MTE060",
+    "description": "Diagnose de Motores"
+  },
+  {
+    "code": "MULTIM",
+    "description": "Multímetro"
+  },
+  {
+    "code": "NIVEL",
+    "description": "Nível"
+  },
+  {
+    "code": "OA-1",
+    "description": "ÓLEO MIN MOTOR DIESEL SAE 15W40 API CI-4"
+  },
+  {
+    "code": "OA-10",
+    "description": "ÓLEO MIN. MOTOR DIESEL SAE 10W API CF/CD"
+  },
+  {
+    "code": "OA-11",
+    "description": "ÓLEO MIN. MOTOR DIESEL SAE 30 API CF/CD"
+  },
+  {
+    "code": "OA-12",
+    "description": "ÓLEO MD400 SAE 50"
+  },
+  {
+    "code": "OA-13",
+    "description": "ÓLEO RIMULA CT20W"
+  },
+  {
+    "code": "OA-14",
+    "description": "ÓLEO RIMULA CT40W"
+  },
+  {
+    "code": "OA-15",
+    "description": "ÓLEO SAE 30"
+  },
+  {
+    "code": "OA-16",
+    "description": "ÓLEO MD300"
+  },
+  {
+    "code": "OA-17",
+    "description": "ÓLEO MD400"
+  },
+  {
+    "code": "OA-2",
+    "description": "ÓLEO MIN. MOTOR DIESEL SAE 30  API CD"
+  },
+  {
+    "code": "OA-3",
+    "description": "ÓLEO MIN. MOTOR DIESEL SAE 40  API CC"
+  },
+  {
+    "code": "OA-4",
+    "description": "ÓLEO MIN. MOTOR DIESEL SAE 15W40 API CG4"
+  },
+  {
+    "code": "OA-5",
+    "description": "ÓLEO MIN. MOTOR DIESEL SAE 20W API CC"
+  },
+  {
+    "code": "OA-6",
+    "description": "ÓLEO MIN. MOTOR GASOL. 20W50 API SF/CC"
+  },
+  {
+    "code": "OA-7",
+    "description": "ÓLEO MIN. MOTOR DIESEL SAE 15W40 API CE"
+  },
+  {
+    "code": "OA-8",
+    "description": "ÓLEO MIN. MOTOR DIESEL SAE 40 API CF/CD"
+  },
+  {
+    "code": "OA-9",
+    "description": "ÓLEO MIN. MOTOR GASOL. SAE 20W40 API SF"
+  },
+  {
+    "code": "OAF-1",
+    "description": "ÓLEO FLUIDO PARA FREIOS - DOT 3"
+  },
+  {
+    "code": "OAS-1",
+    "description": "ÓLEO AUTOM SINT MOTORES DIESEL SAE 10W40"
+  },
+  {
+    "code": "OAT-1",
+    "description": "ÓLEO MIN. TRANS. AUTOMAT. TIPO A"
+  },
+  {
+    "code": "OAT-10",
+    "description": "ÓLEO MIN. TRANS 80W90 API GL-4"
+  },
+  {
+    "code": "OAT-2",
+    "description": "ÓLEO TRANS. AUTOMO. SAE 90 API GL5"
+  },
+  {
+    "code": "OAT-3",
+    "description": "ÓLEO TRANS. AUTOMO. SAE 140 API GL5"
+  },
+  {
+    "code": "OAT-4",
+    "description": "ÓLEO TRANSM. AUTOMO. SAE 85W140 API GL5"
+  },
+  {
+    "code": "OAT-5",
+    "description": "ÓLEO MIN. TRANS. AUTOMAT. TIPO DEXRON II"
+  },
+  {
+    "code": "OAT-6",
+    "description": "ÓLEO MIN. TRANS AUTOM. CATERPILLAR TO-4"
+  },
+  {
+    "code": "OAT-7",
+    "description": "ÓLEO SPIRAX EP140"
+  },
+  {
+    "code": "OAT-9",
+    "description": "ÓLEO HIDR MIN TRANSM  ESSO MOBILFLUID424"
+  },
+  {
+    "code": "OB-1",
+    "description": "ÓLEO MIN. ADESIVIDADE ISO VG 220"
+  },
+  {
+    "code": "OB-2",
+    "description": "ÓLEO MIN. ADESIVIDADE ISO VG 68"
+  },
+  {
+    "code": "OB-3",
+    "description": "ÓLEO MIN. STAPUT 68 - HOUGHTON"
+  },
+  {
+    "code": "OB-4",
+    "description": "ÓLEO MIN. AGENASLIDE 794/68 - AGENA"
+  },
+  {
+    "code": "OB-5",
+    "description": "ÓLEO MIN. COM ADESIVIDADE ISO VG 68 EP"
+  },
+  {
+    "code": "OC-1",
+    "description": "ÓLEO MIN. CILINDRO VAPOR ISO VG 460"
+  },
+  {
+    "code": "OC-2",
+    "description": "ÓLEO MIN. CILINDRO VAPOR ISO VG 680"
+  },
+  {
+    "code": "OC-3",
+    "description": "ÓLEO HIDROCARBONETO SINT E ADITIVOS/68"
+  },
+  {
+    "code": "OCA-1",
+    "description": "ÓLEO MIN. PARAÍINICO ISO VG 46"
+  },
+  {
+    "code": "OCA-10",
+    "description": "ÓLEO ATLAS COPCO 2908850101 - ATLAS COPC"
+  },
+  {
+    "code": "OCA-11",
+    "description": "ÓLEO BASE HJIDROCARBONETOS SINT. VG 46"
+  },
+  {
+    "code": "OCA-12",
+    "description": "ÓLEO SUPER COMPRESSOR FLUID/PETRO CANADA"
+  },
+  {
+    "code": "OCA-13",
+    "description": "ÓLEO TECH GOLD - INGERSOLL RAND"
+  },
+  {
+    "code": "OCA-14",
+    "description": "ÓLEO SINTÉTICO RARUS 829 - MOBIL OIL"
+  },
+  {
+    "code": "OCA-15",
+    "description": "ÓLEO OCV 1X15023 - INGERSOLL RAND"
+  },
+  {
+    "code": "OCA-16",
+    "description": "ÓLEO MIN. ROTO INJECT FLUID - ATLAS COPC"
+  },
+  {
+    "code": "OCA-17",
+    "description": "OLEO MINERAL COMPRESSORES ISO 100 PM LUB"
+  },
+  {
+    "code": "OCA17",
+    "description": "OLEO MINERAL COMPRESSORES ISO 100 PM LUB"
+  },
+  {
+    "code": "OCA-2",
+    "description": "ÓLEO ATLAS COPCO 2901-0522-00"
+  },
+  {
+    "code": "OCA-20",
+    "description": "SINTÉTICO ATLAS COPCO 2901170100"
+  },
+  {
+    "code": "OCA-21",
+    "description": "ÓLEO SINTETICO PAO/150"
+  },
+  {
+    "code": "OCA-3",
+    "description": "ÓLEO ATLAS COPCO 2908-8501-01"
+  },
+  {
+    "code": "OCA-4",
+    "description": "ÓLEO INGERSOL RAND XL 740HT"
+  },
+  {
+    "code": "OCA-5",
+    "description": "ÓLEO SINTÉTICO ISO VG 150"
+  },
+  {
+    "code": "OCA-6",
+    "description": "ÓLEO MINERAL PARAF. ANTI. DESG. ISO VG 4"
+  },
+  {
+    "code": "OCA-7",
+    "description": "ÓLEO SINTÉTICO PAO, EP ISO VG 46"
+  },
+  {
+    "code": "OCA-8",
+    "description": "ÓLEO ULTRA COOLANT - INGERSOLL RAND"
+  },
+  {
+    "code": "OCA-9",
+    "description": "ÓLEO AIROIL 4000SS - COMPAIR"
+  },
+  {
+    "code": "OCR-1",
+    "description": "ÓLEO MIN. NAFTÊNICO ISO VG 68"
+  },
+  {
+    "code": "OCR-10",
+    "description": "ÓLEO CP-115-RE"
+  },
+  {
+    "code": "OCR-2",
+    "description": "ÓLEO MIN. NAFTÊNICO ISO VG 100"
+  },
+  {
+    "code": "OCR-3",
+    "description": "ÓLEO ZEROL - SHERVICE CHEMICOL"
+  },
+  {
+    "code": "OCR-4",
+    "description": "ÓLEO SINT. P/ GAS HFC-134A ISO VG 68"
+  },
+  {
+    "code": "OCR-5",
+    "description": "ÓLEO SINT. ESTER DE POLIOL (POE) VG 68"
+  },
+  {
+    "code": "OCR-6",
+    "description": "ÓLEO PP 47-32 - CARRIER"
+  },
+  {
+    "code": "OCR-7",
+    "description": "ÓLEO SINTET. POE (YORK H) - YSBABA"
+  },
+  {
+    "code": "OCR-8",
+    "description": "ÓLEO FREOL SR-30 - HITACHI"
+  },
+  {
+    "code": "OCR-9",
+    "description": "ÓLEO SINT. POLIOL ESTER ISO VG 68"
+  },
+  {
+    "code": "OD-1",
+    "description": "ÓLEO FLUORADO  VISC. 400 cSt a 40 °C"
+  },
+  {
+    "code": "OD-10",
+    "description": "OLEO MONOETILENOGLICOL INIBIDO UNIGAL"
+  },
+  {
+    "code": "OD-11",
+    "description": "ÓLEO SILIC. FLUIDO DC 200 5 - DOW CORNIN"
+  },
+  {
+    "code": "OD-12",
+    "description": "OLEO SILICONE  47 V 50 - NAKA"
+  },
+  {
+    "code": "OD-13",
+    "description": "OLEO MINERAL UNID REFRIG YSBABA  YORK"
+  },
+  {
+    "code": "OD-14",
+    "description": "ÓLEO TRIBOL LUB - MODERN"
+  },
+  {
+    "code": "OD-15",
+    "description": "ÓLEO SILICONE 1107 FLUIDO - DOW CORNING"
+  },
+  {
+    "code": "OD-16",
+    "description": "ÓLEO GMBHD-7900 ULM - LIQUIMOLY"
+  },
+  {
+    "code": "OD-17",
+    "description": "ÓLEO RED OIL DEPPO - STRUERS"
+  },
+  {
+    "code": "OD-18",
+    "description": "ÓLEO BLUE DEPT1 - STRUERS"
+  },
+  {
+    "code": "OD-19",
+    "description": "ÓLEO FLUORADO - DAIKIN"
+  },
+  {
+    "code": "OD-2",
+    "description": "ÓLEO FLUORADO VISC. 5-15 cSt A 25 °C"
+  },
+  {
+    "code": "OD-20",
+    "description": "ÓLEO  SILICONE DC 550 - DOW CORNING"
+  },
+  {
+    "code": "OD-21",
+    "description": "ÓLEO DE SILICONE - DOW CORNING"
+  },
+  {
+    "code": "OD-22",
+    "description": "ÓLEO DE SILICONE 200/350 - DOW CORNONG"
+  },
+  {
+    "code": "OD-23",
+    "description": "ÓLEO LUBRIF. ADVANCE UPS AS SPRAY - UPS"
+  },
+  {
+    "code": "OD-24",
+    "description": "ÓLEO FERBRAX MV55"
+  },
+  {
+    "code": "OD-25",
+    "description": "ÓLEO MIN. DETERG./DISPER. LIMPEZA SIST."
+  },
+  {
+    "code": "OD-26",
+    "description": "MICRO ÓLEO LUBRIFICANTE ANTI-CORROSIVO"
+  },
+  {
+    "code": "OD-27",
+    "description": "ÓLEO TALPA 20"
+  },
+  {
+    "code": "OD-28",
+    "description": "ÓLEO TALPA 30"
+  },
+  {
+    "code": "OD-29",
+    "description": "ÓLEO AGIP OEF X 46"
+  },
+  {
+    "code": "OD-3",
+    "description": "ÓLEO ULTRAGRADE 19 - BOC EDWARDS"
+  },
+  {
+    "code": "OD-30",
+    "description": "ÓLEO USADO"
+  },
+  {
+    "code": "OD-4",
+    "description": "ÓLEO SIDERLUBRIC FLUSHING 11 - QUAKER"
+  },
+  {
+    "code": "OD-5",
+    "description": "ÓLEO SUSPEMSÃO AQUOSA DE GRAFITE"
+  },
+  {
+    "code": "OD-6",
+    "description": "ÓLEO 518N - CARL ZEISS"
+  },
+  {
+    "code": "OD-7",
+    "description": "ÓLEO ARL A037260 - ARL"
+  },
+  {
+    "code": "OD-8",
+    "description": "ÓLEO E15- BOC EDWARDS"
+  },
+  {
+    "code": "OD-9",
+    "description": "ÓLEO CLARIM - KLEMM"
+  },
+  {
+    "code": "OE-1",
+    "description": "ÓLEO MINERAL EP ISO VG 150"
+  },
+  {
+    "code": "OE-10",
+    "description": "ÓLEO MINERAL EP ISO VG 100"
+  },
+  {
+    "code": "OE-11",
+    "description": "ÓLEO MINERAL EP ISO VG 1000"
+  },
+  {
+    "code": "OE-12",
+    "description": "ÓLEO SINTÉTICO POLIGLICOL ISO VG 1000"
+  },
+  {
+    "code": "OE-13",
+    "description": "ÓLEO MINERAL EP VISCOS. 530 cSt/40 °C"
+  },
+  {
+    "code": "OE-14",
+    "description": "ÓLEO SHC 634"
+  },
+  {
+    "code": "OE-15",
+    "description": "ÓLEO MACOMA 530"
+  },
+  {
+    "code": "OE-16",
+    "description": "ÓLEO SINTÉTICO PAO ISO VG 320"
+  },
+  {
+    "code": "OE-17",
+    "description": "ÓLEO SEMISSINTÉTICO ISO VG 460"
+  },
+  {
+    "code": "OE-18",
+    "description": "ÓLEO SINT POLIALQUILENO GLIC E ADT/320"
+  },
+  {
+    "code": "OE-2",
+    "description": "ÓLEO MINERAL EP ISO VG 220"
+  },
+  {
+    "code": "OE-3",
+    "description": "ÓLEO MINERAL EP ISO VG 320"
+  },
+  {
+    "code": "OE-4",
+    "description": "ÓLEO MINERAL EP ISO VG 220"
+  },
+  {
+    "code": "OE-5",
+    "description": "ÓLEO MINERAL EP ISO VG 460"
+  },
+  {
+    "code": "OE-6",
+    "description": "ÓLEO SINTÉTICO ISO VG 220"
+  },
+  {
+    "code": "OE-7",
+    "description": "ÓLEO BETUMINOSO VISC. 4600 cSt A 40 °C"
+  },
+  {
+    "code": "OE-8",
+    "description": "ÓLEO MINERAL EP ISO VG 680"
+  },
+  {
+    "code": "OE-9",
+    "description": "ÓLEO MINERAL EP ISO VG 1500"
+  },
+  {
+    "code": "OFP-1",
+    "description": "ÓLEO MINERAL ADITIVADO ISO VG 100"
+  },
+  {
+    "code": "OFP-2",
+    "description": "ÓLEO MINERAL ANTIGOT. EP ISO VG 100"
+  },
+  {
+    "code": "OFP-3",
+    "description": "ÓLEO FP-68; FP68"
+  },
+  {
+    "code": "OH-1",
+    "description": "ÓLEO MINERAL AW ISO VG 32"
+  },
+  {
+    "code": "OH-10",
+    "description": "ÓLEO MINERAL AW ISO VG 10"
+  },
+  {
+    "code": "OH-11",
+    "description": "ÓLEO HIDRÁULICO LHDF-900/5L - SKF"
+  },
+  {
+    "code": "OH-12",
+    "description": "ÓLEO HIDRÁULICO LHDF-300/5L - SKF"
+  },
+  {
+    "code": "OH-13",
+    "description": "ÓLEO MINERAL TUTELA LP22 - FL BRASIL"
+  },
+  {
+    "code": "OH-14",
+    "description": "ÓLEO HIDR. AERONAVE FLUID 41 - SHELL"
+  },
+  {
+    "code": "OH-15",
+    "description": "ÓLEO MINERAL ULTRA FILTRADO AW VG 68"
+  },
+  {
+    "code": "OH-16",
+    "description": "ÓLEO MINERAL ULTRA FILTRADO AW VG 46"
+  },
+  {
+    "code": "OH-17",
+    "description": "ÓLEO MINERAL AW  ISO VG 100"
+  },
+  {
+    "code": "OH-18",
+    "description": "ÓLEO MINERAL TELLUS S 68 - SHELL"
+  },
+  {
+    "code": "OH-19",
+    "description": "ÓLEO MINERAL PURO PARAF. ISO VG 68"
+  },
+  {
+    "code": "OH-20",
+    "description": "ÓLEO TELLUS C10"
+  },
+  {
+    "code": "OH-21",
+    "description": "ÓLEO TELLUS C22"
+  },
+  {
+    "code": "OH-22",
+    "description": "ÓLEO TELLUS C32"
+  },
+  {
+    "code": "OH-23",
+    "description": "ÓLEO TELLUS C150"
+  },
+  {
+    "code": "OH-24",
+    "description": "ÓLEO TELLUS C220"
+  },
+  {
+    "code": "OH-25",
+    "description": "ÓLEO AGIP 68"
+  },
+  {
+    "code": "OH-26",
+    "description": "ÓLEO HIDROBAK 150"
+  },
+  {
+    "code": "OH-3",
+    "description": "ÓLEO MINERAL AW ISO VG 46"
+  },
+  {
+    "code": "OH-5",
+    "description": "ÓLEO MINERAL AW ISO VG 68"
+  },
+  {
+    "code": "OH-8",
+    "description": "ÓLEO MINERAL AW ISO VG 68"
+  },
+  {
+    "code": "OH-9",
+    "description": "ÓLEO MINERAL AW ISO VG 15"
+  },
+  {
+    "code": "OHMIM",
+    "description": "Ohmímetro"
+  },
+  {
+    "code": "OHS-1",
+    "description": "ÓLEO SINT. ÉSTER ORGÂNICO ISO VG 46"
+  },
+  {
+    "code": "OHS-10",
+    "description": "ÓLEO USINAGEM DAIROL H-1A - DAIDO"
+  },
+  {
+    "code": "OHS-11",
+    "description": "ÓLEO RESIST. FOGO ÁGUA GLICOL ISO VG 46"
+  },
+  {
+    "code": "OHS-12",
+    "description": "ÓLEO NIVAC FR 200"
+  },
+  {
+    "code": "OHS-13",
+    "description": "ÓLEO ARNICA S46"
+  },
+  {
+    "code": "OHS-14",
+    "description": "ÓLEO TIRRENO 46/20"
+  },
+  {
+    "code": "OHS-2",
+    "description": "ÓLEO SINT. ÉSTER ORGÂNICO ISO VG 68"
+  },
+  {
+    "code": "OHS-3",
+    "description": "ÓLEO SINT. ÉSTER ORGÂNICO ISO VG 46"
+  },
+  {
+    "code": "OHS-4",
+    "description": "ÓLEO EMULSÃO INVERTIDA ISO VG 100"
+  },
+  {
+    "code": "OHS-5",
+    "description": "ÓLEO SINT. ÉSTER ORGÂNICO ISO VG 68"
+  },
+  {
+    "code": "OHS-6",
+    "description": "ÓLEO RESIST. FOGO ÁGUA GLICOL ISO VG 46"
+  },
+  {
+    "code": "OHS-7",
+    "description": "ÓLEO RESIST. FOGO ESTER ORGAN. ISO VG 68"
+  },
+  {
+    "code": "OHS-8",
+    "description": "ÓLEO RESIST. FOGO ÁGUA GLICOL ISO VG 46"
+  },
+  {
+    "code": "OHS-9",
+    "description": "ÓLEO RESIST. FOGO ESTER ORGAN. ISO VG 46"
+  },
+  {
+    "code": "OI-1",
+    "description": "ÓLEO NAFTÊNICO  ISOLANTE TIPO A"
+  },
+  {
+    "code": "OI-2",
+    "description": "ÓLEO SINTÉTICO R-TEMP - COOPER POWER"
+  },
+  {
+    "code": "OI-3",
+    "description": "ÓLEO MINERAL PARAÍINICO 145 KV ISO VG 10"
+  },
+  {
+    "code": "OLFATO",
+    "description": "Olfato"
+  },
+  {
+    "code": "OLP-1",
+    "description": "ÓLEO PARA LUBRIFICAÇÃO POR PERDA"
+  },
+  {
+    "code": "OLP-10",
+    "description": "ÓLEO CARDIUN F F"
+  },
+  {
+    "code": "OLP-11",
+    "description": "ÓLEO SHELL CARDIUM"
+  },
+  {
+    "code": "OLP-12",
+    "description": "COMPOSIÇÃO BETIMUNOSA ADESIVA ALTA VISC."
+  },
+  {
+    "code": "OLP-13",
+    "description": "ÓLEO SEMI-SINT. (MIN./PAO) 7771 cSt"
+  },
+  {
+    "code": "OLP-2",
+    "description": "ÓLEO SEMI SINTÉTICO VISC. 16500 cSt"
+  },
+  {
+    "code": "OLP-3",
+    "description": "ÓLEO MINER. BETUM. EP 1116 cSt/100 °C"
+  },
+  {
+    "code": "OLP-4",
+    "description": "ÓLEO MINERAL/SOLVENTE EP VISC. 1030 cSt"
+  },
+  {
+    "code": "OLP-5",
+    "description": "ÓLEO MIN. MISTO ADESI. EP VG 3000 cPs"
+  },
+  {
+    "code": "OLP-7",
+    "description": "ÓLEO GBA-250"
+  },
+  {
+    "code": "OLP-8",
+    "description": "ÓLEO CARDIUN C D"
+  },
+  {
+    "code": "OLP-9",
+    "description": "ÓLEO CARDIUN C F"
+  },
+  {
+    "code": "OLS-1",
+    "description": "OLEO LUBRIFICANTE SPRAY PARA CORRENTE CO"
+  },
+  {
+    "code": "OLS-2",
+    "description": "OLEO MIN NEU/PTFE/ANTGOTE/KNSU/C4H10/GLP"
+  },
+  {
+    "code": "OM-1",
+    "description": "ÓLEO MINERAL ISO VG 10"
+  },
+  {
+    "code": "OM-10",
+    "description": "ÓLEO MINERAL ANTI-DESGASTE ISO VG 150"
+  },
+  {
+    "code": "OM-11",
+    "description": "ÓLEO MINERAL PURO ISO VG 68"
+  },
+  {
+    "code": "OM-12",
+    "description": "ÓLEO MINERAL PURO ISO VG 100"
+  },
+  {
+    "code": "OM-13",
+    "description": "ÓLEO MINERAL ANTI-DESGASTE ISO VG 10"
+  },
+  {
+    "code": "OM-14",
+    "description": "ÓLEO MINERAL NAFTEN. PURO VISC. 120 cSt"
+  },
+  {
+    "code": "OM-15",
+    "description": "ÓLEO MINERAL PURO ISO VG 220"
+  },
+  {
+    "code": "OM-16",
+    "description": "ÓLEO MINERAL PURO DEMULS. ISO VG 680"
+  },
+  {
+    "code": "OM-17",
+    "description": "ÓLEO CL-22-OF"
+  },
+  {
+    "code": "OM-18",
+    "description": "ÓLEO CL-37-OF"
+  },
+  {
+    "code": "OM-19",
+    "description": "ÓLEO MINERAL CABO AÇO 23cSt"
+  },
+  {
+    "code": "OM-2",
+    "description": "ÓLEO MINE4AL PURO ISO VG 460"
+  },
+  {
+    "code": "OM-20",
+    "description": "ÓLEO MINERAL CABO DE AÇO 80cSt"
+  },
+  {
+    "code": "OM-21",
+    "description": "ÓLEO MINERAL/VEGETAL/ADITIVOS - MICPOL"
+  },
+  {
+    "code": "OM-3",
+    "description": "ÓLEO SINTÉTICO PAG ISO VG 460"
+  },
+  {
+    "code": "OM-4",
+    "description": "ÓLEO MINERAL EP DEMULSIF. ISO VG 460"
+  },
+  {
+    "code": "OM-5",
+    "description": "ÓLEO MINERAL PURO ISO VG 320"
+  },
+  {
+    "code": "OM-6",
+    "description": "ÓLEO SINT. POLIGLICOL EP 750 cSt/40 ºC"
+  },
+  {
+    "code": "OM-7",
+    "description": "ÓLEO MINERAL NAFTEN. PURO VISC. 90 cSt"
+  },
+  {
+    "code": "OM-8",
+    "description": "ÓLEO MINERAL PURO ISO VG 150"
+  },
+  {
+    "code": "OM-9",
+    "description": "ÓLEO MINERAL ANTI-DESGASTE ISO VG 22"
+  },
+  {
+    "code": "ON-1",
+    "description": "ÓLEO MINERAL LUBR. NÉVOA ISO VG 320"
+  },
+  {
+    "code": "OPACIM",
+    "description": "Opacimetro"
+  },
+  {
+    "code": "OSCILOSC",
+    "description": "Osciloscópio"
+  },
+  {
+    "code": "OTV-1",
+    "description": "ÓLEO MINERAL R/O ISO VG 32"
+  },
+  {
+    "code": "OTV-2",
+    "description": "ÓLEO MINERAL R/O ISO VG 46"
+  },
+  {
+    "code": "OTV-3",
+    "description": "ÓLEO MINERAL R/O ISO VG 68"
+  },
+  {
+    "code": "OTV-4",
+    "description": "ÓLEO MINERAL R/O ISO VG 100"
+  },
+  {
+    "code": "OTV-5",
+    "description": "ÓLEO MINERAL R/O ISO VG 220"
+  },
+  {
+    "code": "OTV-6",
+    "description": "ÓLEO MINERAL R/O ISO VG 150"
+  },
+  {
+    "code": "OTV-7",
+    "description": "ÓLEO TURBINA T68"
+  },
+  {
+    "code": "OU-1",
+    "description": "ÓLEO USINAGEM MINERAL -  INTEGRAL"
+  },
+  {
+    "code": "OU-10",
+    "description": "ÓLEO USINAG. MIN. BACTER. - EMUL. LEITO."
+  },
+  {
+    "code": "OU-11",
+    "description": "ÓLEO USINAGEM QUIMATIC - TAPMATIC"
+  },
+  {
+    "code": "OU-12",
+    "description": "ÓLEO USINAGEM DAIROOL NT-22 - DAIDO"
+  },
+  {
+    "code": "OU-13",
+    "description": "ÓLEO USINAGEM MINERAL - EMULSÃO LEITOSA"
+  },
+  {
+    "code": "OU-14",
+    "description": "ÓLEO SEMI-SINTÉTICO - TRANSLUCIDO"
+  },
+  {
+    "code": "OU-15",
+    "description": "ÓLEO USINAGEM N.º 3 - THERMAX"
+  },
+  {
+    "code": "OU-16",
+    "description": "ÓLEO USINAGEM SINTÉTICO BIOESTÁVEL"
+  },
+  {
+    "code": "OU-17",
+    "description": "ÓLEO USINAGEM LONG LIFE COOLANT - MAZAK"
+  },
+  {
+    "code": "OU-18",
+    "description": "ÓLEO USINAGEM SINTÉTICO - EMULSÃO TRANSL"
+  },
+  {
+    "code": "OU-19",
+    "description": "ÓLEO MICROGRIND BR 585-GTF - QUAKER"
+  },
+  {
+    "code": "OU-2",
+    "description": "ÓLEO USINAGEM MINERAL - LEITOSO"
+  },
+  {
+    "code": "OU-20",
+    "description": "ÓLEO USINAGEM SINTÉTICO"
+  },
+  {
+    "code": "OU-21",
+    "description": "ÓLEO USINAGEM ECOCOOL MH 5000C - FUCHS"
+  },
+  {
+    "code": "OU-22",
+    "description": "ÓLEO USINAGEM DAIROLL AS - DAIDO"
+  },
+  {
+    "code": "OU-23",
+    "description": "ÓLEO USINAGEM DAIRL PA-5 - DAIDO"
+  },
+  {
+    "code": "OU-24",
+    "description": "ÓLEO USINAGEM MINERAL INTEGRAL"
+  },
+  {
+    "code": "OU-25",
+    "description": "ÓLEO USINAGEM DAIROLL SF-UM - DAIDO"
+  },
+  {
+    "code": "OU-26",
+    "description": "ÓLEO MACRON C"
+  },
+  {
+    "code": "OU-27",
+    "description": "ÓLEO ST 500"
+  },
+  {
+    "code": "OU-3",
+    "description": "ÓLEO USINAGEM SINTÉTICO - TRANSLUCIDO"
+  },
+  {
+    "code": "OU-4",
+    "description": "ÓLEO USINAGEM MINERAL - LEITOSO"
+  },
+  {
+    "code": "OU-5",
+    "description": "ÓLEO USINAGEM AQUATIC - TAPMATIC"
+  },
+  {
+    "code": "OU-6",
+    "description": "ÓLEO USINAGEM DAIROLL PA-87 - DAIDO"
+  },
+  {
+    "code": "OU-7",
+    "description": "ÓLEO USINAGEM HOCUT 4207 - HOUGHTON"
+  },
+  {
+    "code": "OU-8",
+    "description": "ÓLEO SEMI-SINTÉTICO BIODEGRADÁVEL"
+  },
+  {
+    "code": "OU-9",
+    "description": "ÓLEO USINAGEM RIDGID 59657 - RIDGID"
+  },
+  {
+    "code": "OXIMETRO",
+    "description": "OXÍMETRO"
+  },
+  {
+    "code": "PAQUIM",
+    "description": "Paquímetro"
+  },
+  {
+    "code": "PERIM",
+    "description": "Perímetro"
+  },
+  {
+    "code": "PESOPAD",
+    "description": "Peso padrão"
+  },
+  {
+    "code": "PHMETRO",
+    "description": "PEAGÂMETRO"
+  },
+  {
+    "code": "PI-1",
+    "description": "PASTA PASTA MONTAGEM 50% MOS2"
+  },
+  {
+    "code": "PI-2",
+    "description": "PASTA COBRE 1100ºC"
+  },
+  {
+    "code": "PI-3",
+    "description": "PASTA COBRE FLUIDA 1100ºC"
+  },
+  {
+    "code": "PI-4",
+    "description": "PASTA BRANCA 1150 ºC"
+  },
+  {
+    "code": "PI-5",
+    "description": "ÓLEO MAXLUB B2F-440 - PROMAX"
+  },
+  {
+    "code": "PI-6",
+    "description": "GRAFITE PASTA ANTI-AGARRAMENTO - LECHLER"
+  },
+  {
+    "code": "PI-7",
+    "description": "PASTA ÓLEO MINERAL E MOS2"
+  },
+  {
+    "code": "PI-8",
+    "description": "PASTA GLEITMO 705 - FUCHS"
+  },
+  {
+    "code": "PI-9",
+    "description": "PASTA WOLFRAKOTE TOP - KLUBER"
+  },
+  {
+    "code": "PIROM",
+    "description": "Pirômetro"
+  },
+  {
+    "code": "PRUMO",
+    "description": "Prumo"
+  },
+  {
+    "code": "PTEWHEAT",
+    "description": "Ponte De Wheatstone"
+  },
+  {
+    "code": "RADIOM",
+    "description": "Radiômetro"
+  },
+  {
+    "code": "RAIOX",
+    "description": "Raio X"
+  },
+  {
+    "code": "REGISGRA",
+    "description": "Registrador gráfico"
+  },
+  {
+    "code": "RELCOMPA",
+    "description": "Relógio Comparador"
+  },
+  {
+    "code": "ROTAM",
+    "description": "Rotâmetro"
+  },
+  {
+    "code": "RUGOSIM",
+    "description": "Rugosímetro"
+  },
+  {
+    "code": "SOLUPAD",
+    "description": "Solução Padrão"
+  },
+  {
+    "code": "SPRAYAMO",
+    "description": "Spray De Amônia"
+  },
+  {
+    "code": "TACOM",
+    "description": "Tacômetro"
+  },
+  {
+    "code": "TATO",
+    "description": "Tato"
+  },
+  {
+    "code": "TERMOGRA",
+    "description": "Termografia"
+  },
+  {
+    "code": "TERMOM",
+    "description": "Termômetro"
+  },
+  {
+    "code": "TERROM",
+    "description": "Terrômetro"
+  },
+  {
+    "code": "TESTE",
+    "description": "Teste"
+  },
+  {
+    "code": "TOPOGRA",
+    "description": "Topografia"
+  },
+  {
+    "code": "TORQUIM",
+    "description": "Torquimetro"
+  },
+  {
+    "code": "TRANSDUT",
+    "description": "Transdutor"
+  },
+  {
+    "code": "TRENA",
+    "description": "Trena"
+  },
+  {
+    "code": "ULTRASOM",
+    "description": "Ultra Som"
+  },
+  {
+    "code": "VACUOM",
+    "description": "Vacuômetro"
+  },
+  {
+    "code": "VARETANI",
+    "description": "Vareta de nível"
+  },
+  {
+    "code": "VARIM",
+    "description": "Varímetro"
+  },
+  {
+    "code": "VIBROM",
+    "description": "Vibrômetro"
+  },
+  {
+    "code": "VISUAL",
+    "description": "Visual"
+  },
+  {
+    "code": "VOLTIM",
+    "description": "Voltímetro"
+  },
+  {
+    "code": "WATIM",
+    "description": "Wattímetro"
+  }
+]

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual do Usuário - Sistema PM13 Local</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #394047;
+            background-color: #F3F6F1;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            background-color: #FFFFFF;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid #E7ECE4;
+        }
+        header {
+            border-bottom: 2px solid #84BD00;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        h1 {
+            color: #365E00;
+            margin: 0;
+            font-size: 28px;
+        }
+        .subtitle {
+            color: #7A869A;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        h2 {
+            color: #365E00;
+            border-left: 4px solid #84BD00;
+            padding-left: 12px;
+            margin-top: 40px;
+            font-size: 20px;
+        }
+        h3 {
+            color: #5F8500;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        p {
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        ul, ol {
+            margin: 10px 0 20px 20px;
+            font-size: 14px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        code {
+            font-family: Consolas, Monaco, monospace;
+            background-color: #FAFCFA;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid #E7ECE4;
+            font-size: 13px;
+        }
+        .highlight-box {
+            background-color: #FAFCFA;
+            border-left: 4px solid #84BD00;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        .warning-box {
+            background-color: #FFFBF0;
+            border-left: 4px solid #E2A629;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        .danger-box {
+            background-color: #FFF6F6;
+            border-left: 4px solid #C83A3A;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        .kbd {
+            background-color: #FFFFFF;
+            border: 1px solid #CBD5E0;
+            border-radius: 3px;
+            box-shadow: 0 1px 0 rgba(0,0,0,0.2);
+            color: #333;
+            display: inline-block;
+            font-size: 11px;
+            font-family: inherit;
+            line-height: 1.4;
+            padding: 2px 5px;
+            white-space: nowrap;
+        }
+        .image-placeholder {
+            background-color: #F8FAF7;
+            border: 1px dashed #D0D8CC;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7A869A;
+            font-style: italic;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px 15px;
+            border: 1px solid #E7ECE4;
+            text-align: left;
+            font-size: 13px;
+        }
+        th {
+            background-color: #FAFCFA;
+            color: #365E00;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #F8FAF7;
+        }
+        footer {
+            margin-top: 50px;
+            border-top: 1px solid #E7ECE4;
+            padding-top: 20px;
+            font-size: 12px;
+            color: #7A869A;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Manual do Usuário - Sistema de Controle PM13</h1>
+        <div class="subtitle">Guia completo para operação local de planos e balanceamento de carga de paradas</div>
+    </header>
+
+    <h2>1. Visão Geral</h2>
+    <p>
+        O <strong>Sistema PM13</strong> é uma ferramenta local corporativa desenvolvida para substituir planilhas complexas de controle de paradas programadas de manutenção PM13 na indústria siderúrgica. Ele permite cadastrar planos, vincular itens de manutenção, importar dados diretamente de planilhas unificadas e balancear a carga de trabalho de HH (Homem-Hora) e efetivo necessário ao longo de um horizonte móvel de paradas futuras.
+    </p>
+
+    <div class="highlight-box">
+        <strong>Características Principais:</strong>
+        <ul>
+            <li><strong>Funcionamento 100% Offline:</strong> Não depende de internet, servidores de nuvem externos ou CDNs.</li>
+            <li><strong>Banco de Dados Robusto:</strong> Alimentado por um banco SQLite local, garantindo consistência transacional.</li>
+            <li><strong>Importação Inteligente:</strong> Lê planilhas XLSX unificadas de forma nativa e detecta inconsistências de preenchimento.</li>
+            <li><strong>Visualização de Carga:</strong> Gráficos SVG interativos de HH, efetivo ou ordens, com mapa de calor e painel de detalhamento lateral por parada.</li>
+        </ul>
+    </div>
+
+    <h2>2. Como Iniciar o Sistema</h2>
+    <p>O sistema é executado localmente. Para iniciá-lo, siga os passos abaixo:</p>
+    <ol>
+        <li>Navegue até a pasta de instalação do sistema.</li>
+        <li>Dê dois cliques no arquivo <code>INICIAR_PM13.bat</code>.</li>
+        <li>O script detectará o interpretador Python, iniciará o servidor HTTP local e abrirá automaticamente o navegador no endereço <code>http://127.0.0.1:8765</code>.</li>
+        <li>Mantenha a janela preta do prompt de comando aberta enquanto estiver utilizando o sistema. Para encerrar, feche a janela ou clique no botão <strong>Encerrar Sistema</strong> no canto inferior esquerdo da barra lateral da tela.</li>
+    </ol>
+
+    <h2>3. Lógica e Regras de Negócio Importantes</h2>
+    <p>O sistema calcula os indicadores e o calendário de paradas futuras de forma automatizada com base nas seguintes fórmulas matemáticas:</p>
+
+    <h3>3.1. Calendário de Ocorrência de Planos</h3>
+    <p>
+        Um plano de manutenção programada ocorrerá em uma determinada parada \(S\) (onde \(S\) representa o contador numérico da parada) se, e somente se, satisfizer as seguintes condições:
+    </p>
+    <div style="background-color: #FAFCFA; padding: 12px; border-radius: 4px; border: 1px solid #E7ECE4; margin: 10px 0; font-family: monospace; text-align: center;">
+        S &ge; R &nbsp;&nbsp;&nbsp;&nbsp;e&nbsp;&nbsp;&nbsp;&nbsp; (S - R) mod C == 0
+    </div>
+    <p>Onde:</p>
+    <ul>
+        <li><strong>R:</strong> Contador de Referência (primeira parada cadastrada onde o plano ocorreu).</li>
+        <li><strong>C:</strong> Ciclo do Plano (frequência de ocorrência dada em número de paradas, ex: 3, 6, 12).</li>
+    </ul>
+
+    <h3>3.2. Aproveitamento de Parada e Efetivo Médio</h3>
+    <p>
+        Para planejar a quantidade de pessoas necessárias (Efetivo) em cada parada, o sistema calcula a duração produtiva total de cada parada somando as horas de todos os turnos configurados no projeto e multiplicando pelo <strong>Fator de Aproveitamento</strong>:
+    </p>
+    <div style="background-color: #FAFCFA; padding: 12px; border-radius: 4px; border: 1px solid #E7ECE4; margin: 10px 0; font-family: monospace; text-align: center;">
+        H_produtivas = (&Sigma; Horas dos Turnos Ativos) &times; Fator_Aproveitamento
+    </div>
+    <p>
+        A quantidade de efetivo necessário (número de pessoas da equipe) para a parada é calculada dividindo o total de HH acumulado da parada pelas horas produtivas, arredondando para cima (teto matemático):
+    </p>
+    <div style="background-color: #FAFCFA; padding: 12px; border-radius: 4px; border: 1px solid #E7ECE4; margin: 10px 0; font-family: monospace; text-align: center;">
+        Efetivo = &lceil; HH_total / H_produtivas &rceil;
+    </div>
+
+    <h3>3.3. Restrição de Caracteres</h3>
+    <div class="warning-box">
+        <strong>Limite Crítico de Descrições (35 Caracteres):</strong><br>
+        O ERP SAP corporativo limita a descrição da ordem de manutenção a 35 caracteres.
+        <ul>
+            <li>Planos ou itens com descrições que ultrapassarem 35 caracteres serão marcados com um alerta amarelo de advertência nas tabelas e no painel gerencial.</li>
+            <li>Ao cadastrar ou editar planos/itens no sistema, o contador de caracteres exibirá em tempo real se a descrição exceder esse limite.</li>
+        </ul>
+    </div>
+
+    <h3>3.4. Erros de Cópia e Cola (Divergências de Subárea)</h3>
+    <p>
+        O sistema analisa se há divergência entre a sigla do sistema no código do plano (STP, STE, STF, STD) e a descrição escrita. Caso o código contenha <code>STP</code> (SIST-P) mas a descrição mencione <code>SIST-E</code>, por exemplo, um aviso visual será mostrado apontando a divergência para correção.
+    </p>
+
+    <h2>4. Telas do Sistema</h2>
+
+    <h3>4.1. Visão Geral (Dashboard)</h3>
+    <p>
+        Apresenta os KPIs gerenciais consolidados do projeto ativo, a distribuição de HH por Centro de Trabalho (equipes) e o número de inconsistências cadastrais pendentes.
+    </p>
+    <ul>
+        <li><strong>Alertas Clicáveis:</strong> Caso existam planos sem contador de referência, itens sem plano ou descrições acima do limite, um box amarelo exibirá esses erros. Ao clicar sobre qualquer aviso (ex: "12 itens sem plano"), você será redirecionado para a tela correspondente já com os filtros aplicados para rápida correção.</li>
+    </ul>
+
+    <h3>4.2. Catálogo de Planos</h3>
+    <p>
+        Exibe a tabela com todos os planos cadastrados. Você pode pesquisar por código ou descrição, filtrar por ciclo, status e inconsistência cadastral.
+    </p>
+    <ul>
+        <li><strong>Exclusão Segura:</strong> Se você tentar excluir um plano que possui itens de manutenção vinculados, o sistema abrirá um menu especial perguntando se você deseja <em>desvincular os itens</em> (deixando-os temporariamente sem plano) ou <em>transferir todos os itens vinculados</em> para outro plano do projeto.</li>
+    </ul>
+
+    <h3>4.3. Itens de Manutenção</h3>
+    <p>
+        Gerenciamento das atividades específicas de manutenção. Possui dois recursos essenciais de produtividade:
+    </p>
+    <ul>
+        <li><strong>Edição Rápida na Tabela (Inline):</strong> Você pode alterar os valores de <strong>t(H) (duração)</strong> e <strong>Efetivo</strong> diretamente na tabela sem abrir modais. Basta clicar sobre o valor, digitar o novo e tirar o foco. O Homem-Hora (HH) da linha será recalculado instantaneamente e gravado no banco de dados.</li>
+        <li><strong>Ações em Massa:</strong> Selecionando as caixas de verificação (checkboxes) ao lado dos itens, abrirá uma barra flutuante no rodapé para executar ações em lote:
+            <ul>
+                <li><strong>Atribuir Plano em Massa:</strong> Abre uma tela onde você escolhe o plano de destino e o sistema gera uma <em>prévia de impacto</em> em tempo real mostrando quantos itens serão alterados, o HH que será deslocado e em quais paradas futuras a carga será aplicada.</li>
+                <li><strong>Editar Campos em Massa:</strong> Permite alterar GPM, Centro de Trabalho, Condição ou Prioridade de dezenas de itens de uma só vez.</li>
+                <li><strong>Ativar, Inativar ou Excluir em Lote.</strong></li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>4.4. Balanceamento de Carga</h3>
+    <p>
+        Permite balancear o HH, efetivo ou quantidade de ordens projetadas ao longo do horizonte (padrão de 12 paradas futuras).
+    </p>
+    <ul>
+        <li><strong>Mapa de Calor (Heatmap):</strong> Mostra a intensidade de carga de HH por Centro de Trabalho, GPM ou Plano ao longo das paradas em cores indicativas (Verde = Carga Baixa, Laranja/Vermelho = Picos de Trabalho).</li>
+        <li><strong>Detalhes da Parada (Drill-down):</strong> Clicando sobre qualquer coluna do gráfico de paradas, abrirá uma <strong>gaveta lateral (Drawer)</strong> detalhando todas as ordens planejadas para aquela parada específica, com gráficos de distribuição por GPM e exportação direta da parada para CSV.</li>
+    </ul>
+
+    <h3>4.5. Importador de Planilha Excel</h3>
+    <p>
+        O assistente de importação guia você passo a passo na carga de dados:
+    </p>
+    <ol>
+        <li><strong>Upload:</strong> Arraste e solte o arquivo XLSX corporativo na área indicada.</li>
+        <li><strong>Destino:</strong> Selecione se deseja criar um novo projeto/cenário ou importar os dados para um projeto existente (com opção de <em>substituir todos os dados</em> ou <em>mesclar</em> mantendo os itens que já existem).</li>
+        <li><strong>Efetivo Padrão:</strong> Como a planilha Excel original não possui efetivo preenchido, informe o valor padrão (geralmente 1 ou 2) a ser atribuído temporariamente aos itens importados.</li>
+        <li><strong>Diagnóstico de Inconsistências:</strong> O leitor nativo processa o XML interno da planilha e apresenta uma tabela com todos os erros de preenchimento e advertências da planilha antes de salvar no banco.</li>
+        <li><strong>Gravação:</strong> Confirme para consolidar no banco.</li>
+    </ol>
+
+    <h2>5. Backups e Pontos de Restauração</h2>
+    <p>
+        A barra de navegação conta com um item de <strong>Backup</strong>. O sistema gera backups compactados em arquivos <code>.zip</code> contendo o arquivo <code>pm13.db</code> e metadados JSON com informações de quais projetos e quantidade de itens estão inclusos no snapshot.
+    </p>
+    <div class="danger-box">
+        <strong>Atenção ao Restaurar Backups:</strong><br>
+        Ao restaurar um arquivo de backup, o banco de dados atual será completamente substituído pelo banco do backup. O sistema cria automaticamente um backup de segurança pré-restauração chamado <code>auto_safety_before_restore</code> na pasta <code>backups/</code> para o caso de arrependimento.
+    </div>
+
+    <h2>6. Solução de Problemas (Troubleshooting)</h2>
+    
+    <h3>O comando <code>INICIAR_PM13.bat</code> fecha sozinho ou dá erro de Python</h3>
+    <p>
+        O sistema exige Python 3.11 instalado. Verifique se o executável do Python está no PATH do Windows abrindo um prompt de comando e digitando: <code>python --version</code>.
+    </p>
+
+    <h3>O navegador abriu, mas exibe uma página de erro</h3>
+    <p>
+        Verifique no prompt de comando se o servidor conseguiu iniciar sem erros de porta bloqueada. O sistema tenta usar a porta 8765, mas se estiver ocupada por outro software corporativo, ele subirá na primeira porta livre subsequente (8766, 8767...). Olhe no prompt qual endereço foi impresso (ex: <code>http://127.0.0.1:8766</code>) e acesse manualmente.
+    </p>
+
+    <h3>O status do banco exibe "Desconectado" no topo da tela</h3>
+    <p>
+        Isso indica que o servidor local Python foi encerrado ou a conexão de rede local com a porta do servidor caiu. Verifique se o prompt de comando preto ainda está aberto ou execute novamente o <code>INICIAR_PM13.bat</code>.
+    </p>
+
+    <footer>
+        Sistema de Planejamento de Manutenção PM13 - Execução Local Offline
+    </footer>
+</div>
+
+</body>
+</html>
