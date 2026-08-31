@@ -24,6 +24,7 @@ window.PM11.Characteristics = {
       UI.selectionBar('ch-selection', this.selected.size, `<button class="btn btn-xs btn-outline" data-bulk="edit">Editar em massa</button><button class="btn btn-xs btn-outline" data-bulk="save">Salvar padrão</button><button class="btn btn-xs btn-outline" data-bulk="color">Colorir</button><button class="btn btn-xs btn-danger" data-bulk="delete">Excluir</button>`) +
       UI.tableCard(`${this.rows.length} característica(s) encontrada(s)`, UI.tableTools('chars'), tableHtml);
     this.bind();
+    setTimeout(() => UI.enhanceSelects(), 40);
   },
   body() {
     const UI = window.PM11.UI;

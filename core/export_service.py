@@ -673,9 +673,7 @@ def _sap_operation_workload(operation, item):
 
     if code == '0010' and sub == '0010':
         sol_hc, sol_hours = pair('sol')
-        if sol_hc > 0 or sol_hours > 0:
-            return sol_hc, sol_hours
-        return current_hc, current_hours
+        return sol_hc, sol_hours
 
     if code == '0010' and not sub:
         ele = pair('ele')
@@ -723,7 +721,7 @@ def export_sap_workbook(plans, items, operations=None, long_texts=None,
                     'GrpLisTar.', 'NumGrpRot', 'OPER', 'SUB OPER', 'Descrição da operação']
 
     plan_rows = [[p.get('legacy_code'), p.get('description'), p.get('character_count'),
-                  p.get('cycle'), p.get('unit'), p.get('cycle_text'), p.get('opening_horizon'),
+                  p.get('cycle'), p.get('unit'), p.get('cycle_text'), 0 if str(p.get('unit') or '').upper()=='PRD' else p.get('opening_horizon'),
                   str(p.get('phase') or '').zfill(3) if p.get('phase') else ''] for p in plans]
     item_rows = []
     for i in items:
@@ -1041,6 +1039,7 @@ def export_priorimeter_xlsx(rows):
 
 def export_pm13_systems_xlsx(project_id):
     from core.database import get_db_connection
+    from core.models import list_priorimeter
     from core_pm11.sap_standards import get_sap_cycle_info, generate_nponto_hash
     from core_pm11.xlsx_io import build_xlsx
     import datetime
@@ -1060,20 +1059,29 @@ def export_pm13_systems_xlsx(project_id):
         """, (project_id,)).fetchall()
         items = [dict(r) for r in items_rows]
 
-        chars_rows = conn.execute("""
-            SELECT o.*, i.id as item_id
-            FROM item_operations o
-            JOIN maintenance_items i ON i.id = o.item_id
-            WHERE o.project_id=?
-            ORDER BY o.item_id, o.id
-        """, (project_id,)).fetchall()
-        chars = [dict(r) for r in chars_rows]
+        operations = [dict(r) for r in conn.execute("""SELECT o.*,i.legacy_identifier,i.object_type,i.object_code,i.work_center item_work_center
+            FROM item_operations o JOIN maintenance_items i ON i.id=o.item_id
+            WHERE o.project_id=? ORDER BY i.legacy_identifier,COALESCE(o.display_order,o.id),o.id""",(project_id,)).fetchall()]
+        long_texts = [dict(r) for r in conn.execute("""SELECT t.*,o.item_id,o.operation_code,o.suboperation_code,i.legacy_identifier,i.object_type,i.object_code
+            FROM operation_long_texts t JOIN item_operations o ON o.id=t.operation_id JOIN maintenance_items i ON i.id=o.item_id
+            WHERE t.project_id=? ORDER BY i.legacy_identifier,o.id,COALESCE(t.display_order,t.line_sequence),t.id""",(project_id,)).fetchall()]
+
+        def clean_object_code(value):
+            value = str(value or '').strip()
+            if value.upper() in {'SEM_EQUIPAMENTO', 'SEM EQUIPAMENTO', 'N/A', 'NONE', 'NULL'}:
+                return ''
+            return value
+
+        def route_description(item):
+            route = str(item.get('legacy_start') or '').strip()
+            description = str(item.get('plan_description') or item.get('description') or '').strip()
+            return ' '.join(part for part in (route, description) if part)
 
         now = datetime.datetime.now()
         seed = random.randint(0, 99)
         nponto_map = {}
         for idx, it in enumerate(items, 1):
-            nponto_map[it['id']] = generate_nponto_hash(project_id, it['id'], idx, now, it.get('object_code'), seed)
+            nponto_map[it['id']] = generate_nponto_hash(project_id, it['id'], idx, now, clean_object_code(it.get('object_code')), seed)
 
         # 1. ABA PLANO
         sheet_plano_headers = [
@@ -1088,7 +1096,7 @@ def export_pm13_systems_xlsx(project_id):
             sap_info = get_sap_cycle_info(p.get('cycle_text'))
             interv = sap_info['interval'] if sap_info else p.get('cycle')
             unid_solic = sap_info['unid_solic'] if sap_info else (p.get('unit') or 'SMS')
-            horiz = sap_info['horiz_insp'] if sap_info else (p.get('opening_horizon') or 50)
+            horiz = 0 if str(p.get('unit') or '').upper() == 'PRD' else (sap_info['horiz_insp'] if sap_info else (p.get('opening_horizon') or 50))
             plano_rows.append([
                 p.get('legacy_code', ''),
                 'PM',
@@ -1113,7 +1121,7 @@ def export_pm13_systems_xlsx(project_id):
         ]
         item_rows = [sheet_item_headers]
         for it in items:
-            txt_desc = f"{it.get('legacy_start', '')} {it.get('plan_description', '') or it.get('description', '')}".strip()
+            txt_desc = route_description(it)
             nponto = nponto_map.get(it['id'], '')
             prio = it.get('priority')
             if prio is None or prio == '':
@@ -1122,7 +1130,7 @@ def export_pm13_systems_xlsx(project_id):
                 it.get('plan_code', ''),
                 'PM',
                 txt_desc,
-                it.get('object_code', ''),
+                clean_object_code(it.get('object_code')),
                 'US01',
                 it.get('gpm', ''),
                 'PM13',
@@ -1131,14 +1139,12 @@ def export_pm13_systems_xlsx(project_id):
                 'US01',
                 prio,
                 nponto,
-                it.get('condition_code', ''),
-                '',
-                ''
+                '', '', ''
             ])
 
         # 3. ABA CABEÇALHO
         sheet_cab_headers = [
-            'EQUNREquipamento ACOM', 'PROFIDNETZ Perfil', 'STTAG Data fixada',
+            'EQUNREquipamento ACOM/LOC INST', 'PROFIDNETZ Perfil', 'STTAG Data fixada',
             'KTEXT Denominação Lista Tarefa', 'ARBPLCentro de trabalho', 'WERKS Centro',
             'VERWE Utilização', 'VAGRPGPM', 'STATU Status', 'ANLZU Conds. instal.',
             'SLWBEZ Campo ponto de controle', 'KLART Tipo de classe', 'CLASS_01 Classe',
@@ -1147,9 +1153,9 @@ def export_pm13_systems_xlsx(project_id):
         ]
         cab_rows = [sheet_cab_headers]
         for it in items:
-            txt_desc = f"{it.get('legacy_start', '')} {it.get('plan_description', '') or it.get('description', '')}".strip()
+            txt_desc = route_description(it)
             nponto = nponto_map.get(it['id'], '')
-            eq = str(it.get('object_code') or '').strip()
+            eq = clean_object_code(it.get('object_code'))
             slwbez = '300' if eq else '310'
             cab_rows.append([
                 eq,
@@ -1182,64 +1188,66 @@ def export_pm13_systems_xlsx(project_id):
             'PRZNT Porcentagem aumento', 'LARNT Tipo de Atividade'
         ]
         oper_rows = [sheet_oper_headers]
-        for it in items:
-            txt_desc = f"{it.get('legacy_start', '')} {it.get('plan_description', '') or it.get('description', '')}".strip()
-            nponto = nponto_map.get(it['id'], '')
-            mins = float((it.get('duration_hours') or 0) * 60)
-            headcount = int(it.get('headcount') or 1)
+        item_by_id = {it['id']: it for it in items}
+        for op in operations:
+            it = item_by_id.get(op.get('item_id'), {})
+            nponto = nponto_map.get(op.get('item_id'), '')
+            headcount, hours = _sap_operation_workload(op, it)
             oper_rows.append([
                 nponto,
-                '0010',
-                '',
-                it.get('work_center', ''),
+                str(op.get('operation_code') or '').zfill(4),
+                str(op.get('suboperation_code') or '').zfill(4) if str(op.get('suboperation_code') or '').strip() else '',
+                op.get('work_center') or it.get('work_center', ''),
                 'US01',
                 'PM01',
-                txt_desc,
-                'MIN',
+                op.get('short_text') or it.get('description', ''),
+                'H',
                 headcount,
-                mins,
-                'MIN',
+                hours,
+                'H',
                 2,
                 100,
                 ''
             ])
 
-        # 5. ABA CARACTERISTICAS
-        sheet_char_headers = [
-            'MWERT_02 Valor Caract', 'VORNR Nº operação', 'VERWMERKM Carac.mestre contr.',
-            'QPMK_WERKS Centro Caract.', 'KURZTEXT Texto breve característica',
-            'PMETHODE Método', 'QPMK_WERKS Centro Caract.',
-            'STICHPRVER Processo amostra na característica controle',
-            'STELLEN Casas decimais', 'MASSEINHSW Unidade',
-            'SOLLWERT Valor teórico para uma característica quantitativa',
-            'TOLERANZUN Valor limite inferior', 'TOLERANZOB Valor limite superior',
-            'AUSWMENGE1 Grupo codes para avaliação RESULTADOS', 'AUSWMGWRK1 Centro Catálogo'
+        text_headers = ['Identificador', 'Local de instalação', 'Equipamento', 'Geral', 'GrpLisTar.', 'NumGrpRot', 'OPER', 'SUB OPER', 'Descrição da operação']
+        text_rows = [text_headers]
+        texts_by_operation = {}
+        for tx in long_texts:texts_by_operation.setdefault(tx.get('operation_id'),[]).append(tx)
+        for op in operations:
+            it=item_by_id.get(op.get('item_id'),{});object_code=clean_object_code(it.get('object_code'));is_equipment=bool(object_code) and str(it.get('object_type') or '').upper().startswith('EQUIP')
+            code=str(op.get('operation_code') or '').zfill(4);raw_sub=str(op.get('suboperation_code') or '').strip();sub=raw_sub.zfill(4) if raw_sub else ''
+            if code=='0010' and sub=='0010':
+                sol_hc=int(it.get('sol_headcount') or 0);sol_hours=float(it.get('sol_hours') or 0)
+                texts=[f'{sol_hc} MECÂNICOS {sol_hours:g} HORAS' if (sol_hc or sol_hours) else 'NÃO SE APLICA']
+            else:texts=[materialize_record(tx) for tx in texts_by_operation.get(op.get('id'),[])]
+            for text_value in texts:text_rows.append([nponto_map.get(op.get('item_id'),''),'' if is_equipment else object_code,object_code if is_equipment else '','','','',code,sub,text_value])
+
+        # 5. ABA PRIORÍMETRO
+        priorimeter_headers = [
+            'ITENS', 'ITEM', 'Probabilidade de Falha', 'Impacto da Manutenção',
+            '>1 evento/ano', 'Carga assimétrica', 'Içamento múltiplo',
+            'Sobrecarga térmica', 'Tanques / gases', 'Vazamento / exposição',
+            'Pressurizados', 'Elétrico energizado', 'Espaço confinado',
+            'Altura >2 m', 'Metal quente', 'Conhecimento específico', 'Macaco hidráulico'
         ]
-        char_rows = [sheet_char_headers]
-        for ch in chars:
-            nponto = nponto_map.get(ch.get('item_id'), '')
-            char_rows.append([
-                nponto,
-                ch.get('operation_code', '0010'),
-                'QUALITAT',
-                'US01',
-                ch.get('short_text', ''),
-                'VISUAL',
-                'US01',
-                'AMRT0001',
-                0,
-                ch.get('unit', ''),
-                0, 0, 0,
-                'PMAVALIA',
-                'US01'
-            ])
+        priorimeter_fields = [
+            'legacy_identifier', 'item_description', 'failure_probability', 'maintenance_impact',
+            'events_over_one', 'asymmetric_lifting', 'multi_lifting', 'thermal_overload',
+            'tanks_gases', 'leak_exposure', 'pressurized_systems', 'energized_electrical',
+            'confined_spaces', 'height_over_2m', 'hot_metal', 'difficult_technical', 'hydraulic_jack'
+        ]
+        priorimeter_rows = [priorimeter_headers]
+        for row in list_priorimeter(project_id, status=''):
+            priorimeter_rows.append([row.get(field, '') for field in priorimeter_fields])
 
         sheets = [
             {'name': 'PLANO', 'rows': plano_rows},
             {'name': 'ITEM', 'rows': item_rows},
             {'name': 'CABEÇALHO', 'rows': cab_rows},
             {'name': 'OPERAÇÃO', 'rows': oper_rows},
-            {'name': 'CARACTERISTICAS', 'rows': char_rows}
+            {'name': 'TEXTO LONGO', 'rows': text_rows},
+            {'name': 'Priorímetro', 'rows': priorimeter_rows}
         ]
 
         return build_xlsx(sheets)

@@ -103,7 +103,11 @@ class XLSXReader:
                     rid = rel.attrib.get('Id')
                     target = rel.attrib.get('Target')
                     if rid in sheet_rels and target:
-                        if not target.startswith('xl/'):
+                        if target.startswith('/'):
+                            # Package-absolute target (e.g. openpyxl/LibreOffice writers).
+                            target = target.lstrip('/')
+                        elif not target.startswith('xl/'):
+                            # Target relative to the part that owns this .rels file (xl/).
                             target = 'xl/' + target
                         self.sheets[sheet_rels[rid]] = target
         except zipfile.BadZipFile as exc:

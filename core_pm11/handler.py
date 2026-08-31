@@ -360,6 +360,11 @@ def handle_pm11_request(handler, method, full_path, q_params):
                 pid = _get_project_id(handler, subpath, q_params, d)
                 handler.send_json(_mutate(pid, 'Aplicar modelo de item', lambda: models.apply_item_template(pid, int(d['template_id']), int(d['plan_id']), d.get('equipment_code', ''), d.get('route', ''), d.get('gpm', ''), d.get('work_center', ''))))
                 return True
+            if subpath == '/api/templates/items/apply-to-existing':
+                d = _parse_body(handler)
+                pid = _get_project_id(handler, subpath, q_params, d)
+                handler.send_json(_mutate(pid, 'Aplicar modelo em itens existentes', lambda: models.apply_item_template_to_items(pid, int(d['template_id']), d.get('item_ids', []), d.get('policy', 'REPLACE'), bool(d.get('apply_fields', False)))))
+                return True
             if subpath == '/api/templates/items/delete':
                 d = _parse_body(handler)
                 pid = _get_project_id(handler, subpath, q_params, d)
@@ -429,7 +434,7 @@ def handle_pm11_request(handler, method, full_path, q_params):
                 pid = _get_project_id(handler, subpath, q_params, d)
                 filters = _balance_filters(d)
                 target = float(d.get('target_minutes') or 0)
-                r = balance.auto_balance_preview(pid, d.get('start'), d.get('days', 90), target, filters)
+                r = balance.auto_balance_preview(pid, d.get('start'), d.get('days', 90), target, filters, d.get('attempts', 50), d.get('balance_by', 'none'))
                 handler.send_json(r)
                 return True
             if subpath == '/api/balance/manual-preview':

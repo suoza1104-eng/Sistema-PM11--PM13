@@ -71,6 +71,15 @@ def validate_pm11_project(project_id):
                     'message': f'Regra 5: Plano ciclo PRD exige condição M (atual: {cond})'
                 })
 
+        # Regra PM11: Todo item deve ter ao menos 1 característica de controle atrelada
+        item_chars = [ch for ch in chars if ch.get('item_id') == it['id']]
+        if not item_chars:
+            item_issues[it['id']].append({
+                'severity': 'ERROR',
+                'field': 'characteristics',
+                'message': 'Regra Característica PM11: O Item de Inspeção deve possuir ao menos 1 Característica de Controle atrelada.'
+            })
+
     # Regras das Características (Regra 1, 2, 3, 9)
     for ch in chars:
         cid = ch['id']

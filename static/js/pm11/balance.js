@@ -3,7 +3,7 @@ window.PM11 = window.PM11 || {};
 window.PM11.Balance = {
   schedule: [], metrics: {}, opts: { plans: [], items: [], gpms: [], work_centers: [], routes: [] },
   filters: {}, offsets: {}, book: [], selectedDay: null, target: 240, days: 30, start: '',
-  mode: 'manual', preview: null,
+  mode: 'manual', preview: null, groupBy: 'none', chartMetric: 'hours', attempts: 50, balanceBy: 'none',
 
   async render() {
     const App = window.PM11.App;
@@ -34,6 +34,7 @@ window.PM11.Balance = {
       <div class="form-group"><label>Plano</label><select class="control" id="bal-plan"><option value="">Todos os planos</option>${(this.opts.plans || []).map(p => `<option value="${p.id}" ${String(p.id) === String(this.filters.plan_id || '') ? 'selected' : ''}>${UI.esc(p.code)} — ${UI.esc(p.description || '')}</option>`).join('')}</select></div>
       <div class="form-group"><label>Item</label><select class="control" id="bal-item"><option value="">Todos os itens</option>${(this.opts.items || []).map(i => `<option value="${i.id}" ${String(i.id) === String(this.filters.item_id || '') ? 'selected' : ''}>#${i.legacy_identifier} — ${UI.esc(i.description || i.equipment_code || '')}</option>`).join('')}</select></div>
       <div class="form-group"><label>GPM</label><select class="control" id="bal-gpm"><option value="">Todos os GPMs</option>${(this.opts.gpms || []).map(x => `<option ${x === (this.filters.gpm || '') ? 'selected' : ''}>${UI.esc(x)}</option>`).join('')}</select></div>
+      <div class="form-group"><label>Agrupamento no gráfico</label><select class="control" id="bal-group"><option value="none">Sem agrupamento</option><option value="gpm" ${this.groupBy === 'gpm' ? 'selected' : ''}>GPM</option><option value="work_center" ${this.groupBy === 'work_center' ? 'selected' : ''}>Centro de Trabalho</option><option value="condition_code" ${this.groupBy === 'condition_code' ? 'selected' : ''}>Condição</option><option value="route" ${this.groupBy === 'route' ? 'selected' : ''}>Rota</option><option value="plan_code" ${this.groupBy === 'plan_code' ? 'selected' : ''}>Plano</option></select></div>
       <div class="form-group"><label>C. Trabalho (CT)</label><select class="control" id="bal-wc"><option value="">Todos os CTs</option>${(this.opts.work_centers || []).map(x => `<option ${x === (this.filters.work_center || '') ? 'selected' : ''}>${UI.esc(x)}</option>`).join('')}</select></div>
       <div class="form-group"><label>Condição</label><select class="control" id="bal-cond"><option value="">Todas</option><option value="Q" ${this.filters.condition === 'Q' ? 'selected' : ''}>Q (Qualquer)</option><option value="P" ${this.filters.condition === 'P' ? 'selected' : ''}>P (Parado)</option><option value="M" ${this.filters.condition === 'M' ? 'selected' : ''}>M (Manutenção)</option><option value="F" ${this.filters.condition === 'F' ? 'selected' : ''}>F (Funcionando)</option></select></div>
     `;
@@ -67,8 +68,10 @@ window.PM11.Balance = {
             <h3>Carga Diária Projetada por Parada (${this.schedule.length} dias)</h3>
             <span class="card-subtitle">Clique nas colunas para visualizar ou mover as ordens de inspeção do dia.</span>
           </div>
+          <div class="pm11-chart-switch"><button id="bal-show-hours" class="btn btn-xs ${this.chartMetric === 'hours' ? 'active' : ''}">Mostrar Horas</button><button id="bal-show-orders" class="btn btn-xs ${this.chartMetric === 'orders' ? 'active' : ''}">Mostrar Ordens</button></div>
         </div>
         <div class="card-body">
+          ${this.chartLegend()}
           <div class="chart-bars" id="bal-bars">${this.bars()}</div>
         </div>
       </div>` +
@@ -97,6 +100,7 @@ window.PM11.Balance = {
       </div>`;
 
     this.bind();
+    setTimeout(() => UI.enhanceSelects(), 40);
   },
 
   cards() {
@@ -136,12 +140,13 @@ window.PM11.Balance = {
 
   bars() {
     const UI = window.PM11.UI;
-    const max = Math.max(this.target, ...this.schedule.map(x => x.minutes), 1), h = 250;
+    const valueOf = r => this.chartMetric === 'orders' ? Number(r.count || 0) : Number(r.minutes || 0);
+    const max = Math.max(this.chartMetric === 'hours' ? this.target : 0, ...this.schedule.map(valueOf), 1), h = 250;
     const targetTop = 30 + (1 - Math.min(1, this.target / max)) * h;
 
     setTimeout(() => {
       const box = document.querySelector('#bal-bars');
-      if (box && this.target > 0) {
+      if (box && this.target > 0 && this.chartMetric === 'hours') {
         const l = document.createElement('div');
         l.className = 'target-line';
         l.style.top = targetTop + 'px';
@@ -151,16 +156,31 @@ window.PM11.Balance = {
     }, 0);
 
     return this.schedule.map((r, idx) => {
-      const ht = Math.max(4, Math.min(h, (r.minutes / max) * h));
+      const value = valueOf(r), ht = value ? Math.max(4, Math.min(h, (value / max) * h)) : 2;
       const isOver = this.target > 0 && r.minutes > this.target;
+      const groups = {};
+      (r.items || []).forEach(item => {
+        const key = this.groupBy === 'none' ? 'Carga' : String(item[this.groupBy] || 'Sem cadastro');
+        groups[key] = (groups[key] || 0) + (this.chartMetric === 'orders' ? 1 : Number(item.minutes || 0));
+      });
+      const colors = ['#72B900','#1687C9','#F59E0B','#7C3AED','#E4574F','#0F766E','#D946EF','#64748B'];
+      const allNames = [...new Set(this.schedule.flatMap(day => (day.items || []).map(item => this.groupBy === 'none' ? 'Carga' : String(item[this.groupBy] || 'Sem cadastro'))))].sort();
+      const segments = Object.entries(groups).map(([name, amount]) => `<div class="bar-segment" style="height:${value ? amount / value * ht : 0}px;background:${colors[Math.max(0, allNames.indexOf(name)) % colors.length]}" title="${UI.esc(name)}: ${this.chartMetric === 'orders' ? amount + ' ordem(ns)' : UI.fmtMin(amount)}"></div>`).join('');
       return `<div class="chart-bar-col" data-day="${idx}" title="${UI.fmtDate(r.date, true)} · ${UI.fmtMin(r.minutes)} · ${r.count} ordens">
-        <div class="bar-val">${r.minutes ? UI.fmtMin(r.minutes) : '0'}</div>
+        <div class="bar-val">${this.chartMetric === 'orders' ? r.count : (r.minutes ? UI.fmtMin(r.minutes) : '0')}</div>
         <div class="bar-track">
-          <div class="bar-fill ${isOver ? 'over' : ''}" style="height:${ht}px;"></div>
+          <div class="bar-stack ${isOver ? 'over' : ''}" style="height:${ht}px">${segments}</div>
         </div>
         <div class="bar-lbl">${graphDayLabel(idx)}<br><span class="bar-subdate">${UI.fmtDate(r.date, false)}</span></div>
       </div>`;
     }).join('');
+  },
+
+  chartLegend() {
+    if (this.groupBy === 'none') return '';
+    const UI = window.PM11.UI, colors = ['#72B900','#1687C9','#F59E0B','#7C3AED','#E4574F','#0F766E','#D946EF','#64748B'];
+    const names = [...new Set(this.schedule.flatMap(day => (day.items || []).map(item => String(item[this.groupBy] || 'Sem cadastro'))))].sort();
+    return `<div class="pm11-chart-legend">${names.map((name,i)=>`<span><i style="background:${colors[i%colors.length]}"></i>${UI.esc(name)}</span>`).join('')}</div>`;
   },
 
   heat() {
@@ -204,6 +224,7 @@ window.PM11.Balance = {
       work_center: document.querySelector('#bal-wc').value,
       condition: document.querySelector('#bal-cond').value
     };
+    this.groupBy = document.querySelector('#bal-group')?.value || 'none';
     await this.load();
     this.draw();
   },
@@ -215,7 +236,7 @@ window.PM11.Balance = {
     if (bManual) bManual.onclick = () => this.showBook();
 
     const bAuto = document.querySelector('#btn-auto-balance');
-    if (bAuto) bAuto.onclick = () => this.autoPreview();
+    if (bAuto) bAuto.onclick = () => this.openAutoConfig();
 
     const bRestore = document.querySelector('#btn-restore-pre-balance');
     if (bRestore) bRestore.onclick = () => this.restoreInitial();
@@ -223,10 +244,12 @@ window.PM11.Balance = {
     const bExport = document.querySelector('#btn-export-balance');
     if (bExport) bExport.onclick = () => UI.download(`/api/pm11/export/project?project_id=${App.projectId}&days=${this.days}&start=${this.start}`);
 
-    ['bal-start', 'bal-days', 'bal-target', 'bal-plan', 'bal-item', 'bal-route', 'bal-gpm', 'bal-wc', 'bal-cond'].forEach(id => {
+    ['bal-start', 'bal-days', 'bal-target', 'bal-plan', 'bal-item', 'bal-route', 'bal-gpm', 'bal-wc', 'bal-cond', 'bal-group'].forEach(id => {
       const el = document.querySelector('#' + id);
       if (el) el.onchange = () => this.refreshFromControls();
     });
+    document.querySelector('#bal-show-hours')?.addEventListener('click', () => { this.chartMetric = 'hours'; this.draw(); });
+    document.querySelector('#bal-show-orders')?.addEventListener('click', () => { this.chartMetric = 'orders'; this.draw(); });
 
     document.querySelectorAll('[data-day]').forEach(x => {
       x.onclick = () => this.openDay(Number(x.dataset.day));
@@ -580,6 +603,26 @@ window.PM11.Balance = {
   },
   hideBalanceProgress() { clearInterval(this.balanceProgressTimer);this.balanceProgressTimer=null;document.querySelector('#pm11-balance-progress')?.remove(); },
 
+  openAutoConfig() {
+    const UI = window.PM11.UI;
+    UI.modal('Configurar Balanceamento Automático PM11', `
+      <div class="pm11-auto-config-intro"><span>✦</span><div><b>Busca inteligente do menor gap</b><p>Defina quantos cenários serão comparados e se a linearidade deve ser calculada para a carteira inteira ou separadamente por grupo.</p></div></div>
+      <div class="pm11-auto-config-grid">
+        <div class="form-group"><label>Quantidade de balanceamentos</label><input class="control" id="pm11-auto-attempts" type="number" min="1" max="1000" value="${this.attempts}"><small>Mais tentativas aumentam a busca e o tempo de processamento.</small></div>
+        <div class="form-group"><label>Estratégia de linearidade</label><select class="control" id="pm11-auto-balance-by"><option value="none">Carga total do projeto</option><option value="work_center" ${this.balanceBy === 'work_center' ? 'selected' : ''}>Separar por Centro de Trabalho</option><option value="gpm" ${this.balanceBy === 'gpm' ? 'selected' : ''}>Separar por GPM</option></select><small>Cada CT ou GPM terá sua própria carga diária linear.</small></div>
+      </div>
+      <div class="pm11-auto-rules"><b>Regras preservadas</b><div><span>✓ Mesmo ciclo e texto do ciclo</span><span>✓ Mesmos 9 primeiros caracteres do plano</span><span>✓ Sequência e agrupamento por rota</span><span>✓ Itens trancados não se movem</span></div></div>
+    `, {
+      wide: true,
+      saveText: 'Executar Balanceamento',
+      onSave: () => {
+        this.attempts = Math.max(1, Math.min(1000, Number(document.querySelector('#pm11-auto-attempts')?.value || 50)));
+        this.balanceBy = document.querySelector('#pm11-auto-balance-by')?.value || 'none';
+        setTimeout(() => this.autoPreview(), 80);
+      }
+    });
+  },
+
   async autoPreview() {
     const UI = window.PM11.UI, API = window.PM11.API, App = window.PM11.App;
     this.showBalanceProgress();
@@ -589,6 +632,8 @@ window.PM11.Balance = {
         start: this.start,
         days: this.days,
         target_minutes: this.target,
+        attempts: this.attempts,
+        balance_by: this.balanceBy,
         ...this.filters
       });
       await this.finishBalanceProgress(true);

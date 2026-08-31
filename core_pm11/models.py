@@ -755,6 +755,35 @@ def apply_item_template(pid,tid,plan_id,equipment_code='',route='',gpm='',work_c
     except Exception:c.rollback();raise
     finally:c.close()
 
+def apply_item_template_to_items(pid,tid,item_ids,policy='REPLACE',apply_fields=False):
+    """Apply an Item template to existing items, preserving their identity and plan."""
+    t=get_item_template(tid)
+    if not t:raise ValueError('Modelo de Item não encontrado.')
+    policy=str(policy or 'REPLACE').upper()
+    if policy not in ('REPLACE','ADD'):raise ValueError('Política inválida. Use REPLACE ou ADD.')
+    ids=sorted({int(x) for x in item_ids if int(x)>0})
+    if not ids:raise ValueError('Selecione ao menos um Item de destino.')
+    c=get_conn();created=0;replaced=0;updated_items=0
+    try:
+        c.execute('BEGIN')
+        for item_id in ids:
+            item=c.execute('SELECT id FROM inspection_items WHERE id=? AND project_id=?',(item_id,pid)).fetchone()
+            if not item:raise ValueError(f'Item {item_id} não pertence ao projeto ativo.')
+            existing=c.execute('SELECT COUNT(*) FROM control_characteristics WHERE item_id=?',(item_id,)).fetchone()[0]
+            if policy=='REPLACE' and existing:
+                c.execute('DELETE FROM control_characteristics WHERE item_id=?',(item_id,));replaced+=existing
+            if apply_fields:
+                c.execute('''UPDATE inspection_items SET condition_code=?,priority=?,description=?,char_count=?,inspection_minutes=?,criticality=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND project_id=?''',
+                          (t['condition_code'],t['priority'],t['item_description'],len(t['item_description'] or ''),t['inspection_minutes'],t['criticality'],item_id,pid));updated_items+=1
+            base_sort=c.execute('SELECT COALESCE(MAX(sort_order),0) FROM control_characteristics WHERE item_id=?',(item_id,)).fetchone()[0]
+            for pos,ch in enumerate(t['characteristics'],1):
+                c.execute('''INSERT INTO control_characteristics(project_id,item_id,sort_order,characteristic_type,description,method_code,decimals,unit_code,reference_value,lower_limit,upper_limit,status,source_template_id)
+                             VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)''',(pid,item_id,base_sort+pos,ch['characteristic_type'],ch['description'],ch['method_code'],ch['decimals'],ch['unit_code'],ch['reference_value'],ch['lower_limit'],ch['upper_limit'],ch['status'],tid));created+=1
+        c.commit();_revalidate(pid)
+        return {'items_updated':len(ids),'characteristics_created':created,'characteristics_replaced':replaced,'fields_updated':updated_items,'policy':policy}
+    except Exception:c.rollback();raise
+    finally:c.close()
+
 def delete_item_template(tid):
     c=get_conn()
     try:c.execute('DELETE FROM item_templates WHERE id=?',(tid,));c.commit()

@@ -17,3 +17,4 @@ if errorlevel 1 (
     echo Verifique se o Python 3 esta instalado no computador.
     pause
 )
+

@@ -29,6 +29,7 @@ window.PM11.Items = {
       UI.selectionBar('it-selection', this.selected.size, `<button class="btn btn-xs btn-outline" data-bulk="plan">Atribuir Plano</button><button class="btn btn-xs btn-outline" data-bulk="edit">Editar Campos</button><button class="btn btn-xs btn-outline" data-bulk="model">Aplicar Modelo</button><button class="btn btn-xs btn-outline" data-bulk="save">Salvar como Modelo</button><button class="btn btn-xs btn-outline" data-bulk="clone">Clonar</button><button class="btn btn-xs btn-outline" data-bulk="color">Colorir</button><button class="btn btn-xs btn-danger" data-bulk="delete">Excluir</button>`) +
       UI.tableCard(`${this.rows.length} item(ns) encontrado(s)`, UI.tableTools('items'), tableHtml);
     this.bind();
+    setTimeout(() => UI.enhanceSelects(), 40);
   },
   body() {
     const UI = window.PM11.UI;
@@ -278,7 +279,7 @@ window.PM11.Items = {
     if (this.selected.size !== 1) return UI.toast('Selecione exatamente um Item para salvar como modelo.', 'warn');
     return this.saveModel([...this.selected][0]);
   },
-  async applyModel() {
+  async applyLegacyCharacteristicModel() {
     const UI = window.PM11.UI, API = window.PM11.API, App = window.PM11.App;
     if (!this.selected.size) return;
     const t = await API.get('/api/templates/characteristics');
@@ -290,6 +291,28 @@ window.PM11.Items = {
     UI.toast('Padrão aplicado.');
     this.selected.clear();
     await this.render();
+  },
+  async applyModel() {
+    const UI = window.PM11.UI, API = window.PM11.API, App = window.PM11.App;
+    if (!this.selected.size) return;
+    const templates = (await API.get('/api/templates/items')).filter(x => x.status === 'ACTIVE');
+    if (!templates.length) return UI.toast('Não existem modelos de Item ativos na Biblioteca.', 'warn');
+    const targets = this.rows.filter(x => this.selected.has(x.id));
+    const withCharacteristics = targets.filter(x => Number(x.characteristic_count || 0) > 0).length;
+    UI.modal('Aplicar Item Modelo', `
+      <div class="pm11-template-apply-summary"><b>${targets.length} item(ns) selecionado(s)</b><span>${withCharacteristics} já possuem características</span></div>
+      <div class="form-group"><label>Escolha o Item Modelo</label><div class="pm11-template-picker">${templates.map((t,i)=>`<label><input type="radio" name="item-template-choice" value="${t.id}" ${i===0?'checked':''}><span><b>${UI.esc(t.name)}</b><small>${UI.esc(t.item_description||'')} Â· ${t.characteristic_count||0} característica(s) Â· ${UI.fmtMin(t.inspection_minutes||0)}</small></span></label>`).join('')}</div></div>
+      <div class="pm11-template-policy"><b>Como aplicar as características?</b><label><input type="radio" name="item-template-policy" value="REPLACE" checked><span><strong>Substituir</strong><small>Remove as características atuais e aplica exatamente as salvas no modelo.</small></span></label><label><input type="radio" name="item-template-policy" value="ADD"><span><strong>Acrescentar</strong><small>Mantém as atuais e adiciona as características do modelo ao final.</small></span></label></div>
+      <label class="pm11-template-fields-option"><input type="checkbox" id="item-template-apply-fields"><span><b>Aplicar também os campos padronizados do Item Modelo</b><small>Descrição, condição, prioridade, tempo e criticidade. Plano, equipamento, GPM, CT e rota serão preservados.</small></span></label>
+      ${withCharacteristics?`<div class="pm11-template-warning">⚠ ${withCharacteristics} item(ns) possuem características. Ao substituir, elas serão removidas somente após esta confirmação.</div>`:''}
+    `, {wide:true,saveText:'Confirmar e Aplicar Modelo',onSave:async()=>{
+      const templateId=Number(document.querySelector('input[name="item-template-choice"]:checked')?.value||0);
+      const policy=document.querySelector('input[name="item-template-policy"]:checked')?.value||'REPLACE';
+      if(!templateId){UI.toast('Selecione um Item Modelo.','warn');return false;}
+      const result=await API.post('/api/templates/items/apply-to-existing',{project_id:App.projectId,template_id:templateId,item_ids:[...this.selected],policy,apply_fields:Boolean(document.querySelector('#item-template-apply-fields')?.checked)});
+      UI.toast(`Modelo aplicado em ${result.items_updated||0} item(ns): ${result.characteristics_created||0} característica(s) carregada(s).`);
+      this.selected.clear();await this.render();
+    }});
   },
   bulkColor() {
     const API = window.PM11.API, App = window.PM11.App;

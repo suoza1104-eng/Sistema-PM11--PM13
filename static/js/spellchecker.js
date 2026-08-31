@@ -128,7 +128,7 @@ window.SpellChecker = {
         if (!word || word.length < 2) return null;
 
         // Regra 1: Se a palavra já possui acentuação correta (á, é, í, ó, ú, â, ê, ô, ã, õ, ç), NUNCA ALTERA!
-        if (/[áéíóúâêôãõçÁÉÍÓÚÂÊÔÃÕÇ]/.test(word)) {
+        if (/[áéíóúâêôãõçÁÉÍÓÚÂÊÔÕÇ]/.test(word)) {
             return null;
         }
 

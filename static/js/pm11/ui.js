@@ -352,5 +352,151 @@ window.PM11.UI = {
 
   input(label, name, value = '', extra = '') {
     return `<div class="form-group"><label>${label}</label><input class="control" name="${name}" value="${this.esc(value)}" ${extra}></div>`;
+  },
+
+  makeSearchableSelect(selectEl) {
+    if (!selectEl || selectEl.dataset.searchableEnhanced === 'true') return;
+    selectEl.dataset.searchableEnhanced = 'true';
+
+    // Hide native select visually
+    selectEl.style.display = 'none';
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'searchable-select-wrapper';
+    selectEl.parentNode.insertBefore(wrapper, selectEl);
+    wrapper.appendChild(selectEl);
+
+    const trigger = document.createElement('div');
+    trigger.className = 'searchable-select-trigger';
+    trigger.tabIndex = 0;
+    trigger.innerHTML = `<span class="searchable-select-label"></span><span class="searchable-select-arrow">▼</span>`;
+    wrapper.appendChild(trigger);
+
+    const dropdown = document.createElement('div');
+    dropdown.className = 'searchable-select-dropdown hidden';
+    dropdown.innerHTML = `
+      <div class="searchable-select-search-box">
+        <input type="text" class="searchable-select-input" placeholder="🔍 Digite para buscar...">
+      </div>
+      <div class="searchable-select-options"></div>
+    `;
+    wrapper.appendChild(dropdown);
+
+    const labelEl = trigger.querySelector('.searchable-select-label');
+    const inputEl = dropdown.querySelector('.searchable-select-input');
+    const optionsContainer = dropdown.querySelector('.searchable-select-options');
+
+    const norm = str => String(str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+    const updateTriggerLabel = () => {
+      const selectedOpt = selectEl.options[selectEl.selectedIndex];
+      labelEl.textContent = selectedOpt ? selectedOpt.textContent : (selectEl.options[0]?.textContent || '');
+    };
+
+    const renderOptions = (filterQuery = '') => {
+      const q = norm(filterQuery);
+      const opts = Array.from(selectEl.options);
+      optionsContainer.innerHTML = '';
+      let matchCount = 0;
+
+      opts.forEach(opt => {
+        const text = opt.textContent || opt.innerText || '';
+        const val = opt.value;
+        const matches = !q || norm(text).includes(q) || norm(val).includes(q);
+
+        if (matches) {
+          matchCount++;
+          const optDiv = document.createElement('div');
+          const isSelected = opt.selected || String(val) === String(selectEl.value);
+          optDiv.className = `searchable-select-option ${isSelected ? 'selected' : ''}`;
+          optDiv.textContent = text;
+          optDiv.dataset.value = val;
+          optDiv.onclick = (e) => {
+            e.stopPropagation();
+            selectEl.value = val;
+            selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+            updateTriggerLabel();
+            closeDropdown();
+          };
+          optionsContainer.appendChild(optDiv);
+        }
+      });
+
+      if (matchCount === 0) {
+        optionsContainer.innerHTML = `<div class="searchable-select-no-results">Nenhum resultado encontrado</div>`;
+      }
+    };
+
+    const openDropdown = () => {
+      document.querySelectorAll('.searchable-select-wrapper.open').forEach(w => {
+        if (w !== wrapper) {
+          w.classList.remove('open');
+          w.querySelector('.searchable-select-dropdown')?.classList.add('hidden');
+        }
+      });
+      wrapper.classList.add('open');
+      dropdown.classList.remove('hidden');
+      inputEl.value = '';
+      renderOptions('');
+      setTimeout(() => inputEl.focus(), 30);
+    };
+
+    const closeDropdown = () => {
+      wrapper.classList.remove('open');
+      dropdown.classList.add('hidden');
+    };
+
+    trigger.onclick = (e) => {
+      e.stopPropagation();
+      if (wrapper.classList.contains('open')) {
+        closeDropdown();
+      } else {
+        openDropdown();
+      }
+    };
+
+    inputEl.onclick = (e) => e.stopPropagation();
+    inputEl.oninput = (e) => {
+      renderOptions(e.target.value);
+    };
+
+    inputEl.onkeydown = (e) => {
+      if (e.key === 'Escape') {
+        closeDropdown();
+      }
+    };
+
+    if (!window._searchableSelectGlobalClickListener) {
+      window._searchableSelectGlobalClickListener = true;
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.searchable-select-wrapper')) {
+          document.querySelectorAll('.searchable-select-wrapper.open').forEach(w => {
+            w.classList.remove('open');
+            w.querySelector('.searchable-select-dropdown')?.classList.add('hidden');
+          });
+        }
+      });
+    }
+
+    const observer = new MutationObserver(() => {
+      updateTriggerLabel();
+      if (wrapper.classList.contains('open')) {
+        renderOptions(inputEl.value);
+      }
+    });
+    observer.observe(selectEl, { childList: true, subtree: true, attributes: true });
+
+    selectEl.addEventListener('change', () => {
+      updateTriggerLabel();
+    });
+
+    updateTriggerLabel();
+  },
+
+  enhanceSelects(parentEl) {
+    const root = parentEl || document;
+    root.querySelectorAll('select.control, .filters-grid select, .filter-card select, .form-group select').forEach(sel => {
+      this.makeSearchableSelect(sel);
+    });
   }
 };

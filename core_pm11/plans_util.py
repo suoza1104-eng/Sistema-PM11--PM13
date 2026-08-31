@@ -27,12 +27,19 @@ def get_plan_dates_and_labels(anchor_date_str, offset_days, description='', code
         offset = int(offset_days)
         if offset < 1:
             raise ValueError
-        start = datetime.date.fromisoformat(str(anchor_date_str)) + datetime.timedelta(days=offset - 1)
+        anchor = datetime.date.fromisoformat(str(anchor_date_str))
+        logical_delta = offset - 1
+        working_delta = (logical_delta // 7) * 5 + min(logical_delta % 7, 5)
+        start = anchor
+        for _ in range(working_delta):
+            start += datetime.timedelta(days=1)
+            while start.weekday() >= 5:
+                start += datetime.timedelta(days=1)
     except (TypeError, ValueError):
         return {'day_of_week_label': '', 'calculated_start_date': ''}
     week = ((offset - 1) // 7) + 1
-    day_index = start.weekday()
-    sap_day = (day_index % 5) + 2
+    day_index = (offset - 1) % 7
+    sap_day = day_index + 2
     return {
         'day_of_week_label': f'{_DAYS[day_index]} ({week}S{sap_day})',
         'calculated_start_date': start.strftime('%d/%m/%Y')

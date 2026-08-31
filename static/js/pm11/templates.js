@@ -1,7 +1,7 @@
 window.PM11 = window.PM11 || {};
 
 window.PM11.Templates = {
-  tab: 'characteristics', rows: [], filters: { search: '', status: '', row_color: '' }, selected: new Set(),
+  tab: 'items', rows: [], filters: { search: '', status: '', row_color: '' }, selected: new Set(),
   async render() { await this.load(); this.draw(); },
   async load() {
     const API = window.PM11.API;
@@ -19,7 +19,7 @@ window.PM11.Templates = {
     const actionsHtml = `<button class="btn btn-outline" id="tp-clear">Limpar</button><button class="btn btn-primary" id="tp-filter">Filtrar</button>`;
     const tableHtml = `<table class="data-table" id="templates-table"><thead>${this.header()}</thead><tbody>${this.body()}</tbody></table>`;
 
-    document.querySelector('#view').innerHTML = UI.pageHead('Biblioteca de Padrões', 'Repositório central para reutilizar Características, Itens e Equipamentos/Pacotes.') +
+    document.querySelector('#view').innerHTML = UI.pageHead('Biblioteca de Itens Modelo', 'Cada modelo reúne os campos padronizados do Item e todas as suas Características de Controle.') +
       `<div class="library-tabs">
         <button class="library-tab ${this.tab === 'characteristics' ? 'active' : ''}" data-tab="characteristics">⚡ Características</button>
         <button class="library-tab ${this.tab === 'items' ? 'active' : ''}" data-tab="items">📦 Itens</button>
@@ -29,6 +29,7 @@ window.PM11.Templates = {
       UI.selectionBar('tp-selection', this.selected.size, `<button class="btn btn-xs btn-outline" data-bulk="status">Ativar/Inativar</button><button class="btn btn-xs btn-outline" data-bulk="color">Colorir</button><button class="btn btn-xs btn-danger" data-bulk="delete">Excluir</button>`) +
       `<div class="library-layout">${UI.tableCard(`${this.rows.length} padrão(ões) encontrado(s)`, UI.tableTools('templates'), tableHtml)}<aside class="library-preview" id="library-preview"><div class="preview-placeholder"><b>Selecione um padrão</b><p>Veja a estrutura técnica completa antes de editar ou aplicar.</p></div></aside></div>`;
     this.bind();
+    setTimeout(() => UI.enhanceSelects(), 40);
   },
   header() {
     if (this.tab === 'characteristics') return '<tr><th></th><th>NOME</th><th>CATEGORIA</th><th>CARACTERÍSTICAS</th><th>STATUS</th><th class="actions-col">AÇÕES</th></tr>';

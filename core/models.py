@@ -1459,6 +1459,27 @@ def update_item(item_id, legacy_identifier, plan_id, object_type, object_code, g
             mec_hc, mec_h, ele_hc, ele_h, sol_hc, sol_h,
             status, notes, item_id
         ))
+        # Keep the operation editor and both SAP exports consistent with the
+        # discipline workload entered on the Item screen.
+        principal = cursor.execute("""SELECT id FROM item_operations WHERE item_id=? AND operation_code='0010'
+            AND TRIM(COALESCE(suboperation_code,''))='' ORDER BY id LIMIT 1""", (item_id,)).fetchone()
+        main_hc, main_hours = (ele_hc, ele_h) if (ele_hc or ele_h) else (mec_hc, mec_h)
+        if principal:
+            cursor.execute("UPDATE item_operations SET headcount=?,hours=?,unit='H',updated_at=CURRENT_TIMESTAMP WHERE id=?", (main_hc, main_hours, principal['id']))
+        else:
+            cursor.execute("""INSERT INTO item_operations(project_id,item_id,operation_code,suboperation_code,work_center,short_text,unit,headcount,hours,status)
+                VALUES(?,?,?,'',?,?, 'H',?,?,'ACTIVE')""", (project_id,item_id,'0010',str(work_center).strip(),desc_clean,main_hc,main_hours))
+        welding = cursor.execute("""SELECT id FROM item_operations WHERE item_id=? AND operation_code='0010'
+            AND TRIM(COALESCE(suboperation_code,''))='0010' ORDER BY id LIMIT 1""", (item_id,)).fetchone()
+        if welding:
+            welding_id=welding['id'];cursor.execute("UPDATE item_operations SET headcount=?,hours=?,unit='H',updated_at=CURRENT_TIMESTAMP WHERE id=?", (sol_hc, sol_h, welding_id))
+        else:
+            cursor.execute("""INSERT INTO item_operations(project_id,item_id,operation_code,suboperation_code,work_center,short_text,unit,headcount,hours,status)
+                VALUES(?,?,?,'0010',?,?,'H',?,?,'ACTIVE')""", (project_id,item_id,'0010',str(work_center).strip(),'APOIO DE SOLDA',sol_hc,sol_h));welding_id=cursor.lastrowid
+        welding_text = f'{sol_hc} MECÂNICOS {sol_h:g} HORAS' if (sol_hc or sol_h) else 'NÃO SE APLICA'
+        text_row=cursor.execute("SELECT id FROM operation_long_texts WHERE operation_id=? ORDER BY line_sequence,id LIMIT 1",(welding_id,)).fetchone()
+        if text_row:cursor.execute("UPDATE operation_long_texts SET text=?,structure_mode='FREE',structure_json=NULL,updated_at=CURRENT_TIMESTAMP WHERE id=?",(welding_text,text_row['id']))
+        else:cursor.execute("INSERT INTO operation_long_texts(project_id,operation_id,line_sequence,text,structure_mode) VALUES(?,?,?,?,?)",(project_id,welding_id,1,welding_text,'FREE'))
         conn.commit()
         log_action(project_id, 'ITEM', item_id, 'UPDATE', old_data, {
             'legacy_identifier': legacy_identifier, 'plan_id': p_id, 'team_id': t_id, 'hh': hh_val, 'status': status

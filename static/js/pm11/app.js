@@ -99,6 +99,7 @@ window.PM11.App = {
       window.PM11.UI.showLoader('Carregando...');
       loaderShown = true;
       await mod.render();
+      setTimeout(() => window.PM11.UI?.enhanceSelects?.(), 40);
     } catch (e) {
       console.error(`Erro na tela PM11 ${view}:`, e);
       const v = document.querySelector('#view');

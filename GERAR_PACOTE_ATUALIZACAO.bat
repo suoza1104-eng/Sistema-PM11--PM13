@@ -59,3 +59,4 @@ echo ========================================================
 echo  Processo concluido! O pacote ZIP pode ser enviado para a equipe.
 echo ========================================================
 pause
+

@@ -34,6 +34,7 @@ window.PM11.Plans = {
     const anchor = `<div class="card" style="margin-bottom:16px"><div class="card-body"><div class="form-group" style="max-width:340px"><label>Data de Início da Programação</label><input class="control" id="pl-anchor-date" type="date" value="${UI.esc(project.balance_anchor_date || '')}"></div></div></div>`;
     v.insertAdjacentHTML('afterbegin', anchor);
     this.bind();
+    setTimeout(() => UI.enhanceSelects(), 40);
   },
   sapCycles: [
     'DIÁRIA', 'DOIS DIAS', '3 DIAS', '1 SEMANA', 'DUAS SEMANAS', '3 SEMANAS',

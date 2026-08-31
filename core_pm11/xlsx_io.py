@@ -188,7 +188,7 @@ def export_systems_xlsx(project_id):
             sap_info = get_sap_cycle_info(p.get('text_cycle'))
             interv = sap_info['interval'] if sap_info else p.get('cycle_value')
             unid_solic = sap_info['unid_solic'] if sap_info else (p.get('unit') or 'SMS')
-            horiz = sap_info['horiz_insp'] if sap_info else 50
+            horiz = 0 if str(p.get('unit') or '').upper() == 'PRD' else (sap_info['horiz_insp'] if sap_info else 50)
             plano_rows.append([
                 p.get('code', ''),
                 'PM',
@@ -231,9 +231,7 @@ def export_systems_xlsx(project_id):
                 'US01',
                 prio,
                 nponto,
-                it.get('condition_code', ''),
-                '',
-                ''
+                '', '', ''
             ])
 
         # 3. ABA CABEÇALHO
@@ -285,7 +283,7 @@ def export_systems_xlsx(project_id):
         for it in items:
             txt_desc = f"{it.get('route', '')} {it.get('plan_description', '')}".strip()
             nponto = nponto_map.get(it['id'], '')
-            mins = float(it.get('inspection_minutes') or 0)
+            hours = float(it.get('inspection_minutes') or 0) / 60.0
             oper_rows.append([
                 nponto,
                 '0010',
@@ -294,10 +292,10 @@ def export_systems_xlsx(project_id):
                 'US01',
                 'PM01',
                 txt_desc,
-                'MIN',
+                'H',
                 1,
-                mins,
-                'MIN',
+                hours,
+                'H',
                 2,
                 100,
                 ''

@@ -52,14 +52,11 @@ def _occurrence_indices(dates,anchor,offset_days,unit,cycle):
     if u in ('PRD', 'PARADA'): return []
     interval = _interval_days(unit, cycle)
     offset = max(1, int(offset_days or 1))
-    # Plan offsets (nSd) are stored as calendar days from the anchor Monday,
-    # while this schedule contains weekdays only. Convert the calendar offset
-    # to its working-day position before applying the weekly/monthly interval.
+    # nSd describes the logical PM11 week (2=Monday ... 6=Friday).  The
+    # projection's first date is always SEG1, even when that date is not a
+    # civil Monday.  Therefore this conversion must not use anchor.weekday().
     calendar_delta = offset - 1
-    start_idx = sum(
-        1 for step in range(calendar_delta)
-        if (anchor + datetime.timedelta(days=step)).weekday() < 5
-    ) % interval
+    start_idx = ((calendar_delta // 7) * 5 + min(calendar_delta % 7, 5)) % interval
     return list(range(start_idx, len(dates), interval))
 def project_schedule(project_id,start_date=None,days=30,offset_override=None,filters=None,assignment_override=None,include_book=False):
     days=max(1,min(int(days),730));anchor=_anchor(project_id,start_date);dates=_working_dates(anchor,days);items=load_items(project_id,filters,only_in_book=None if (assignment_override or include_book) else False);offsets={int(k):int(v) for k,v in (offset_override or {}).items()};assignments={int(k):int(v) for k,v in (assignment_override or {}).items()}
@@ -75,7 +72,7 @@ def project_schedule(project_id,start_date=None,days=30,offset_override=None,fil
         interval=_interval_days(it['unit'],it['cycle_value']);plan_offset=max(1,int(it.get('plan_offset_days') or 1))
         indices=list(range(offsets[it['id']]%interval,days,interval)) if it['id'] in offsets else _occurrence_indices(dates,anchor,plan_offset,it['unit'],it['cycle_value'])
         for idx in indices:
-            mins=float(it['inspection_minutes'] or 0);loads[idx]+=mins;counts[idx]+=1;occ[idx].append({'item_id':it['id'],'identifier':it['legacy_identifier'],'route':it['route'],'equipment':it['equipment_code'],'description':it['description'],'minutes':mins,'plan_code':it['plan_code'],'plan_description':it.get('plan_description',''),'text_cycle':it.get('text_cycle',''),'cycle_code':it['cycle_code'],'cycle_value':it['cycle_value'],'unit':it['unit'],'interval_days':interval,'current_offset':plan_offset-1,'locked':int(it.get('locked') or 0),'gpm':it['gpm'],'work_center':it['work_center']})
+            mins=float(it['inspection_minutes'] or 0);loads[idx]+=mins;counts[idx]+=1;occ[idx].append({'item_id':it['id'],'identifier':it['legacy_identifier'],'route':it['route'],'equipment':it['equipment_code'],'description':it['description'],'minutes':mins,'plan_code':it['plan_code'],'plan_description':it.get('plan_description',''),'text_cycle':it.get('text_cycle',''),'cycle_code':it['cycle_code'],'cycle_value':it['cycle_value'],'unit':it['unit'],'interval_days':interval,'current_offset':plan_offset-1,'locked':int(it.get('locked') or 0),'gpm':it['gpm'],'work_center':it['work_center'],'condition_code':it['condition_code']})
     return [{'day_index':i,'date':dates[i].isoformat(),'minutes':round(loads[i],2),'hours':round(loads[i]/60,2),'count':counts[i],'items':sorted(occ[i],key=lambda x:_route_key(x['route']))} for i in range(days)]
 def metrics(schedule,target_minutes=0):
     loads=[float(r['minutes'] or 0) for r in schedule];counts=[int(r['count'] or 0) for r in schedule];target=float(target_minutes or 0)
@@ -91,71 +88,82 @@ def _objective(loads,target=0):
     avg=sum(loads)/len(loads);variance=sum((x-avg)**2 for x in loads)/len(loads)
     overload=sum(max(0,x-target)**2 for x in loads) if target>0 else 0
     return (round(overload,6),round(max(loads)-min(loads),6),round(variance,6),round(max(loads),6))
-def auto_balance_preview(project_id,start_date=None,days=90,target_minutes=0,filters=None):
+def auto_balance_preview(project_id,start_date=None,days=90,target_minutes=0,filters=None,attempts=50,balance_by='none'):
     t0=time.perf_counter();items=load_items(project_id,filters);base=project_schedule(project_id,start_date,days,filters=filters);c=get_conn()
     try:plans=[dict(r) for r in c.execute("SELECT * FROM inspection_plans WHERE project_id=? AND status='ACTIVE' AND offset_days IS NOT NULL",(project_id,)).fetchall()]
     finally:c.close()
     families={}
     for p in plans:families.setdefault((p['cycle_value'],str(p['unit'] or '').upper(),str(p['text_cycle'] or '').strip(),str(p['code'] or '')[:9].upper()),[]).append(p)
-    fixed_assignments={};failures=[];target=float(target_minutes or 0);anchor=_anchor(project_id,start_date);dates=_working_dates(anchor,int(days));fixed_loads=[0.0]*len(dates)
+    attempts=max(1,min(int(attempts or 50),1000));balance_by=str(balance_by or 'none').lower()
+    dimension_field={'gpm':'gpm','work_center':'work_center'}.get(balance_by)
+    fixed_assignments={};failures=[];target=float(target_minutes or 0);anchor=_anchor(project_id,start_date);dates=_working_dates(anchor,int(days));fixed_loads=[0.0]*len(dates);fixed_dimension_loads={}
     movable=[]
     for it in items:
         if not int(it.get('locked') or 0):movable.append(it);continue
         current=next((p for p in plans if p['id']==it['plan_id']),None)
         if not current:failures.append({'item_id':it['id'],'identifier':it['legacy_identifier'],'reason':'Item trancado sem plano de origem com offset.'});continue
         fixed_assignments[it['id']]=current['id']
-        for idx in _occurrence_indices(dates,anchor,current['offset_days'],current['unit'],current['cycle_value']):fixed_loads[idx]+=float(it.get('inspection_minutes') or 0)
+        dimension=str(it.get(dimension_field) or 'Sem cadastro') if dimension_field else '__all__'
+        dim_loads=fixed_dimension_loads.setdefault(dimension,[0.0]*len(dates))
+        for idx in _occurrence_indices(dates,anchor,current['offset_days'],current['unit'],current['cycle_value']):
+            fixed_loads[idx]+=float(it.get('inspection_minutes') or 0);dim_loads[idx]+=float(it.get('inspection_minutes') or 0)
     route_groups={}
     for it in movable:
         family=(it['cycle_value'],str(it['unit'] or '').upper(),str(it['text_cycle'] or '').strip(),str(it['plan_code'] or '')[:9].upper())
-        route_groups.setdefault((family,str(it.get('route') or '').strip()),[]).append(it)
+        dimension=str(it.get(dimension_field) or 'Sem cadastro') if dimension_field else '__all__'
+        route_groups.setdefault((family,str(it.get('route') or '').strip(),dimension),[]).append(it)
     ordered_groups=sorted(route_groups.items(),key=lambda entry:(_route_key(entry[0][1]),entry[0][0]))
     valid_groups=[]
-    for (family,route),group_items in ordered_groups:
+    for (family,route,dimension),group_items in ordered_groups:
         eligible=families.get(family,[])
         if not eligible:
             for it in group_items:failures.append({'item_id':it['id'],'identifier':it['legacy_identifier'],'route':route,'reason':'Nenhum plano com offset, mesmo ciclo, texto ciclo e prefixo de 9 caracteres.'})
             continue
         options=[];mins=sum(float(it.get('inspection_minutes') or 0) for it in group_items)
         for candidate in eligible:options.append((candidate,_occurrence_indices(dates,anchor,candidate['offset_days'],candidate['unit'],candidate['cycle_value'])))
-        valid_groups.append({'items':group_items,'minutes':mins,'options':options,'route':route})
-    rng=random.Random(project_id*1000003+int(days));orders=[list(valid_groups),list(reversed(valid_groups))]
-    for _ in range(48):
+        valid_groups.append({'items':group_items,'minutes':mins,'options':options,'route':route,'dimension':dimension})
+    rng=random.Random(project_id*1000003+int(days));orders=[list(valid_groups)]
+    if attempts>1:orders.append(list(reversed(valid_groups)))
+    for _ in range(max(0,attempts-len(orders))):
         order=list(valid_groups);rng.shuffle(order);orders.append(order)
     best_global=None
     for order in orders:
-        loads=list(fixed_loads);trial=dict(fixed_assignments);chosen_by_group={}
+        loads=list(fixed_loads);dimension_loads={k:list(v) for k,v in fixed_dimension_loads.items()};trial=dict(fixed_assignments);chosen_by_group={}
         for group in order:
+            dim_loads=dimension_loads.setdefault(group['dimension'],[0.0]*len(dates))
             choice=None
             for candidate,indices in group['options']:
-                for idx in indices:loads[idx]+=group['minutes']
-                rank=(_score(loads,target),candidate['offset_days'],candidate['id'])
-                for idx in indices:loads[idx]-=group['minutes']
+                for idx in indices:loads[idx]+=group['minutes'];dim_loads[idx]+=group['minutes']
+                rank=((_score(dim_loads,0),_score(loads,target)) if dimension_field else (_score(loads,target),),candidate['offset_days'],candidate['id'])
+                for idx in indices:loads[idx]-=group['minutes'];dim_loads[idx]-=group['minutes']
                 if choice is None or rank<choice[0]:choice=(rank,candidate,indices)
             for it in group['items']:trial[it['id']]=choice[1]['id']
-            for idx in choice[2]:loads[idx]+=group['minutes']
+            for idx in choice[2]:loads[idx]+=group['minutes'];dim_loads[idx]+=group['minutes']
             chosen_by_group[id(group)]=(choice[1],choice[2])
-        rank=_objective(loads,target)
-        if best_global is None or rank<best_global[0]:best_global=(rank,trial,loads,chosen_by_group)
+        dimension_rank=tuple(sum(x) for x in zip(*(_objective(v,0) for v in dimension_loads.values()))) if dimension_field and dimension_loads else ()
+        rank=(dimension_rank,_objective(loads,target)) if dimension_field else _objective(loads,target)
+        if best_global is None or rank<best_global[0]:best_global=(rank,trial,loads,chosen_by_group,dimension_loads)
     # Coordinate-descent refinement: retest every route against the complete load.
-    rank,assignments,loads,chosen_by_group=best_global
+    rank,assignments,loads,chosen_by_group,dimension_loads=best_global
     refinement_rounds=0
     for _ in range(8):
         improved=False;refinement_rounds+=1
         for group in valid_groups:
+            dim_loads=dimension_loads.setdefault(group['dimension'],[0.0]*len(dates))
             old_candidate,old_indices=chosen_by_group[id(group)]
-            for idx in old_indices:loads[idx]-=group['minutes']
+            for idx in old_indices:loads[idx]-=group['minutes'];dim_loads[idx]-=group['minutes']
             choice=None
             for candidate,indices in group['options']:
-                for idx in indices:loads[idx]+=group['minutes']
-                candidate_rank=_objective(loads,target)
-                for idx in indices:loads[idx]-=group['minutes']
+                for idx in indices:loads[idx]+=group['minutes'];dim_loads[idx]+=group['minutes']
+                candidate_rank=((_objective(dim_loads,0),_objective(loads,target)) if dimension_field else _objective(loads,target))
+                for idx in indices:loads[idx]-=group['minutes'];dim_loads[idx]-=group['minutes']
                 if choice is None or candidate_rank<choice[0]:choice=(candidate_rank,candidate,indices)
-            for idx in choice[2]:loads[idx]+=group['minutes']
+            for idx in choice[2]:loads[idx]+=group['minutes'];dim_loads[idx]+=group['minutes']
             chosen_by_group[id(group)]=(choice[1],choice[2])
             for it in group['items']:assignments[it['id']]=choice[1]['id']
             if choice[1]['id']!=old_candidate['id']:improved=True
-        new_rank=_objective(loads,target)
+        dimension_rank=tuple(sum(x) for x in zip(*(_objective(v,0) for v in dimension_loads.values()))) if dimension_field and dimension_loads else ()
+        new_rank=(dimension_rank,_objective(loads,target)) if dimension_field else _objective(loads,target)
         if not improved or new_rank>=rank:break
         rank=new_rank
     proposed=project_schedule(project_id,start_date,days,filters=filters,assignment_override=assignments);changes=[{'item_id':it['id'],'identifier':it['legacy_identifier'],'from_plan_id':it['plan_id'],'from_plan_code':it['plan_code'],'to_plan_id':assignments[it['id']]} for it in items if assignments.get(it['id'],it['plan_id'])!=it['plan_id']]
@@ -164,7 +172,7 @@ def auto_balance_preview(project_id,start_date=None,days=90,target_minutes=0,fil
         if not any(key[0]==family for key in route_groups):continue
         available={(int(p['offset_days'])-1)%7 for p in family_plans};missing=[name for idx,name in enumerate(weekday_names) if idx not in available]
         if missing:constrained_families.append({'cycle_value':family[0],'unit':family[1],'text_cycle':family[2],'code_prefix':family[3],'missing_weekdays':missing})
-    return {'start_date':_anchor(project_id,start_date).isoformat(),'days':int(days),'before':base,'after':proposed,'before_metrics':metrics(base,target_minutes),'after_metrics':metrics(proposed,target_minutes),'assignments':assignments,'changes':changes,'failures':failures,'changed_items':len(changes),'route_groups_tested':len(route_groups),'attempts':len(orders),'refinement_rounds':refinement_rounds,'objective':rank,'constrained_families':constrained_families,'elapsed_seconds':round(time.perf_counter()-t0,3),'algorithm':'PM11 - Busca multi-rodada e refinamento por rota; menor gap global dentro das regras'}
+    return {'start_date':_anchor(project_id,start_date).isoformat(),'days':int(days),'before':base,'after':proposed,'before_metrics':metrics(base,target_minutes),'after_metrics':metrics(proposed,target_minutes),'assignments':assignments,'changes':changes,'failures':failures,'changed_items':len(changes),'route_groups_tested':len(route_groups),'attempts':len(orders),'balance_by':balance_by,'refinement_rounds':refinement_rounds,'objective':rank,'constrained_families':constrained_families,'elapsed_seconds':round(time.perf_counter()-t0,3),'algorithm':'PM11 - Busca multi-rodada e refinamento por rota; menor gap global dentro das regras'}
 def apply_assignments(project_id,assignments):
     c=get_conn()
     try:

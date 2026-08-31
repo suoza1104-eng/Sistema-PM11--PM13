@@ -841,27 +841,37 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                 cursor.execute(f"SELECT COUNT(*) FROM item_operations o LEFT JOIN maintenance_items i ON i.id=o.item_id AND i.deleted_at IS NULL WHERE {where_str}", params)
                 total = cursor.fetchone()[0]
 
+                pkg_seq_sort = """
+                    CASE 
+                        WHEN COALESCE(o.operation_code,'') = '0010' AND (o.suboperation_code IS NULL OR o.suboperation_code = '' OR o.suboperation_code = '0000' OR o.suboperation_code = '-') THEN 1
+                        WHEN COALESCE(o.operation_code,'') = '0010' AND o.suboperation_code = '0011' THEN 2
+                        WHEN COALESCE(o.operation_code,'') = '0010' AND o.suboperation_code = '0012' THEN 3
+                        WHEN COALESCE(o.operation_code,'') = '0010' AND o.suboperation_code = '0013' THEN 4
+                        WHEN COALESCE(o.operation_code,'') = '0010' AND o.suboperation_code = '0014' THEN 5
+                        WHEN COALESCE(o.operation_code,'') = '0020' AND (o.suboperation_code IS NULL OR o.suboperation_code = '' OR o.suboperation_code = '0000' OR o.suboperation_code = '-') THEN 6
+                        ELSE 7 
+                    END ASC
+                """
                 if order_by in ('legacy_identifier', 'item_id', 'id', 'item'):
                     order_clause = f"""
                         CAST(i.legacy_identifier AS INTEGER) {order_dir.upper()}, 
                         i.legacy_identifier {order_dir.upper()}, 
+                        {pkg_seq_sort},
                         COALESCE(o.operation_code, '') ASC,
-                        CASE WHEN o.suboperation_code IS NULL OR o.suboperation_code = '' OR o.suboperation_code = '-' THEN 0 ELSE 1 END ASC,
                         COALESCE(o.suboperation_code, '') ASC,
                         o.id ASC
                     """
                 elif order_by in ('operation_code', 'oper'):
                     order_clause = f"""
                         COALESCE(o.operation_code, '') {order_dir.upper()},
-                        CASE WHEN o.suboperation_code IS NULL OR o.suboperation_code = '' OR o.suboperation_code = '-' THEN 0 ELSE 1 END ASC,
+                        {pkg_seq_sort},
                         COALESCE(o.suboperation_code, '') ASC,
-                        CAST(i.legacy_identifier AS INTEGER) ASC,
                         o.id ASC
                     """
                 elif order_by in ('suboperation_code', 'subop'):
                     order_clause = f"""
-                        CASE WHEN o.suboperation_code IS NULL OR o.suboperation_code = '' OR o.suboperation_code = '-' THEN 0 ELSE 1 END {order_dir.upper()},
                         COALESCE(o.suboperation_code, '') {order_dir.upper()},
+                        {pkg_seq_sort},
                         CAST(i.legacy_identifier AS INTEGER) ASC,
                         COALESCE(o.operation_code, '') ASC,
                         o.id ASC
@@ -870,6 +880,7 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                     order_clause = f"""
                         COALESCE(o.work_center, '') {order_dir.upper()},
                         CAST(i.legacy_identifier AS INTEGER) ASC,
+                        {pkg_seq_sort},
                         COALESCE(o.operation_code, '') ASC,
                         o.id ASC
                     """
@@ -877,26 +888,29 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                     order_clause = f"""
                         COALESCE(o.short_text, '') {order_dir.upper()},
                         CAST(i.legacy_identifier AS INTEGER) ASC,
+                        {pkg_seq_sort},
                         o.id ASC
                     """
                 elif order_by == 'headcount':
                     order_clause = f"""
                         COALESCE(o.headcount, 0) {order_dir.upper()},
                         CAST(i.legacy_identifier AS INTEGER) ASC,
+                        {pkg_seq_sort},
                         o.id ASC
                     """
                 elif order_by == 'hours':
                     order_clause = f"""
                         COALESCE(o.hours, 0) {order_dir.upper()},
                         CAST(i.legacy_identifier AS INTEGER) ASC,
+                        {pkg_seq_sort},
                         o.id ASC
                     """
                 else:
                     order_clause = f"""
                         CAST(i.legacy_identifier AS INTEGER) ASC, 
                         i.legacy_identifier ASC, 
+                        {pkg_seq_sort},
                         COALESCE(o.operation_code, '') ASC,
-                        CASE WHEN o.suboperation_code IS NULL OR o.suboperation_code = '' OR o.suboperation_code = '-' THEN 0 ELSE 1 END ASC,
                         COALESCE(o.suboperation_code, '') ASC,
                         o.id ASC
                     """
@@ -1417,6 +1431,20 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                 self.send_json(backup_service.list_backups())
                 return
 
+            if path == '/api/export/systems':
+                proj_id = int(q_params.get('project_id', 0))
+                content = export_service.export_pm13_systems_xlsx(proj_id)
+                project = models.get_project(proj_id) or {'name': 'PM13'}
+                safe_name = re.sub(r'[^A-Za-z0-9_-]+', '_', project.get('name') or 'PM13')
+                filename = f"CARGA_SISTEMAS_PM13_{safe_name}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+                self.send_header('Content-Disposition', f'attachment; filename="{filename}"')
+                self.send_header('Content-Length', len(content))
+                self.end_headers()
+                self.wfile.write(content)
+                return
+
             # GET /api/export (Handles downloads)
             if path == '/api/export':
                 export_started = time.perf_counter()
@@ -1449,7 +1477,7 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                                       WHERE o.project_id=? AND o.status='ACTIVE' AND i.deleted_at IS NULL
                                       ORDER BY CAST(i.legacy_identifier AS INTEGER), o.operation_code, o.suboperation_code""", (proj_id,))
                     operations = [models.to_dict(x) for x in cursor.fetchall()]
-                    cursor.execute("""SELECT t.*, o.operation_code, o.suboperation_code,
+                    cursor.execute("""SELECT t.*, o.item_id, o.operation_code, o.suboperation_code,
                                              i.legacy_identifier, i.object_type, i.object_code
                                       FROM operation_long_texts t JOIN item_operations o ON o.id=t.operation_id
                                       JOIN maintenance_items i ON i.id=o.item_id

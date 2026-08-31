@@ -1,15 +1,18 @@
 """
 Motor de Validação e Diagnóstico Técnico de Consistência para o PM13.
-Aprimora o sistema de alertas e armações do PM13 com as 9 regras técnicas completas.
+Aprimora o sistema de alertas e armações do PM13 com as regras técnicas completas.
 """
 
 import json
 from core.database import get_db_connection
 from core.technical_classes import check_technical_class_compatibility
 
+def is_sub_empty(val):
+    return val is None or str(val).strip() in ('', '0000', '-', 'None')
+
 def validate_pm13_project(project_id):
     """
-    Executa a varredura completa de validação técnica do PM13 de acordo com as 9 regras.
+    Executa a varredura completa de validação técnica do PM13.
     """
     conn = get_db_connection()
     c = conn.cursor()
@@ -23,13 +26,22 @@ def validate_pm13_project(project_id):
         WHERE o.project_id=?
     """, (project_id,)).fetchall()
 
+    lt_rows = c.execute("""
+        SELECT lt.*, o.item_id, o.operation_code, o.suboperation_code
+        FROM operation_long_texts lt
+        JOIN item_operations o ON o.id = lt.operation_id
+        WHERE lt.project_id=?
+    """, (project_id,)).fetchall()
+
     plans = [dict(r) for r in plans_rows]
     items = [dict(r) for r in items_rows]
     ops = [dict(r) for r in ops_rows]
+    lts = [dict(r) for r in lt_rows]
 
     plan_issues = {p['id']: [] for p in plans}
     item_issues = {i['id']: [] for i in items}
     op_issues = {op['id']: [] for op in ops}
+    lt_issues = {lt['id']: [] for lt in lts}
 
     # Regra 7: Unicidade de Identificador em Itens
     seen_item_codes = set()
@@ -85,12 +97,39 @@ def validate_pm13_project(project_id):
                     'message': f'Regra 5: Plano ciclo PRD exige condição M (atual: {cond})'
                 })
 
-    # Regras das Operações / Características no PM13
+        # REGRA PM13 - Pacote Obrigatório de Operações (0010, 0010 0011, 0010 0012, 0010 0013, 0010 0014, 0020)
+        it_ops = [op for op in ops if op.get('item_id') == it['id']]
+        
+        has_0010_no_sub = any(op.get('operation_code') == '0010' and is_sub_empty(op.get('suboperation_code')) for op in it_ops)
+        has_0010_0011  = any(op.get('operation_code') == '0010' and str(op.get('suboperation_code')).strip() == '0011' for op in it_ops)
+        has_0010_0012  = any(op.get('operation_code') == '0010' and str(op.get('suboperation_code')).strip() == '0012' for op in it_ops)
+        has_0010_0013  = any(op.get('operation_code') == '0010' and str(op.get('suboperation_code')).strip() == '0013' for op in it_ops)
+        has_0010_0014  = any(op.get('operation_code') == '0010' and str(op.get('suboperation_code')).strip() == '0014' for op in it_ops)
+        has_0020_no_sub = any(op.get('operation_code') == '0020' and is_sub_empty(op.get('suboperation_code')) for op in it_ops)
+
+        missing_pkg = []
+        if not has_0010_no_sub: missing_pkg.append('0010')
+        if not has_0010_0011: missing_pkg.append('0010 0011')
+        if not has_0010_0012: missing_pkg.append('0010 0012')
+        if not has_0010_0013: missing_pkg.append('0010 0013')
+        if not has_0010_0014: missing_pkg.append('0010 0014')
+        if not has_0020_no_sub: missing_pkg.append('0020')
+
+        if missing_pkg:
+            item_issues[it['id']].append({
+                'severity': 'ERROR',
+                'field': 'operations_package',
+                'message': f'Regra Pacote PM13: Item sem pacote completo de operações obrigatórias (0010, 0010 0011, 0010 0012, 0010 0013, 0010 0014, 0020). Faltante(s): {", ".join(missing_pkg)}'
+            })
+
+    # Regras das Operações e Texto Longo no PM13
     for op in ops:
         opid = op['id']
         item_id = op.get('item_id')
         method = op.get('short_text') or ''
         unit = op.get('unit') or ''
+        op_code = str(op.get('operation_code') or '').strip()
+        subop_code = str(op.get('suboperation_code') or '').strip()
 
         # Regra 2: Pertence a um Item Válido
         if not item_id or not any(i['id'] == item_id for i in items):
@@ -110,6 +149,47 @@ def validate_pm13_project(project_id):
                     'message': f'Regra 3: {warning_msg}'
                 })
 
+        # REGRA PM13 - Exigência de Texto Longo por Operação
+        op_lts = [lt for lt in lts if lt.get('operation_id') == opid]
+        is_first_0010 = (op_code == '0010' and is_sub_empty(subop_code))
+
+        if is_first_0010:
+            if not op_lts:
+                msg = 'Regra Texto Longo PM13: A operação 0010 (sem suboperação) exige linha na aba Texto Longo.'
+                op_issues[opid].append({'severity': 'ERROR', 'field': 'long_text', 'message': msg})
+                if item_id and item_id in item_issues:
+                    item_issues[item_id].append({'severity': 'ERROR', 'field': 'long_text', 'message': msg})
+            else:
+                non_empty = [lt for lt in op_lts if str(lt.get('text') or '').strip() != '']
+                if non_empty:
+                    msg = 'Regra Texto Longo PM13: A operação 0010 (sem suboperação) deve possuir Texto Longo VAZIO (encontrado conteúdo preenchido).'
+                    op_issues[opid].append({'severity': 'ERROR', 'field': 'long_text', 'message': msg})
+                    if item_id and item_id in item_issues:
+                        item_issues[item_id].append({'severity': 'ERROR', 'field': 'long_text', 'message': msg})
+        else:
+            non_empty = [lt for lt in op_lts if str(lt.get('text') or '').strip() != '']
+            if not non_empty:
+                op_label = f"{op_code} {subop_code}".strip()
+                msg = f'Regra Texto Longo PM13: A operação {op_label} exige Texto Longo preenchido e não pode ficar em branco.'
+                op_issues[opid].append({'severity': 'ERROR', 'field': 'long_text', 'message': msg})
+                if item_id and item_id in item_issues:
+                    item_issues[item_id].append({'severity': 'ERROR', 'field': 'long_text', 'message': msg})
+
+    # Regras das Linhas de Texto Longo
+    for lt in lts:
+        ltid = lt['id']
+        op_id = lt.get('operation_id')
+        op_match = next((op for op in ops if op['id'] == op_id), None)
+        if op_match:
+            op_code = str(op_match.get('operation_code') or '').strip()
+            sub_code = str(op_match.get('suboperation_code') or '').strip()
+            is_first_0010 = (op_code == '0010' and is_sub_empty(sub_code))
+            txt = str(lt.get('text') or '').strip()
+            if is_first_0010 and txt != '':
+                lt_issues[ltid].append({'severity': 'ERROR', 'field': 'text', 'message': 'Texto Longo da operação 0010 deve ser VAZIO.'})
+            elif not is_first_0010 and txt == '':
+                lt_issues[ltid].append({'severity': 'ERROR', 'field': 'text', 'message': 'Texto Longo desta operação é OBRIGATÓRIO e não pode ficar em branco.'})
+
     for p in plans:
         issues = plan_issues[p['id']]
         status = 'ERROR' if any(i['severity'] == 'ERROR' for i in issues) else ('WARNING' if issues else 'OK')
@@ -128,11 +208,17 @@ def validate_pm13_project(project_id):
         c.execute("UPDATE item_operations SET validation_status=?, validation_issues_json=? WHERE id=?",
                   (status, json.dumps(issues, ensure_ascii=False), op['id']))
 
+    for lt in lts:
+        issues = lt_issues[lt['id']]
+        status = 'ERROR' if any(i['severity'] == 'ERROR' for i in issues) else ('WARNING' if issues else 'OK')
+        c.execute("UPDATE operation_long_texts SET validation_status=?, validation_issues_json=? WHERE id=?",
+                  (status, json.dumps(issues, ensure_ascii=False), lt['id']))
+
     conn.commit()
     conn.close()
     return {
         'plans_validated': len(plans),
         'items_validated': len(items),
-        'ops_validated': len(ops)
+        'ops_validated': len(ops),
+        'lts_validated': len(lts)
     }
-

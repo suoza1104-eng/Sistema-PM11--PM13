@@ -26,6 +26,15 @@ class TestPM11CalendarOffsets(unittest.TestCase):
         indices = {self.index_for(f'{week}S{sap_day}') for week in range(1, 5) for sap_day in range(2, 7)}
         self.assertEqual(indices, set(range(20)))
 
+    def test_operational_week_does_not_depend_on_civil_anchor_weekday(self):
+        anchor = datetime.date(2026, 8, 27)  # Thursday, but projection starts at SEG1.
+        dates = _working_dates(anchor, 30)
+        indices = []
+        for sap_day in range(2, 7):
+            offset = parse_offset_from_text(code=f'1S{sap_day}')
+            indices.append(_occurrence_indices(dates, anchor, offset, 'MES', 1)[0])
+        self.assertEqual(indices, [0, 1, 2, 3, 4])
+
 
 if __name__ == '__main__':
     unittest.main()
