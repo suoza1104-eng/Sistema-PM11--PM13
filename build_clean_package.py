@@ -83,8 +83,6 @@ def build_clean_package():
         'launcher.py',
         'INICIAR_SISTEMA.bat',
         'INICIAR_PM13.bat',
-        'ATUALIZAR_SISTEMA.bat',
-        'updater_gui.py',
         'TESTAR_PM13.bat',
         'app.py',
         'core',
