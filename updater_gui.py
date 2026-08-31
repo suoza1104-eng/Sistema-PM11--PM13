@@ -50,7 +50,7 @@ class SystemUpdaterApp:
 
     def setup_ui(self):
         # Header Box
-        header_frame = tk.Frame(self.root, bg=COLOR_PRIMARY_DARK, height=80, padding=15)
+        header_frame = tk.Frame(self.root, bg=COLOR_PRIMARY_DARK, height=80, padx=15, pady=15)
         header_frame.pack(fill=tk.X)
 
         title_lbl = tk.Label(
@@ -178,8 +178,8 @@ class SystemUpdaterApp:
         self.log_text.pack(fill=tk.BOTH, expand=True)
 
         # Footer Actions Bar
-        footer_frame = tk.Frame(self.root, bg=COLOR_BG, padx=20, pady=(0, 15))
-        footer_frame.pack(fill=tk.X)
+        footer_frame = tk.Frame(self.root, bg=COLOR_BG, padx=20, pady=10)
+        footer_frame.pack(fill=tk.X, pady=(0, 15))
 
         self.btn_update = tk.Button(
             footer_frame, 
