@@ -27,7 +27,7 @@ class SystemUpdaterApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Atualizador de Sistema — PM13 / PM11")
-        self.root.geometry("640 x 540")
+        self.root.geometry("640x540")
         self.root.minsize(580, 480)
         self.root.configure(bg=COLOR_BG)
 
