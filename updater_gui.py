@@ -34,18 +34,29 @@ class SystemUpdaterApp:
         # Definir diretório fonte da atualização (onde o atualizador está localizado)
         self.source_dir = os.path.dirname(os.path.abspath(__file__))
         
-        # Tentar auto-detectar diretório de destino padrão
+        # Tentar auto-detectar diretório de destino padrão (pasta do sistema original)
         self.target_dir = self.detect_default_target()
 
         self.setup_ui()
 
     def detect_default_target(self):
-        """Auto-detecta a pasta do sistema se estiver na mesma pasta ou pasta pai."""
+        """Auto-detecta a pasta do sistema original."""
+        parent = os.path.dirname(self.source_dir)
+        folder_name = os.path.basename(self.source_dir).upper()
+
+        # Se a pasta onde o atualizador está rodando for a PACOTE_ATUALIZACAO...,
+        # a pasta de destino correta é a pasta PAI (onde o sistema está instalado).
+        if "PACOTE_ATUALIZACAO" in folder_name or "PACOTE_" in folder_name:
+            if os.path.exists(os.path.join(parent, "app.py")) or os.path.exists(os.path.join(parent, "core")):
+                return parent
+            return parent
+
         if os.path.exists(os.path.join(self.source_dir, "app.py")) and os.path.exists(os.path.join(self.source_dir, "core")):
             return self.source_dir
-        parent = os.path.dirname(self.source_dir)
+
         if os.path.exists(os.path.join(parent, "app.py")) and os.path.exists(os.path.join(parent, "core")):
             return parent
+
         return ""
 
     def setup_ui(self):
@@ -236,13 +247,29 @@ class SystemUpdaterApp:
             messagebox.showerror("Pasta Inválida", "Por favor, selecione uma pasta de instalação válida no seu computador.")
             return
 
+        abs_target = os.path.abspath(target)
+        abs_source = os.path.abspath(self.source_dir)
+
+        # Validar se a pessoa selecionou a própria pasta temporária do pacote de atualização
+        if abs_target == abs_source or "PACOTE_ATUALIZACAO" in os.path.basename(abs_target).upper():
+            parent = os.path.dirname(abs_source)
+            messagebox.showerror(
+                "Pasta de Destino Incorreta", 
+                "A pasta selecionada no campo é a própria pasta do PACOTE DE ATUALIZAÇÃO!\n\n"
+                "Por favor, clique em '📂 Selecionar Pasta...' e escolha a pasta onde o seu SISTEMA ORIGINAL está instalado no computador (ex: ...\\Planos PM13-PM11)."
+            )
+            if parent and parent != abs_source and os.path.exists(parent):
+                self.path_entry.delete(0, tk.END)
+                self.path_entry.insert(0, parent)
+            return
+
         # Confirmar se a pasta possui estrutura válida do sistema
         has_app = os.path.exists(os.path.join(target, "app.py"))
         has_static = os.path.exists(os.path.join(target, "static"))
         if not (has_app or has_static):
             resp = messagebox.askyesno(
                 "Aviso de Pasta", 
-                "A pasta selecionada não contém os arquivos padrão do sistema. Deseja instalar como uma nova cópia?"
+                "A pasta selecionada não contém os arquivos padrão do sistema. Deseja instalar como uma nova cópia nesta pasta?"
             )
             if not resp:
                 return
@@ -282,8 +309,8 @@ class SystemUpdaterApp:
             # Subpastas e arquivos a serem atualizados
             items_to_copy = [
                 "app.py", "core", "core_pm11", "catalogs", "static", "tests",
-                "INICIAR_PM13.bat", "TESTAR_PM13.bat", "read_xlsb.ps1",
-                "README.md", "MANUAL_USUARIO.html", ".gitignore"
+                "launcher.py", "INICIAR_SISTEMA.bat", "INICIAR_PM13.bat", "TESTAR_PM13.bat", 
+                "read_xlsb.ps1", "app_icon.ico", "README.md", "MANUAL_USUARIO.html", ".gitignore"
             ]
 
             total_items = len(items_to_copy)
@@ -292,6 +319,10 @@ class SystemUpdaterApp:
                 dst_path = os.path.join(target_dir, item)
 
                 if os.path.exists(src_path):
+                    if os.path.abspath(src_path) == os.path.abspath(dst_path):
+                        self.log(f"Ignorado (mesmo arquivo): {item}")
+                        continue
+
                     if os.path.isdir(src_path):
                         shutil.copytree(src_path, dst_path, dirs_exist_ok=True)
                     else:
@@ -347,7 +378,10 @@ class SystemUpdaterApp:
 
     def launch_system(self):
         """Inicia o sistema atualizado no navegador."""
-        bat_script = os.path.join(self.target_dir, "INICIAR_PM13.bat")
+        bat_script = os.path.join(self.target_dir, "INICIAR_SISTEMA.bat")
+        if not os.path.exists(bat_script):
+            bat_script = os.path.join(self.target_dir, "INICIAR_PM13.bat")
+
         if os.path.exists(bat_script):
             subprocess.Popen(["cmd", "/c", f"start \"\" \"{bat_script}\""], cwd=self.target_dir)
             self.root.destroy()
@@ -361,4 +395,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
