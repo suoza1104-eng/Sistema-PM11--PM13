@@ -33,6 +33,9 @@ def create_desktop_shortcut():
         if not os.path.exists(target_bat):
             target_bat = os.path.join(root_dir, "INICIAR_PM13.bat")
 
+        icon_path = os.path.join(root_dir, "app_icon.ico")
+        icon_setting = f'shortcut.IconLocation = "{icon_path}"' if os.path.exists(icon_path) else ''
+
         # Usar VBScript via Windows Script Host para criar atalho .lnk sem dependência externa
         vbs_script = f"""
 Set WshShell = CreateObject("WScript.Shell")
@@ -40,6 +43,7 @@ Set shortcut = WshShell.CreateShortcut("{shortcut_path}")
 shortcut.TargetPath = "{target_bat}"
 shortcut.WorkingDirectory = "{root_dir}"
 shortcut.Description = "Inicializador do Sistema PM13 / PM11"
+{icon_setting}
 shortcut.WindowStyle = 1
 shortcut.Save
 """
@@ -135,3 +139,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

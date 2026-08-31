@@ -79,6 +79,7 @@ def build_clean_package():
     os.makedirs(temp_backups_dir, exist_ok=True)
 
     include_items = [
+        'app_icon.ico',
         'launcher.py',
         'INICIAR_SISTEMA.bat',
         'INICIAR_PM13.bat',

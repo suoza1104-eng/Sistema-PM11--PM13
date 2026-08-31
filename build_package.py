@@ -16,6 +16,9 @@ def build_update_package():
     zip_path = os.path.join(root_dir, zip_filename)
 
     include_items = [
+        'app_icon.ico',
+        'launcher.py',
+        'INICIAR_SISTEMA.bat',
         'updater_gui.py',
         'ATUALIZAR_SISTEMA.bat',
         'INICIAR_PM13.bat',
@@ -63,3 +66,4 @@ def build_update_package():
 
 if __name__ == "__main__":
     build_update_package()
+
