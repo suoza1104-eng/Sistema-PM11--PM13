@@ -2204,6 +2204,80 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                 self.send_json({'message': f'{count} registros atualizados com sucesso!', 'count': count})
                 return
 
+            # POST /api/operations/bulk-delete
+            if path == '/api/operations/bulk-delete':
+                data = self.read_json_body()
+                proj_id = int(data.get('project_id', 0))
+                raw_ids = data.get('ids', [])
+                ids = [int(x) for x in raw_ids if str(x).isdigit()]
+                if not ids:
+                    self.send_error_json("Nenhuma operação fornecida para exclusão em massa.")
+                    return
+                
+                conn = get_db_connection(); cur = conn.cursor()
+                placeholders = ','.join('?' for _ in ids)
+                
+                cur.execute(f"DELETE FROM operation_long_texts WHERE operation_id IN ({placeholders})", ids)
+                cur.execute(f"DELETE FROM item_operations WHERE id IN ({placeholders})", ids)
+                deleted_ops = cur.rowcount
+                conn.commit(); conn.close()
+                
+                if proj_id:
+                    try:
+                        from core import validation_engine
+                        validation_engine.validate_pm13_project(proj_id)
+                    except Exception:
+                        pass
+                
+                self.send_json({'message': f'{deleted_ops} operações excluídas com sucesso!', 'count': deleted_ops})
+                return
+
+            # POST /api/long-texts/bulk-delete
+            if path == '/api/long-texts/bulk-delete':
+                data = self.read_json_body()
+                proj_id = int(data.get('project_id', 0))
+                raw_ids = data.get('ids', [])
+                ids = [int(x) for x in raw_ids if str(x).isdigit()]
+                delete_ops = bool(data.get('delete_associated_operations', False))
+                if not ids:
+                    self.send_error_json("Nenhum texto longo fornecido para exclusão em massa.")
+                    return
+                
+                conn = get_db_connection(); cur = conn.cursor()
+                placeholders = ','.join('?' for _ in ids)
+                
+                if delete_ops:
+                    op_rows = cur.execute(f"SELECT DISTINCT operation_id FROM operation_long_texts WHERE id IN ({placeholders}) AND operation_id IS NOT NULL", ids).fetchall()
+                    op_ids = [r[0] for r in op_rows if r[0]]
+                    
+                    cur.execute(f"DELETE FROM operation_long_texts WHERE id IN ({placeholders})", ids)
+                    deleted_lts = cur.rowcount
+                    
+                    deleted_ops = 0
+                    if op_ids:
+                        op_placeholders = ','.join('?' for _ in op_ids)
+                        cur.execute(f"DELETE FROM operation_long_texts WHERE operation_id IN ({op_placeholders})", op_ids)
+                        cur.execute(f"DELETE FROM item_operations WHERE id IN ({op_placeholders})", op_ids)
+                        deleted_ops = cur.rowcount
+                    conn.commit(); conn.close()
+                    msg = f'{deleted_lts} textos longos e {deleted_ops} operações vinculadas foram excluídos com sucesso!'
+                    cnt = deleted_lts
+                else:
+                    cur.execute(f"DELETE FROM operation_long_texts WHERE id IN ({placeholders})", ids)
+                    cnt = cur.rowcount
+                    conn.commit(); conn.close()
+                    msg = f'{cnt} textos longos excluídos com sucesso!'
+
+                if proj_id:
+                    try:
+                        from core import validation_engine
+                        validation_engine.validate_pm13_project(proj_id)
+                    except Exception:
+                        pass
+
+                self.send_json({'message': msg, 'count': cnt})
+                return
+
             # POST /api/plans/bulk-update
             if path == '/api/plans/bulk-update':
                 data = self.read_json_body()

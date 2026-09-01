@@ -1601,36 +1601,61 @@ const Operations = {
         const selectedSet = kind === 'operations' ? this.selectedOperationIds : this.selectedLongTextIds;
         const ids = Array.from(selectedSet);
         if (!ids.length) return;
-        const label = kind === 'operations' ? 'operações' : 'textos longos';
-        const impactMsg = kind === 'operations'
-            ? `Tem certeza que deseja excluir em massa as <strong>${ids.length} operações</strong> selecionadas?<br><br><span style="color:var(--danger-color);font-size:12px;">⚠️ Os textos longos vinculados a estas operações também serão removidos.</span>`
-            : `Tem certeza que deseja excluir em massa os <strong>${ids.length} textos longos</strong> selecionados?`;
+        const projectId = App.getValidProjectId();
 
-        window.App.confirm(`Excluir em Massa (${label})`, impactMsg, async () => {
-            let deleted = 0;
-            UI.showLoader(`Excluindo ${label} selecionados...`);
-            try {
-                for (const id of ids) {
-                    await API.delete(`/api/${kind}/${id}`);
-                    deleted++;
-                }
-                selectedSet.clear();
-                this.updateBulkToolbar(kind);
-                UI.showToast(`${deleted} ${label} excluído(s) com sucesso!`, 'success');
-                if (kind === 'operations') {
-                    await Promise.all([this.loadOperations(), this.loadLongTexts()]);
-                } else {
-                    await this.loadLongTexts();
-                }
-            } catch (err) {
-                UI.showToast(`${deleted} de ${ids.length} ${label} excluído(s). Erro: ${err.message}`, 'error', 5000);
-                selectedSet.clear();
-                this.updateBulkToolbar(kind);
-                if (kind === 'operations') await this.loadOperations(); else await this.loadLongTexts();
-            } finally {
-                UI.hideLoader();
+        if (kind === 'long-texts') {
+            const modalChoice = document.getElementById('modal-delete-lt-choice');
+            const msgEl = document.getElementById('delete-lt-choice-count-msg');
+            if (msgEl) msgEl.innerHTML = `Você selecionou <strong>${ids.length} texto(s) longo(s)</strong>.`;
+            if (modalChoice) modalChoice.classList.remove('hidden');
+
+            const btnOnlyLt = document.getElementById('btn-delete-only-lt');
+            const btnLtAndOps = document.getElementById('btn-delete-lt-and-ops');
+
+            if (btnOnlyLt) {
+                btnOnlyLt.onclick = async () => {
+                    if (modalChoice) modalChoice.classList.add('hidden');
+                    await this.executeBulkDeleteEndpoint('long-texts', ids, projectId, false);
+                };
             }
+            if (btnLtAndOps) {
+                btnLtAndOps.onclick = async () => {
+                    if (modalChoice) modalChoice.classList.add('hidden');
+                    await this.executeBulkDeleteEndpoint('long-texts', ids, projectId, true);
+                };
+            }
+            return;
+        }
+
+        // Deleting operations directly
+        const impactMsg = `Tem certeza que deseja excluir em massa as <strong>${ids.length} operações</strong> selecionadas?<br><br><span style="color:var(--danger-color);font-size:12px;">⚠️ Os textos longos vinculados a estas operações também serão removidos.</span>`;
+        window.App.confirm("Excluir Operações em Massa", impactMsg, async () => {
+            await this.executeBulkDeleteEndpoint('operations', ids, projectId, false);
         });
+    },
+
+    async executeBulkDeleteEndpoint(kind, ids, projectId, deleteAssociatedOps = false) {
+        const selectedSet = kind === 'operations' ? this.selectedOperationIds : this.selectedLongTextIds;
+        UI.showLoader(`Excluindo em massa (${ids.length} registros)...`);
+        try {
+            const endpoint = kind === 'operations' ? '/api/operations/bulk-delete' : '/api/long-texts/bulk-delete';
+            const res = await API.post(endpoint, {
+                project_id: projectId,
+                ids: ids,
+                delete_associated_operations: deleteAssociatedOps
+            });
+            selectedSet.clear();
+            this.updateBulkToolbar(kind);
+            UI.showToast(res.message || 'Exclusão realizada com sucesso!', 'success');
+            await Promise.all([this.loadOperations(), this.loadLongTexts()]);
+        } catch (err) {
+            UI.showToast(`Erro na exclusão em massa: ${err.message}`, 'error', 5000);
+            selectedSet.clear();
+            this.updateBulkToolbar(kind);
+            await Promise.all([this.loadOperations(), this.loadLongTexts()]);
+        } finally {
+            UI.hideLoader();
+        }
     },
 
     _resetBulkForm(prefix, fields) {

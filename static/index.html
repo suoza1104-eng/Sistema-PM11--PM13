@@ -2788,6 +2788,35 @@
         </div>
     </div>
 
+    <!-- Modal: Choice for Bulk Deleting Long Texts -->
+    <div id="modal-delete-lt-choice" class="modal-overlay hidden">
+        <div class="modal modal-md">
+            <div class="modal-header bg-danger">
+                <h2>🗑️ Opções de Exclusão em Massa (Textos Longos)</h2>
+                <button class="modal-close btn-icon" onclick="document.getElementById('modal-delete-lt-choice').classList.add('hidden')">✕</button>
+            </div>
+            <div class="modal-body" style="padding: 20px;">
+                <p id="delete-lt-choice-count-msg" style="font-size: 15px; font-weight: 600; margin-bottom: 12px; color: var(--text-primary);"></p>
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Como você deseja proceder com os registros selecionados?</p>
+                
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button class="btn btn-warning" id="btn-delete-only-lt" style="padding: 14px; text-align: left; display: flex; flex-direction: column; gap: 4px; border-radius: 8px;">
+                        <span style="font-size: 14px; font-weight: 700;">📝 1. Excluir Apenas os Textos Longos</span>
+                        <span style="font-size: 12px; opacity: 0.9;">Remove somente o procedimento técnico em texto, preservando as operações pai na tabela.</span>
+                    </button>
+
+                    <button class="btn btn-danger" id="btn-delete-lt-and-ops" style="padding: 14px; text-align: left; display: flex; flex-direction: column; gap: 4px; border-radius: 8px;">
+                        <span style="font-size: 14px; font-weight: 700;">💣 2. Excluir o Pacote de Operações Completo</span>
+                        <span style="font-size: 12px; opacity: 0.9;">Remove tanto as operações quanto todos os textos longos a elas vinculados.</span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer" style="justify-content: flex-end;">
+                <button class="btn btn-outline" onclick="document.getElementById('modal-delete-lt-choice').classList.add('hidden')">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal: Automatic intelligent balancing -->
     <div id="auto-balance-modal" class="modal-overlay hidden auto-balance-overlay">
         <div class="auto-balance-modal">
