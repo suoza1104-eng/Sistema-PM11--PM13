@@ -3076,14 +3076,32 @@
 
     <!-- Modal: Bulk Edit Long Texts -->
     <div id="modal-bulk-edit-long-texts" class="modal-overlay hidden">
-        <div class="modal">
-            <div class="modal-header"><h2>Editar Textos Longos em Massa</h2><button class="modal-close btn-icon" data-close="modal-bulk-edit-long-texts">✕</button></div>
+        <div class="modal modal-md">
+            <div class="modal-header">
+                <h2>Editar Textos Longos em Massa</h2>
+                <button class="modal-close btn-icon" data-close="modal-bulk-edit-long-texts">✕</button>
+            </div>
             <div class="modal-body">
-                <p id="bulk-edit-long-texts-count-text"></p>
+                <p id="bulk-edit-long-texts-count-text" class="fw-bold"></p>
                 <p class="txt-warning mt-5">Somente os campos marcados serão atualizados.</p>
-                <form class="mt-15">
-                    <div class="form-row-checkbox mt-10"><input type="checkbox" id="bulk-lt-enable-text"><div class="form-group"><label>Texto / procedimento técnico (duplo clique para abrir editor)</label><textarea id="bulk-lt-input-text" rows="8" disabled placeholder="Digite o texto ou dê dois cliques para abrir o editor padrão..." ondblclick="if(!this.disabled) Items.openBulkLongTextEditor(this)"></textarea></div></div>
+                <form class="mt-15" onsubmit="event.preventDefault();">
+                    <div class="form-row-checkbox mt-10" style="align-items: flex-start;">
+                        <input type="checkbox" id="bulk-lt-enable-text" style="margin-top: 10px;">
+                        <div class="form-group" style="flex:1;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                <label style="margin:0; font-weight:600;">Texto / Procedimento Técnico</label>
+                                <button type="button" id="btn-bulk-lt-clear" class="btn btn-secondary btn-sm" style="background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; cursor:pointer;">
+                                    🧹 Definir como VAZIO (Limpar em Massa)
+                                </button>
+                            </div>
+                            <textarea id="bulk-lt-input-text" rows="8" placeholder="Digite o texto diretamente aqui ou clique no botão acima para limpar..." style="width:100%; box-sizing:border-box; font-family:inherit; padding:8px; resize:vertical;"></textarea>
+                        </div>
+                    </div>
                 </form>
+            </div>
+            <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:10px; margin-top:15px;">
+                <button type="button" class="btn btn-secondary" data-close="modal-bulk-edit-long-texts">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btn-bulk-lt-save" onclick="Operations.bulkEditLongTextsConfirm()">Aplicar Alterações em Massa</button>
             </div>
         </div>
     </div>

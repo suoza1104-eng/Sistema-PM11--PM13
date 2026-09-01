@@ -811,6 +811,12 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
 
             if path == '/api/operations':
                 proj_id = int(q_params.get('project_id', 0))
+                if proj_id:
+                    try:
+                        from core import validation_engine
+                        validation_engine.validate_pm13_project(proj_id)
+                    except Exception:
+                        pass
                 search = q_params.get('search', '').strip()
                 work_center = q_params.get('work_center', '').strip()
                 item_id = q_params.get('item_id')
@@ -947,6 +953,12 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
 
             if path == '/api/long-texts':
                 proj_id = int(q_params.get('project_id', 0))
+                if proj_id:
+                    try:
+                        from core import validation_engine
+                        validation_engine.validate_pm13_project(proj_id)
+                    except Exception:
+                        pass
                 search = q_params.get('search', '').strip()
                 operation_id = q_params.get('operation_id')
                 limit_param = q_params.get('limit')
@@ -2112,9 +2124,6 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                 if not proj_id or not record_ids or not updates:
                     self.send_error_json('Parâmetros inválidos para atualização em massa.')
                     return
-                if path == '/api/long-texts/bulk-update' and 'text' in updates and not str(updates['text']).strip():
-                    self.send_error_json('O texto longo não pode ficar vazio.')
-                    return
                 if path == '/api/operations/bulk-update' and 'short_text' in updates and not str(updates['short_text']).strip():
                     self.send_error_json('O texto breve não pode ficar vazio.')
                     return
@@ -2122,6 +2131,14 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                     count = models.bulk_update_operations(proj_id, record_ids, updates)
                 else:
                     count = models.bulk_update_long_texts(proj_id, record_ids, updates)
+
+                # Re-executar motor de validação para atualizar alarmes vermelhos em tempo real
+                try:
+                    from core import validation_engine
+                    validation_engine.validate_pm13_project(proj_id)
+                except Exception:
+                    pass
+
                 self.send_json({'message': f'{count} registros atualizados com sucesso!', 'count': count})
                 return
 

@@ -7,8 +7,17 @@ import json
 from core.database import get_db_connection
 from core.technical_classes import check_technical_class_compatibility
 
+def clean_op_code(val):
+    s = str(val or '').strip()
+    if s.isdigit():
+        return f"{int(s):04d}"
+    return s
+
 def is_sub_empty(val):
-    return val is None or str(val).strip() in ('', '0000', '-', 'None')
+    if val is None:
+        return True
+    s = str(val).strip()
+    return s in ('', '0000', '-', 'None', '0', '00', '000', ' - ', ' -')
 
 def validate_pm13_project(project_id):
     """
@@ -100,12 +109,12 @@ def validate_pm13_project(project_id):
         # REGRA PM13 - Pacote Obrigatório de Operações (0010, 0010 0011, 0010 0012, 0010 0013, 0010 0014, 0020)
         it_ops = [op for op in ops if op.get('item_id') == it['id']]
         
-        has_0010_no_sub = any(op.get('operation_code') == '0010' and is_sub_empty(op.get('suboperation_code')) for op in it_ops)
-        has_0010_0011  = any(op.get('operation_code') == '0010' and str(op.get('suboperation_code')).strip() == '0011' for op in it_ops)
-        has_0010_0012  = any(op.get('operation_code') == '0010' and str(op.get('suboperation_code')).strip() == '0012' for op in it_ops)
-        has_0010_0013  = any(op.get('operation_code') == '0010' and str(op.get('suboperation_code')).strip() == '0013' for op in it_ops)
-        has_0010_0014  = any(op.get('operation_code') == '0010' and str(op.get('suboperation_code')).strip() == '0014' for op in it_ops)
-        has_0020_no_sub = any(op.get('operation_code') == '0020' and is_sub_empty(op.get('suboperation_code')) for op in it_ops)
+        has_0010_no_sub = any(clean_op_code(op.get('operation_code')) == '0010' and is_sub_empty(op.get('suboperation_code')) for op in it_ops)
+        has_0010_0011  = any(clean_op_code(op.get('operation_code')) == '0010' and str(op.get('suboperation_code')).strip() == '0011' for op in it_ops)
+        has_0010_0012  = any(clean_op_code(op.get('operation_code')) == '0010' and str(op.get('suboperation_code')).strip() == '0012' for op in it_ops)
+        has_0010_0013  = any(clean_op_code(op.get('operation_code')) == '0010' and str(op.get('suboperation_code')).strip() == '0013' for op in it_ops)
+        has_0010_0014  = any(clean_op_code(op.get('operation_code')) == '0010' and str(op.get('suboperation_code')).strip() == '0014' for op in it_ops)
+        has_0020_no_sub = any(clean_op_code(op.get('operation_code')) == '0020' and is_sub_empty(op.get('suboperation_code')) for op in it_ops)
 
         missing_pkg = []
         if not has_0010_no_sub: missing_pkg.append('0010')
@@ -128,7 +137,7 @@ def validate_pm13_project(project_id):
         item_id = op.get('item_id')
         method = op.get('short_text') or ''
         unit = op.get('unit') or ''
-        op_code = str(op.get('operation_code') or '').strip()
+        op_code = clean_op_code(op.get('operation_code'))
         subop_code = str(op.get('suboperation_code') or '').strip()
 
         # Regra 2: Pertence a um Item Válido
@@ -181,12 +190,12 @@ def validate_pm13_project(project_id):
         op_id = lt.get('operation_id')
         op_match = next((op for op in ops if op['id'] == op_id), None)
         if op_match:
-            op_code = str(op_match.get('operation_code') or '').strip()
+            op_code = clean_op_code(op_match.get('operation_code'))
             sub_code = str(op_match.get('suboperation_code') or '').strip()
             is_first_0010 = (op_code == '0010' and is_sub_empty(sub_code))
             txt = str(lt.get('text') or '').strip()
             if is_first_0010 and txt != '':
-                lt_issues[ltid].append({'severity': 'ERROR', 'field': 'text', 'message': 'Texto Longo da operação 0010 deve ser VAZIO.'})
+                lt_issues[ltid].append({'severity': 'ERROR', 'field': 'text', 'message': 'Texto Longo da operação 0010 (sem suboperação) deve ser VAZIO.'})
             elif not is_first_0010 and txt == '':
                 lt_issues[ltid].append({'severity': 'ERROR', 'field': 'text', 'message': 'Texto Longo desta operação é OBRIGATÓRIO e não pode ficar em branco.'})
 

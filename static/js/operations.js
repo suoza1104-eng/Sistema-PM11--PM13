@@ -1591,13 +1591,6 @@ const Operations = {
         this._openModal('modal-bulk-edit-operations');
     },
 
-    openBulkEditLongTexts() {
-        this._resetBulkForm('lt', ['group-code','group-counter','text']);
-        document.getElementById('bulk-edit-long-texts-count-text').textContent =
-            `${this.selectedLongTextIds.size} textos longos selecionados serão alterados em massa.`;
-        this._openModal('modal-bulk-edit-long-texts');
-    },
-
     async bulkEditOperationsConfirm() {
         const updates = {};
         const values = {
@@ -1615,18 +1608,54 @@ const Operations = {
         await this._submitBulkEdit('operations', Array.from(this.selectedOperationIds), updates);
     },
 
+    openBulkEditLongTexts() {
+        const countText = document.getElementById('bulk-edit-long-texts-count-text');
+        if (countText) {
+            countText.textContent = `${this.selectedLongTextIds.size} textos longos selecionados serão alterados em massa.`;
+        }
+
+        const cb = document.getElementById('bulk-lt-enable-text');
+        const input = document.getElementById('bulk-lt-input-text');
+        
+        if (cb) cb.checked = false;
+        if (input) {
+            input.value = '';
+            input.disabled = false;
+        }
+
+        if (input && !input._hasBulkListeners) {
+            input._hasBulkListeners = true;
+            input.addEventListener('focus', () => { if (cb) cb.checked = true; });
+            input.addEventListener('input', () => { if (cb) cb.checked = true; });
+            input.addEventListener('click', () => { if (cb) cb.checked = true; });
+        }
+
+        const clearBtn = document.getElementById('btn-bulk-lt-clear');
+        if (clearBtn && !clearBtn._hasClickListener) {
+            clearBtn._hasClickListener = true;
+            clearBtn.addEventListener('click', () => {
+                if (input) input.value = '';
+                if (cb) cb.checked = true;
+                UI.showToast('Marcado para limpar (Texto Vazio). Clique em Aplicar para confirmar.', 'info');
+            });
+        }
+
+        this._openModal('modal-bulk-edit-long-texts');
+    },
+
     async bulkEditLongTextsConfirm() {
-        const updates = {};
-        const values = {
-            'group-code': ['group_code', 'bulk-lt-input-group-code'],
-            'group-counter': ['group_counter', 'bulk-lt-input-group-counter'],
-            'text': ['text', 'bulk-lt-input-text']
+        const cb = document.getElementById('bulk-lt-enable-text');
+        const input = document.getElementById('bulk-lt-input-text');
+
+        if (!cb || !cb.checked) {
+            UI.showToast('Marque a caixa de seleção ou digite/limpe o campo para alterar em massa.', 'error');
+            return;
+        }
+
+        const updates = {
+            'text': input ? input.value : ''
         };
-        Object.entries(values).forEach(([field, [key, inputId]]) => {
-            if (document.getElementById(`bulk-lt-enable-${field}`).checked) {
-                updates[key] = document.getElementById(inputId).value;
-            }
-        });
+
         await this._submitBulkEdit('long-texts', Array.from(this.selectedLongTextIds), updates);
     },
 
