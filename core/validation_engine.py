@@ -180,7 +180,6 @@ def validate_pm13_project(project_id):
                 if item_id and item_id in item_issues:
                     item_issues[item_id].append({'code': 'missing_long_text', 'severity': 'ERROR', 'field': 'long_text', 'message': msg})
 
-    # Regras das Linhas de Texto Longo
     for lt in lts:
         ltid = lt['id']
         op_id = lt.get('operation_id')
@@ -188,12 +187,12 @@ def validate_pm13_project(project_id):
         if op_match:
             op_code = clean_op_code(op_match.get('operation_code'))
             sub_code = str(op_match.get('suboperation_code') or '').strip()
-            is_first_0010 = (op_code == '0010' and is_sub_empty(sub_code))
+            is_first = (op_code == '0010' and is_sub_empty(sub_code))
             txt = str(lt.get('text') or '').strip()
-            if is_first_0010 and txt != '':
-                lt_issues[ltid].append({'severity': 'ERROR', 'field': 'text', 'message': 'Texto Longo da operação 0010 (sem suboperação) deve ser VAZIO.'})
-            elif not is_first_0010 and txt == '':
-                lt_issues[ltid].append({'severity': 'ERROR', 'field': 'text', 'message': 'Texto Longo desta operação é OBRIGATÓRIO e não pode ficar em branco.'})
+            if is_first and txt != '':
+                lt_issues[ltid].append({'code': 'header_has_long_text', 'severity': 'ERROR', 'field': 'text', 'message': 'Operação 0010 principal não deve possuir texto longo.'})
+            elif not is_first and txt == '':
+                lt_issues[ltid].append({'code': 'missing_long_text', 'severity': 'ERROR', 'field': 'text', 'message': 'Texto Longo desta operação é OBRIGATÓRIO e não pode ficar em branco.'})
 
     for p in plans:
         issues = plan_issues[p['id']]
