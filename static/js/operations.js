@@ -1636,8 +1636,11 @@ const Operations = {
 
     async executeBulkDeleteEndpoint(kind, ids, projectId, deleteAssociatedOps = false) {
         const selectedSet = kind === 'operations' ? this.selectedOperationIds : this.selectedLongTextIds;
-        UI.showLoader(`Excluindo em massa (${ids.length} registros)...`);
+        const label = kind === 'operations' ? 'operações' : 'textos longos';
+        
+        App.showBulkProgressModal(`Excluindo ${label} em Massa...`, `Transmitindo solicitação para excluir <strong>${ids.length} ${label}</strong>...`);
         try {
+            App.updateBulkProgressModal(60, "Processando remoção no banco de dados SQLite...");
             const endpoint = kind === 'operations' ? '/api/operations/bulk-delete' : '/api/long-texts/bulk-delete';
             const res = await API.post(endpoint, {
                 project_id: projectId,
@@ -1646,15 +1649,13 @@ const Operations = {
             });
             selectedSet.clear();
             this.updateBulkToolbar(kind);
-            UI.showToast(res.message || 'Exclusão realizada com sucesso!', 'success');
+            App.finishBulkProgressModal(true, "Exclusão Concluída!", res.message || `${ids.length} ${label} excluído(s) com sucesso!`);
             await Promise.all([this.loadOperations(), this.loadLongTexts()]);
         } catch (err) {
-            UI.showToast(`Erro na exclusão em massa: ${err.message}`, 'error', 5000);
+            App.finishBulkProgressModal(false, `Erro na Exclusão (${label})`, `Falha ao processar exclusão no servidor: ${err.message}`);
             selectedSet.clear();
             this.updateBulkToolbar(kind);
             await Promise.all([this.loadOperations(), this.loadLongTexts()]);
-        } finally {
-            UI.hideLoader();
         }
     },
 

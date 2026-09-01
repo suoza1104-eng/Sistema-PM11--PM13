@@ -2817,6 +2817,39 @@
         </div>
     </div>
 
+    <!-- Modal: Animated Progress Overlay for Bulk Deletions -->
+    <div id="modal-bulk-progress" class="modal-overlay hidden" style="z-index: 10000; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px);">
+        <div class="modal modal-md" style="text-align: center; padding: 30px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); background: var(--bg-surface);">
+            <div id="bulk-progress-spinner-container" style="margin-bottom: 20px;">
+                <div class="spinner" style="width: 56px; height: 56px; border-width: 5px; margin: 0 auto;"></div>
+            </div>
+            
+            <div id="bulk-progress-icon-success" class="hidden" style="font-size: 56px; line-height: 1; margin-bottom: 16px; color: var(--success-color, #10b981);">
+                ✅
+            </div>
+            
+            <div id="bulk-progress-icon-error" class="hidden" style="font-size: 56px; line-height: 1; margin-bottom: 16px; color: var(--danger-color, #ef4444);">
+                ❌
+            </div>
+
+            <h3 id="bulk-progress-title" style="font-size: 20px; font-weight: 700; color: var(--text-primary); margin-bottom: 10px;">
+                Excluindo Registros em Massa...
+            </h3>
+            
+            <p id="bulk-progress-status" style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5;">
+                Aguarde enquanto o sistema processa a exclusão no banco de dados.
+            </p>
+
+            <div id="bulk-progress-bar-wrapper" style="width: 100%; height: 10px; background: rgba(0,0,0,0.1); border-radius: 999px; overflow: hidden; margin-bottom: 20px;">
+                <div id="bulk-progress-bar-fill" style="width: 20%; height: 100%; background: linear-gradient(90deg, #3b82f6, #6366f1); border-radius: 999px; transition: width 0.3s ease, background 0.3s ease;"></div>
+            </div>
+
+            <div id="bulk-progress-actions" class="hidden" style="margin-top: 15px;">
+                <button class="btn btn-primary" onclick="document.getElementById('modal-bulk-progress').classList.add('hidden')">Entendido</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal: Automatic intelligent balancing -->
     <div id="auto-balance-modal" class="modal-overlay hidden auto-balance-overlay">
         <div class="auto-balance-modal">
@@ -3527,7 +3560,7 @@
     <script src="js/priorimeter.js?v=1.0.0"></script>
     <script src="js/import.js?v=1.3.2"></script>
     <script src="js/technical_classes.js?v=4.0.0"></script>
-    <script src="js/app.js?v=2.3.1"></script>
+    <script src="js/app.js?v=2.3.3"></script>
     <!-- PM11 Front-end scripts -->
     <script src="js/pm11/api.js?v=4.0.0"></script>
     <script src="js/pm11/ui.js?v=6.0.0"></script>

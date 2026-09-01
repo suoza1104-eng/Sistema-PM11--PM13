@@ -1891,6 +1891,42 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                     self.send_error_json(f"Já existe um projeto cadastrado com o nome '{name}'. Por favor, escolha um nome diferente.", 400)
                 return
 
+            # Explicit validation endpoint used by the diagnostic modal.  Unlike
+            # the list endpoints, validation errors are not swallowed and the
+            # caller receives the actual refreshed state of the selected item.
+            if path == '/api/validation/revalidate':
+                data = self.read_json_body()
+                proj_id = int(data.get('project_id', 0))
+                item_id = int(data.get('item_id', 0))
+                if not proj_id or not item_id:
+                    self.send_error_json('Projeto e item sao obrigatorios.')
+                    return
+
+                from core import validation_engine
+                validation_engine.validate_pm13_project(proj_id)
+                conn = get_db_connection()
+                row = conn.execute("""
+                    SELECT id, validation_status, validation_issues_json
+                    FROM maintenance_items
+                    WHERE id=? AND project_id=? AND (deleted_at IS NULL OR deleted_at='')
+                """, (item_id, proj_id)).fetchone()
+                conn.close()
+                if not row:
+                    self.send_error_json('Item nao encontrado neste projeto.', 404)
+                    return
+                try:
+                    issues = json.loads(row['validation_issues_json'] or '[]')
+                except (TypeError, ValueError, json.JSONDecodeError):
+                    issues = []
+                missing = [issue for issue in issues if issue.get('code') == 'missing_long_text']
+                self.send_json({
+                    'item_id': row['id'],
+                    'validation_status': row['validation_status'],
+                    'validation_issues': issues,
+                    'missing_long_text_resolved': not missing,
+                })
+                return
+
             # POST /api/standards/long-texts
             if path == '/api/standards/long-texts':
                 data = self.read_json_body()
@@ -2204,12 +2240,57 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                 self.send_json({'message': f'{count} registros atualizados com sucesso!', 'count': count})
                 return
 
+            # POST /api/items/bulk-delete
+            if path == '/api/items/bulk-delete':
+                data = self.read_json_body()
+                proj_id = int(data.get('project_id', 0) or 0)
+                raw_ids = data.get('ids', [])
+                ids = []
+                for x in raw_ids:
+                    try: ids.append(int(x))
+                    except (ValueError, TypeError): pass
+                cascade = bool(data.get('cascade_related', True))
+
+                if not ids:
+                    self.send_error_json("Nenhum item selecionado para exclusão.")
+                    return
+
+                conn = get_db_connection(); cur = conn.cursor()
+                placeholders = ','.join('?' for _ in ids)
+
+                if cascade:
+                    op_rows = cur.execute(f"SELECT id FROM item_operations WHERE item_id IN ({placeholders})", ids).fetchall()
+                    op_ids = [r[0] for r in op_rows if r[0]]
+                    if op_ids:
+                        op_placeholders = ','.join('?' for _ in op_ids)
+                        cur.execute(f"DELETE FROM operation_long_texts WHERE operation_id IN ({op_placeholders})", op_ids)
+                        cur.execute(f"DELETE FROM item_operations WHERE id IN ({op_placeholders})", op_ids)
+                else:
+                    cur.execute(f"UPDATE item_operations SET item_id = NULL WHERE item_id IN ({placeholders})", ids)
+
+                cur.execute(f"DELETE FROM maintenance_items WHERE id IN ({placeholders})", ids)
+                deleted_count = cur.rowcount
+                conn.commit(); conn.close()
+
+                if proj_id:
+                    try:
+                        from core import validation_engine
+                        validation_engine.validate_pm13_project(proj_id)
+                    except Exception:
+                        pass
+
+                self.send_json({'message': f'{deleted_count} itens excluídos com sucesso!', 'count': deleted_count})
+                return
+
             # POST /api/operations/bulk-delete
             if path == '/api/operations/bulk-delete':
                 data = self.read_json_body()
-                proj_id = int(data.get('project_id', 0))
+                proj_id = int(data.get('project_id', 0) or 0)
                 raw_ids = data.get('ids', [])
-                ids = [int(x) for x in raw_ids if str(x).isdigit()]
+                ids = []
+                for x in raw_ids:
+                    try: ids.append(int(x))
+                    except (ValueError, TypeError): pass
                 if not ids:
                     self.send_error_json("Nenhuma operação fornecida para exclusão em massa.")
                     return
@@ -2235,9 +2316,12 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
             # POST /api/long-texts/bulk-delete
             if path == '/api/long-texts/bulk-delete':
                 data = self.read_json_body()
-                proj_id = int(data.get('project_id', 0))
+                proj_id = int(data.get('project_id', 0) or 0)
                 raw_ids = data.get('ids', [])
-                ids = [int(x) for x in raw_ids if str(x).isdigit()]
+                ids = []
+                for x in raw_ids:
+                    try: ids.append(int(x))
+                    except (ValueError, TypeError): pass
                 delete_ops = bool(data.get('delete_associated_operations', False))
                 if not ids:
                     self.send_error_json("Nenhum texto longo fornecido para exclusão em massa.")

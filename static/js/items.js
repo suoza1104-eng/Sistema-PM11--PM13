@@ -1266,29 +1266,30 @@ const Items = {
 
     bulkDelete() {
         const itemIds = Array.from(this.selectedIds);
-        const cascadeRelated = window.confirm(
-            `Deseja excluir também todas as OPERAÇÕES e TEXTOS LONGOS vinculados aos ${itemIds.length} itens?\n\n` +
-            "OK = excluir todos os pacotes.\nCancelar = manter relacionados e marcá-los como erro."
-        );
-        window.App.confirm("Excluir Itens em Massa", `Tem certeza que deseja excluir permanentemente os ${itemIds.length} itens selecionados?`, async () => {
-            UI.showLoader("Excluindo itens...");
+        if (!itemIds.length) {
+            UI.showToast('Selecione pelo menos um item para excluir.', 'warning');
+            return;
+        }
+
+        const projectId = App.getValidProjectId();
+        const msg = `Tem certeza que deseja excluir permanentemente os <strong>${itemIds.length} itens</strong> selecionados?<br><br>` +
+            `<span style="color:var(--danger-color);font-size:12px;">⚠️ Todas as operações e textos longos vinculados aos itens selecionados também serão excluídos.</span>`;
+
+        window.App.confirm("Excluir Itens em Massa", msg, async () => {
+            App.showBulkProgressModal("Excluindo Itens em Massa...", `Transmitindo solicitação para excluir <strong>${itemIds.length} itens</strong>...`);
             try {
-                // Delete them one by one or implement a bulk delete.
-                // We can delete using models or updates status logically.
-                // Since update logically sets deleted_at, we can do it via a bulk update of deleted_at!
-                // Wait! In SQLite, deleted_at is updated with timestamp. We can execute it!
-                // But bulk_update_items is designed for fields. Let's make a delete bulk in SQLite or delete them.
-                // Let's implement logical deletion one by one since it runs locally and is fast.
-                for (let id of itemIds) {
-                    await API.delete(`/api/items/${id}`, { cascade_related: cascadeRelated });
-                }
-                UI.showToast("Itens excluídos com sucesso!");
+                App.updateBulkProgressModal(65, "Processando exclusão no banco de dados SQLite...");
+                const res = await API.post('/api/items/bulk-delete', {
+                    project_id: projectId,
+                    ids: itemIds,
+                    cascade_related: true
+                });
+                App.finishBulkProgressModal(true, "Exclusão Concluída!", res.message || `${itemIds.length} itens excluídos com sucesso!`);
                 Items.selectedIds.clear();
+                Items.updateBulkToolbar();
                 await Items.load();
             } catch (err) {
-                UI.showToast(`Erro ao excluir itens: ${err.message}`, 'error');
-            } finally {
-                UI.hideLoader();
+                App.finishBulkProgressModal(false, "Erro na Exclusão dos Itens", `Falha ao processar exclusão no servidor: ${err.message}`);
             }
         });
     },

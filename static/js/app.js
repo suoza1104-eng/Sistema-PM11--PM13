@@ -573,6 +573,62 @@ window.App = {
         document.getElementById('confirm-extra-content').innerHTML = ''; // Clean
     },
 
+    showBulkProgressModal(title, statusMsg) {
+        const modal = document.getElementById('modal-bulk-progress');
+        if (!modal) return;
+        document.getElementById('bulk-progress-spinner-container')?.classList.remove('hidden');
+        document.getElementById('bulk-progress-icon-success')?.classList.add('hidden');
+        document.getElementById('bulk-progress-icon-error')?.classList.add('hidden');
+        document.getElementById('bulk-progress-actions')?.classList.add('hidden');
+        
+        const titleEl = document.getElementById('bulk-progress-title');
+        const statusEl = document.getElementById('bulk-progress-status');
+        const barFill = document.getElementById('bulk-progress-bar-fill');
+        
+        if (titleEl) titleEl.textContent = title;
+        if (statusEl) statusEl.innerHTML = statusMsg;
+        if (barFill) {
+            barFill.style.width = '35%';
+            barFill.style.background = 'linear-gradient(90deg, #3b82f6, #6366f1)';
+        }
+        modal.classList.remove('hidden');
+    },
+
+    updateBulkProgressModal(percent, statusMsg) {
+        const statusEl = document.getElementById('bulk-progress-status');
+        const barFill = document.getElementById('bulk-progress-bar-fill');
+        if (statusEl && statusMsg) statusEl.innerHTML = statusMsg;
+        if (barFill) barFill.style.width = `${percent}%`;
+    },
+
+    finishBulkProgressModal(isSuccess, title, resultMsg) {
+        const spinner = document.getElementById('bulk-progress-spinner-container');
+        const iconSuccess = document.getElementById('bulk-progress-icon-success');
+        const iconError = document.getElementById('bulk-progress-icon-error');
+        const titleEl = document.getElementById('bulk-progress-title');
+        const statusEl = document.getElementById('bulk-progress-status');
+        const barFill = document.getElementById('bulk-progress-bar-fill');
+        const actions = document.getElementById('bulk-progress-actions');
+
+        if (spinner) spinner.classList.add('hidden');
+        if (isSuccess) {
+            if (iconSuccess) iconSuccess.classList.remove('hidden');
+            if (barFill) {
+                barFill.style.width = '100%';
+                barFill.style.background = 'var(--success-color, #10b981)';
+            }
+        } else {
+            if (iconError) iconError.classList.remove('hidden');
+            if (barFill) {
+                barFill.style.width = '100%';
+                barFill.style.background = 'var(--danger-color, #ef4444)';
+            }
+        }
+        if (titleEl) titleEl.textContent = title;
+        if (statusEl) statusEl.innerHTML = resultMsg;
+        if (actions) actions.classList.remove('hidden');
+    },
+
     openStopDetailsDrawer(stopCounter) {
         // Delegate to Balance controller
         Balance.openStopDetails(stopCounter);
@@ -847,6 +903,8 @@ window.App = {
         applyBtn.disabled = true;
 
         modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+        modal.setAttribute('aria-hidden', 'false');
 
         try {
             let entity = null;
@@ -855,7 +913,7 @@ window.App = {
 
             if (type === 'operation') {
                 const ops = window.Operations ? window.Operations.currentOperations : [];
-                entity = ops.find(o => o.id === id);
+                entity = ops.find(o => Number(o.id) === Number(id));
                 if (entity) {
                     typeEl.textContent = 'OPERAÇÃO SAP';
                     nameEl.textContent = `[ID ${entity.legacy_identifier}] OP ${entity.operation_code}${entity.suboperation_code ? '/' + entity.suboperation_code : ''} — ${entity.short_text || entity.item_description || ''}`;
@@ -919,16 +977,23 @@ window.App = {
                     // 3. Check for missing long text
                     if (!fixAction && issues.some(i => i.code === 'missing_long_text')) {
                         fixAction = {
-                            label: `Criar linha de Texto Longo Vazio vinculada a esta operação`,
+                            label: `Revalidar o Texto Longo e, se estiver realmente vazio, abrir a ordem para preenchimento`,
                             execute: async () => {
-                                await API.post('/api/long-texts', {
-                                    operation_id: entity.id,
-                                    text: ''
+                                const projectId = this.getValidProjectId();
+                                const result = await API.post('/api/validation/revalidate', {
+                                    project_id: projectId,
+                                    item_id: entity.item_id
                                 });
-                                UI.showToast(`Linha de texto longo criada com sucesso!`);
                                 if (window.Operations) {
-                                    window.Operations.loadOperations();
-                                    window.Operations.loadLongTexts();
+                                    await Promise.all([window.Operations.loadOperations(), window.Operations.loadLongTexts()]);
+                                }
+                                if (result.missing_long_text_resolved) {
+                                    UI.showToast('Texto Longo confirmado. O alerta incorreto foi removido.', 'success');
+                                } else {
+                                    UI.showToast('O Texto Longo continua vazio. A ordem foi aberta para preenchimento.', 'warning');
+                                    if (window.Operations && entity.item_id) {
+                                        await window.Operations.openSapOrder(entity.item_id);
+                                    }
                                 }
                             }
                         };
@@ -945,7 +1010,7 @@ window.App = {
                 }
             } else if (type === 'item') {
                 const items = window.Items ? window.Items.currentItems : [];
-                entity = items.find(i => i.id === id);
+                entity = items.find(i => Number(i.id) === Number(id));
                 if (entity) {
                     typeEl.textContent = 'ITEM DE MANUTENÇÃO';
                     nameEl.textContent = `[ID ${entity.legacy_identifier}] ${entity.description || entity.object_code || ''}`;
@@ -963,6 +1028,7 @@ window.App = {
                     const updates = {};
                     const labels = [];
 
+                    const hasMissingLongText = issues.some(i => i.code === 'missing_long_text');
                     const hasRule5Prd = issues.some(i => (i.message || '').includes('PRD exige condição M'));
                     const hasRule5Sms = issues.some(i => (i.message || '').includes('SMS exige condição'));
                     const hasRule6Prio = issues.some(i => (i.message || '').includes('Regra 6') || (i.field === 'priority' && (!i.priority || Number(i.priority) === 0)));
@@ -1000,6 +1066,22 @@ window.App = {
                                 if (window.Items) await window.Items.load();
                             }
                         };
+                    } else if (hasMissingLongText) {
+                        fixAction = {
+                            label: 'Revalidar os Textos Longos deste item e remover o alerta caso o conteúdo já esteja preenchido',
+                            execute: async () => {
+                                const projectId = this.getValidProjectId();
+                                const result = await API.post('/api/validation/revalidate', {
+                                    project_id: projectId,
+                                    item_id: entity.id
+                                });
+                                if (window.Items) await window.Items.load();
+                                if (!result.missing_long_text_resolved) {
+                                    throw new Error('A revalidacao confirmou que ainda existe Texto Longo obrigatorio sem conteudo.');
+                                }
+                                UI.showToast('Texto Longo confirmado. O alerta incorreto foi removido.', 'success');
+                            }
+                        };
                     } else if (entity.plan_id === null) {
                         fixAction = {
                             label: `Abrir popup para selecionar e vincular um plano a este item`,
@@ -1012,7 +1094,7 @@ window.App = {
                 }
             } else if (type === 'plan') {
                 const plans = window.Plans ? window.Plans.currentPlans : [];
-                entity = plans.find(p => p.id === id);
+                entity = plans.find(p => Number(p.id) === Number(id));
                 if (entity) {
                     typeEl.textContent = 'PLANO DE REPARO';
                     nameEl.textContent = `[${entity.legacy_code}] ${entity.description || ''}`;
@@ -1136,6 +1218,7 @@ window.App = {
         if (modal) {
             modal.classList.add('hidden');
             modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
         }
         document.querySelectorAll('#modal-issue-fix, .modal-overlay[data-transient="true"]').forEach(m => {
             m.classList.add('hidden');
