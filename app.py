@@ -855,14 +855,15 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
 
                 pkg_seq_sort = """
                     CASE 
-                        WHEN COALESCE(o.operation_code,'') = '0010' AND (o.suboperation_code IS NULL OR o.suboperation_code = '' OR o.suboperation_code = '0000' OR o.suboperation_code = '-') THEN 1
-                        WHEN COALESCE(o.operation_code,'') = '0010' AND (o.suboperation_code = '0010' OR o.suboperation_code = '10') THEN 2
-                        WHEN COALESCE(o.operation_code,'') = '0010' AND (o.suboperation_code = '0011' OR o.suboperation_code = '11') THEN 3
-                        WHEN COALESCE(o.operation_code,'') = '0010' AND (o.suboperation_code = '0012' OR o.suboperation_code = '12') THEN 4
-                        WHEN COALESCE(o.operation_code,'') = '0010' AND (o.suboperation_code = '0013' OR o.suboperation_code = '13') THEN 5
-                        WHEN COALESCE(o.operation_code,'') = '0010' AND (o.suboperation_code = '0014' OR o.suboperation_code = '14') THEN 6
-                        WHEN COALESCE(o.operation_code,'') = '0020' AND (o.suboperation_code IS NULL OR o.suboperation_code = '' OR o.suboperation_code = '0000' OR o.suboperation_code = '-') THEN 7
-                        ELSE 8 
+                        WHEN TRIM(COALESCE(o.operation_code,'')) = '0010' AND (o.suboperation_code IS NULL OR TRIM(o.suboperation_code) = '' OR TRIM(o.suboperation_code) = '0000' OR TRIM(o.suboperation_code) = '-') THEN 1
+                        WHEN TRIM(COALESCE(o.operation_code,'')) = '0010' AND (TRIM(o.suboperation_code) = '0010' OR TRIM(o.suboperation_code) = '10') THEN 2
+                        WHEN TRIM(COALESCE(o.operation_code,'')) = '0010' AND (TRIM(o.suboperation_code) = '0011' OR TRIM(o.suboperation_code) = '11') THEN 3
+                        WHEN TRIM(COALESCE(o.operation_code,'')) = '0010' AND (TRIM(o.suboperation_code) = '0012' OR TRIM(o.suboperation_code) = '12') THEN 4
+                        WHEN TRIM(COALESCE(o.operation_code,'')) = '0010' AND (TRIM(o.suboperation_code) = '0013' OR TRIM(o.suboperation_code) = '13') THEN 5
+                        WHEN TRIM(COALESCE(o.operation_code,'')) = '0010' AND (TRIM(o.suboperation_code) = '0014' OR TRIM(o.suboperation_code) = '14') THEN 6
+                        WHEN TRIM(COALESCE(o.operation_code,'')) = '0010' THEN 7
+                        WHEN TRIM(COALESCE(o.operation_code,'')) = '0020' THEN 8
+                        ELSE 9 
                     END ASC
                 """
                 if order_by in ('legacy_identifier', 'item_id', 'id', 'item'):
@@ -979,14 +980,15 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
 
                 pkg_seq_sort = """
                     CASE 
-                        WHEN COALESCE(o.operation_code,'') = '0010' AND (o.suboperation_code IS NULL OR o.suboperation_code = '' OR o.suboperation_code = '0000' OR o.suboperation_code = '-') THEN 1
-                        WHEN COALESCE(o.operation_code,'') = '0010' AND (o.suboperation_code = '0010' OR o.suboperation_code = '10') THEN 2
-                        WHEN COALESCE(o.operation_code,'') = '0010' AND (o.suboperation_code = '0011' OR o.suboperation_code = '11') THEN 3
-                        WHEN COALESCE(o.operation_code,'') = '0010' AND (o.suboperation_code = '0012' OR o.suboperation_code = '12') THEN 4
-                        WHEN COALESCE(o.operation_code,'') = '0010' AND (o.suboperation_code = '0013' OR o.suboperation_code = '13') THEN 5
-                        WHEN COALESCE(o.operation_code,'') = '0010' AND (o.suboperation_code = '0014' OR o.suboperation_code = '14') THEN 6
-                        WHEN COALESCE(o.operation_code,'') = '0020' AND (o.suboperation_code IS NULL OR o.suboperation_code = '' OR o.suboperation_code = '0000' OR o.suboperation_code = '-') THEN 7
-                        ELSE 8 
+                        WHEN TRIM(COALESCE(o.operation_code,'')) = '0010' AND (o.suboperation_code IS NULL OR TRIM(o.suboperation_code) = '' OR TRIM(o.suboperation_code) = '0000' OR TRIM(o.suboperation_code) = '-') THEN 1
+                        WHEN TRIM(COALESCE(o.operation_code,'')) = '0010' AND (TRIM(o.suboperation_code) = '0010' OR TRIM(o.suboperation_code) = '10') THEN 2
+                        WHEN TRIM(COALESCE(o.operation_code,'')) = '0010' AND (TRIM(o.suboperation_code) = '0011' OR TRIM(o.suboperation_code) = '11') THEN 3
+                        WHEN TRIM(COALESCE(o.operation_code,'')) = '0010' AND (TRIM(o.suboperation_code) = '0012' OR TRIM(o.suboperation_code) = '12') THEN 4
+                        WHEN TRIM(COALESCE(o.operation_code,'')) = '0010' AND (TRIM(o.suboperation_code) = '0013' OR TRIM(o.suboperation_code) = '13') THEN 5
+                        WHEN TRIM(COALESCE(o.operation_code,'')) = '0010' AND (TRIM(o.suboperation_code) = '0014' OR TRIM(o.suboperation_code) = '14') THEN 6
+                        WHEN TRIM(COALESCE(o.operation_code,'')) = '0010' THEN 7
+                        WHEN TRIM(COALESCE(o.operation_code,'')) = '0020' THEN 8
+                        ELSE 9 
                     END ASC
                 """
 
