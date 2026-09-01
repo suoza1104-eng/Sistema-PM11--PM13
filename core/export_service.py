@@ -1219,7 +1219,7 @@ def export_pm13_systems_xlsx(project_id):
             code=str(op.get('operation_code') or '').zfill(4);raw_sub=str(op.get('suboperation_code') or '').strip();sub=raw_sub.zfill(4) if raw_sub else ''
             if code=='0010' and sub=='0010':
                 sol_hc=int(it.get('sol_headcount') or 0);sol_hours=float(it.get('sol_hours') or 0)
-                texts=[f'{sol_hc} MECÂNICOS {sol_hours:g} HORAS' if (sol_hc or sol_hours) else 'NÃO SE APLICA']
+                texts=[f'{sol_hc} MECÂNICOS {sol_hours:g} HORAS' if (sol_hc or sol_hours) else '']
             else:texts=[materialize_record(tx) for tx in texts_by_operation.get(op.get('id'),[])]
             for text_value in texts:text_rows.append([nponto_map.get(op.get('item_id'),''),'' if is_equipment else object_code,object_code if is_equipment else '','','','',code,sub,text_value])
 

@@ -906,13 +906,13 @@ window.App = {
                     // 3. Check for missing long text
                     if (!fixAction && issues.some(i => i.code === 'missing_long_text')) {
                         fixAction = {
-                            label: `Criar Texto Longo Padrão ("NÃO SE APLICA") vinculado a esta operação`,
+                            label: `Criar linha de Texto Longo Vazio vinculada a esta operação`,
                             execute: async () => {
                                 await API.post('/api/long-texts', {
                                     operation_id: entity.id,
-                                    text: 'NÃO SE APLICA'
+                                    text: ''
                                 });
-                                UI.showToast(`Texto longo padrão criado com sucesso!`);
+                                UI.showToast(`Linha de texto longo criada com sucesso!`);
                                 if (window.Operations) {
                                     window.Operations.loadOperations();
                                     window.Operations.loadLongTexts();

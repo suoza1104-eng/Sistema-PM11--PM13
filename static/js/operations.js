@@ -712,7 +712,7 @@ const Operations = {
                 if (rawTxt !== '') {
                     safeText = this.esc(rawTxt);
                 } else if (isFirst0010) {
-                    safeText = '<span style="color: var(--text-muted); font-style: italic;">NÃO SE APLICA</span>';
+                    safeText = '<span style="color: var(--text-muted); font-style: italic;">(vazio)</span>';
                 } else {
                     safeText = '<span style="color: #ef4444; font-style: italic;">(Sem texto longo obrigatório)</span>';
                 }

@@ -1476,7 +1476,7 @@ def update_item(item_id, legacy_identifier, plan_id, object_type, object_code, g
         else:
             cursor.execute("""INSERT INTO item_operations(project_id,item_id,operation_code,suboperation_code,work_center,short_text,unit,headcount,hours,status)
                 VALUES(?,?,?,'0010',?,?,'H',?,?,'ACTIVE')""", (project_id,item_id,'0010',str(work_center).strip(),'APOIO DE SOLDA',sol_hc,sol_h));welding_id=cursor.lastrowid
-        welding_text = f'{sol_hc} MECÂNICOS {sol_h:g} HORAS' if (sol_hc or sol_h) else 'NÃO SE APLICA'
+        welding_text = f'{sol_hc} MECÂNICOS {sol_h:g} HORAS' if (sol_hc or sol_h) else ''
         text_row=cursor.execute("SELECT id FROM operation_long_texts WHERE operation_id=? ORDER BY line_sequence,id LIMIT 1",(welding_id,)).fetchone()
         if text_row:cursor.execute("UPDATE operation_long_texts SET text=?,structure_mode='FREE',structure_json=NULL,updated_at=CURRENT_TIMESTAMP WHERE id=?",(welding_text,text_row['id']))
         else:cursor.execute("INSERT INTO operation_long_texts(project_id,operation_id,line_sequence,text,structure_mode) VALUES(?,?,?,?,?)",(project_id,welding_id,1,welding_text,'FREE'))
