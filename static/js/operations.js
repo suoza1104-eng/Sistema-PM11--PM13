@@ -651,7 +651,9 @@ const Operations = {
                 project_id: projectId,
                 search: this.ltFilters.search,
                 limit: this.ltFilters.limit,
-                offset: this.ltFilters.offset
+                offset: this.ltFilters.offset,
+                order_by: this.ltFilters.order_by || 'legacy_identifier',
+                order_dir: this.ltFilters.order_dir || 'asc'
             });
 
             let texts = res.long_texts || [];
@@ -694,27 +696,43 @@ const Operations = {
             }
 
             tbody.innerHTML = texts.map(t => {
-                const safeIdent = this.esc(t.pending_item_identifier || t.legacy_identifier);
+                const safeIdent = this.esc(t.pending_item_identifier || t.legacy_identifier || '-');
                 const safeObj = this.esc(t.object_code || '');
-                const safeOp = this.esc(t.operation_code);
+                const safeOp = this.esc(t.operation_code || '');
                 const safeSub = this.esc(t.suboperation_code || '-');
                 const safeItemDescription = this.esc(t.item_description || this.itemDescriptions.get(String(t.legacy_identifier)) || '-');
                 const safeOpShortText = this.esc(t.op_short_text || '-');
-                const safeText = this.esc(String(t.text || '').replace(/^[ \t]+/, ''));
 
-                const issues = t.computed_issues || [];
+                const rawTxt = String(t.text || '').replace(/^[ \t]+/, '');
+                const subStr = str => str === null || str === undefined ? '' : String(str).trim();
+                const cleanSub = subStr(t.suboperation_code);
+                const isFirst0010 = (safeOp === '0010' && ['', '0000', '-', 'None'].includes(cleanSub));
+
+                let safeText = '';
+                if (rawTxt !== '') {
+                    safeText = this.esc(rawTxt);
+                } else if (isFirst0010) {
+                    safeText = '<span style="color: var(--text-muted); font-style: italic;">NÃO SE APLICA</span>';
+                } else {
+                    safeText = '<span style="color: #ef4444; font-style: italic;">(Sem texto longo obrigatório)</span>';
+                }
+
+                const rowId = t.long_text_id || t.id || 0;
+                const opId = t.operation_id || 0;
+
+                const issues = Array.isArray(t.validation_issues) ? [...t.validation_issues] : (t.computed_issues || []);
                 const isError = issues.some(x => x.severity === 'ERROR');
                 const isWarning = issues.length > 0 && !isError;
                 let rowClass = isError ? 'table-alert-red' : (isWarning ? 'table-alert-yellow' : '');
                 if (t.row_color) rowClass += ` item-row-marked item-row-color-${t.row_color}`;
                 const issuesText = issues.map(i => `• ${i.message}`).join('\n');
                 const indicator = issues.length
-                    ? `<span class="row-issue-indicator issue-${isError ? 'error' : 'warning'}" style="cursor:pointer;" onclick="event.stopPropagation(); App.openIssueFixModal('long-text', ${t.id})" title="Clique para abrir o diagnóstico e aplicar a correção automática: ${this.esc(issuesText)}">${isError ? '⛔' : '⚠️'}</span>`
+                    ? `<span class="row-issue-indicator issue-${isError ? 'error' : 'warning'}" style="cursor:pointer;" onclick="event.stopPropagation(); App.openIssueFixModal('long-text', ${rowId})" title="Clique para abrir o diagnóstico e aplicar a correção automática: ${this.esc(issuesText)}">${isError ? '⛔' : '⚠️'}</span>`
                     : '';
 
                 return `<tr class="${rowClass}" ${issues.length ? `title="${this.esc(issuesText)}"` : ''}>
                     <td class="text-center" style="display:flex; align-items:center; justify-content:center; gap:4px; height:100%; padding: 8px 4px;">
-                        ${indicator}<button class="row-color-brush" onclick="RowTools.open(event,'long-texts',${t.id},'()=>Operations.loadLongTexts()')">🖌️</button><input type="checkbox" class="long-text-row-checkbox" data-id="${t.id}" ${this.selectedLongTextIds.has(t.id) ? 'checked' : ''} onchange="Operations.toggleBulkSelection('long-texts',this,${t.id})">
+                        ${indicator}<button class="row-color-brush" onclick="RowTools.open(event,'long-texts',${rowId},'()=>Operations.loadLongTexts()')">🖌️</button><input type="checkbox" class="long-text-row-checkbox" data-id="${rowId}" ${this.selectedLongTextIds.has(rowId) ? 'checked' : ''} onchange="Operations.toggleBulkSelection('long-texts',this,${rowId})">
                     </td>
                     <td class="text-center">
                         <span class="badge badge-neutral" title="${safeObj}">${safeIdent}</span>
@@ -723,12 +741,12 @@ const Operations = {
                     <td class="text-center" style="color: var(--text-muted);">${safeSub}</td>
                     <td class="management-description-cell" style="font-weight: 500; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${safeItemDescription}">${safeItemDescription}</td>
                     <td class="management-description-cell" style="font-weight: 500; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-secondary);" title="${safeOpShortText}">${safeOpShortText}</td>
-                    <td class="editable-cell long-text-content-cell" style="white-space: pre-wrap; word-break: break-word; font-size: 12px; line-height: 1.5; color: var(--text-primary); cursor:pointer;" title="Duplo clique para abrir o editor de blocos" ondblclick="Operations.openEditLongTextModal(${t.id})">${safeText}</td>
+                    <td class="editable-cell long-text-content-cell" style="white-space: pre-wrap; word-break: break-word; font-size: 12px; line-height: 1.5; color: var(--text-primary); cursor:pointer;" title="Duplo clique para abrir o editor de blocos" ondblclick="Operations.openEditLongTextModal(${rowId})">${safeText}</td>
                     <td class="text-center">
                         <div class="actions-cell" style="justify-content: center; gap: 4px; flex-wrap:wrap;">
-                            <button class="btn btn-xs btn-outline" style="color:#0F766E;border-color:#5EEAD4;" title="Abrir editor estruturado de tópicos, subtópicos e blocos" onclick="Operations.openEditLongTextModal(${t.id})">🧩 Editar blocos</button>
-                            <button class="btn btn-xs btn-outline" title="Clonar como cópia pendente" onclick="Operations.cloneLongText(${t.id})">Clonar</button>
-                            <button class="btn btn-xs btn-danger" title="Excluir texto" onclick="Operations.deleteLongText(${t.id})">Excluir</button>
+                            <button class="btn btn-xs btn-outline" style="color:#0F766E;border-color:#5EEAD4;" title="Abrir editor estruturado de tópicos, subtópicos e blocos" onclick="Operations.openEditLongTextModal(${rowId})">🧩 Editar blocos</button>
+                            <button class="btn btn-xs btn-outline" title="Clonar como cópia pendente" onclick="Operations.cloneLongText(${rowId})">Clonar</button>
+                            <button class="btn btn-xs btn-danger" title="Excluir texto" onclick="Operations.deleteLongText(${rowId})">Excluir</button>
                         </div>
                     </td>
                 </tr>`;

@@ -965,11 +965,43 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                 limit = 100000 if not limit_param or str(limit_param).lower() == 'all' else int(limit_param)
                 offset = int(q_params.get('offset', 0))
 
+                order_by = q_params.get('order_by', 'legacy_identifier').strip().lower()
+                order_dir = q_params.get('order_dir', 'asc').strip().lower()
+                if order_dir not in ('asc', 'desc'):
+                    order_dir = 'asc'
+
+                pkg_seq_sort = """
+                    CASE 
+                        WHEN COALESCE(o.operation_code,'') = '0010' AND (o.suboperation_code IS NULL OR o.suboperation_code = '' OR o.suboperation_code = '0000' OR o.suboperation_code = '-') THEN 1
+                        WHEN COALESCE(o.operation_code,'') = '0010' AND o.suboperation_code = '0011' THEN 2
+                        WHEN COALESCE(o.operation_code,'') = '0010' AND o.suboperation_code = '0012' THEN 3
+                        WHEN COALESCE(o.operation_code,'') = '0010' AND o.suboperation_code = '0013' THEN 4
+                        WHEN COALESCE(o.operation_code,'') = '0010' AND o.suboperation_code = '0014' THEN 5
+                        WHEN COALESCE(o.operation_code,'') = '0020' AND (o.suboperation_code IS NULL OR o.suboperation_code = '' OR o.suboperation_code = '0000' OR o.suboperation_code = '-') THEN 6
+                        ELSE 7 
+                    END ASC
+                """
+
+                if order_by in ('id', 'long_text_id', 'lt_id'):
+                    order_clause = f"COALESCE(t.id, o.id) {order_dir.upper()}, o.id {order_dir.upper()}"
+                elif order_by in ('operation_id', 'op_id'):
+                    order_clause = f"o.id {order_dir.upper()}"
+                elif order_by in ('operation_code', 'oper', 'op'):
+                    order_clause = f"COALESCE(o.operation_code, '') {order_dir.upper()}, {pkg_seq_sort}, COALESCE(o.suboperation_code, '') ASC"
+                elif order_by in ('suboperation_code', 'subop', 'sub'):
+                    order_clause = f"COALESCE(o.suboperation_code, '') {order_dir.upper()}, COALESCE(o.operation_code, '') ASC"
+                elif order_by in ('text', 'long_text', 'content'):
+                    order_clause = f"COALESCE(t.text, '') {order_dir.upper()}"
+                elif order_by in ('short_text', 'op_short_text', 'operation'):
+                    order_clause = f"COALESCE(o.short_text, '') {order_dir.upper()}"
+                else: # legacy_identifier, item_id, item
+                    order_clause = f"CAST(i.legacy_identifier AS INTEGER) {order_dir.upper()}, i.legacy_identifier {order_dir.upper()}, {pkg_seq_sort}, COALESCE(o.operation_code, '') ASC, COALESCE(o.suboperation_code, '') ASC, o.id ASC"
+
                 conn = get_db_connection(); cursor = conn.cursor()
-                where = ["t.project_id = ?"]
+                where = ["o.project_id = ?"]
                 params = [proj_id]
                 if operation_id:
-                    where.append("t.operation_id = ?")
+                    where.append("o.id = ?")
                     params.append(int(operation_id))
                 if search:
                     where.append("(i.legacy_identifier LIKE ? OR o.operation_code LIKE ? OR o.short_text LIKE ? OR t.text LIKE ?)")
@@ -977,23 +1009,43 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                     params.extend([s_term, s_term, s_term, s_term])
                 where_str = " AND ".join(where)
 
-                cursor.execute(f"""SELECT COUNT(*) FROM operation_long_texts t
-                                  LEFT JOIN item_operations o ON o.id=t.operation_id
+                cursor.execute(f"""SELECT COUNT(*) FROM item_operations o
                                   LEFT JOIN maintenance_items i ON i.id=o.item_id AND i.deleted_at IS NULL
+                                  LEFT JOIN operation_long_texts t ON t.operation_id=o.id
                                   WHERE {where_str}""", params)
                 total = cursor.fetchone()[0]
 
-                cursor.execute(f"""SELECT t.*, o.item_id, o.operation_code, o.suboperation_code, o.short_text as op_short_text, o.work_center,
-                                         i.legacy_identifier, i.object_code, i.description AS item_description
-                                  FROM operation_long_texts t
-                                  LEFT JOIN item_operations o ON o.id=t.operation_id
+                cursor.execute(f"""SELECT 
+                                     COALESCE(t.id, 0) AS id,
+                                     t.id AS long_text_id,
+                                     o.id AS operation_id,
+                                     o.project_id,
+                                     o.item_id,
+                                     o.operation_code,
+                                     o.suboperation_code,
+                                     o.short_text AS op_short_text,
+                                     o.work_center,
+                                     COALESCE(t.group_code, '') AS group_code,
+                                     COALESCE(t.group_counter, '') AS group_counter,
+                                     COALESCE(t.line_sequence, 1) AS line_sequence,
+                                     COALESCE(t.text, '') AS text,
+                                     COALESCE(t.validation_status, o.validation_status, 'OK') AS validation_status,
+                                     COALESCE(t.validation_issues_json, o.validation_issues_json, '[]') AS validation_issues_json,
+                                     COALESCE(t.row_color, o.row_color, '') AS row_color,
+                                     COALESCE(t.display_order, o.display_order, o.id) AS display_order,
+                                     i.legacy_identifier,
+                                     i.object_code,
+                                     i.description AS item_description
+                                  FROM item_operations o
                                   LEFT JOIN maintenance_items i ON i.id=o.item_id AND i.deleted_at IS NULL
+                                  LEFT JOIN operation_long_texts t ON t.operation_id=o.id
                                   WHERE {where_str}
-                                  ORDER BY COALESCE(t.display_order,t.id), t.id
+                                  ORDER BY {order_clause}
                                   LIMIT ? OFFSET ?""", params + [limit, offset])
                 rows = [models.to_dict(x) for x in cursor.fetchall()]
                 for row in rows:
-                    row['text'] = materialize_record(row)
+                    if row.get('text'):
+                        row['text'] = materialize_record(row)
                     try:
                         row['validation_issues'] = json.loads(row.get('validation_issues_json') or '[]')
                     except (TypeError, ValueError):
@@ -1004,7 +1056,7 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                     elif not row.get('legacy_identifier'):
                         row['validation_issues'].append({'code': 'long_text_without_item', 'severity': 'ERROR',
                                                         'message': 'Texto longo sem ID de item existente.'})
-                    row['validation_status'] = ('ERROR' if row['validation_issues'] else 'OK')
+                    row['validation_status'] = ('ERROR' if any(iss.get('severity') == 'ERROR' for iss in row['validation_issues']) else ('WARNING' if row['validation_issues'] else 'OK'))
                 conn.close()
                 self.send_json({'long_texts': rows, 'total': total})
                 return
