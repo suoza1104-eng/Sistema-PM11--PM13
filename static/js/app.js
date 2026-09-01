@@ -960,23 +960,44 @@ window.App = {
                     if (entity.headcount === null || entity.headcount === 0) issues.push({ severity: 'WARNING', message: 'Item sem efetivo/homens definido.' });
                     if (entity.character_count > 35) issues.push({ severity: 'WARNING', message: `Descrição extensa (${entity.character_count} caract. > 35).` });
 
+                    const updates = {};
+                    const labels = [];
+
+                    const hasRule5Prd = issues.some(i => (i.message || '').includes('PRD exige condição M'));
+                    const hasRule5Sms = issues.some(i => (i.message || '').includes('SMS exige condição'));
+                    const hasRule6Prio = issues.some(i => (i.message || '').includes('Regra 6') || (i.field === 'priority' && (!i.priority || Number(i.priority) === 0)));
+
+                    if (hasRule5Prd) {
+                        updates.condition_code = 'M';
+                        labels.push("Condição Operacional = 'M'");
+                    } else if (hasRule5Sms) {
+                        updates.condition_code = 'P';
+                        labels.push("Condição Operacional = 'P'");
+                    }
+
+                    if (hasRule6Prio || entity.priority === null || entity.priority === undefined || Number(entity.priority) === 0) {
+                        updates.priority = 1;
+                        labels.push("Prioridade PM13 = 1");
+                    }
+
+                    if (entity.headcount === null || entity.headcount === 0) {
+                        updates.headcount = 1;
+                        labels.push("Efetivo = 1");
+                    }
+
                     if (entity.character_count > 35) {
                         const trimmed = (entity.description || '').substring(0, 35).trim();
+                        updates.description = trimmed;
+                        labels.push(`Descrição cortada para 35 caract. ("${trimmed}")`);
+                    }
+
+                    if (Object.keys(updates).length > 0) {
                         fixAction = {
-                            label: `Ajustar descrição para limite de 35 caracteres: "${trimmed}"`,
+                            label: `Aplicar correções de conformidade SAP: ${labels.join(', ')}`,
                             execute: async () => {
-                                await API.put(`/api/items/${entity.id}`, { description: trimmed });
-                                UI.showToast('Descrição do item ajustada para 35 caracteres com sucesso!');
-                                if (window.Items) window.Items.load();
-                            }
-                        };
-                    } else if (entity.headcount === null || entity.headcount === 0) {
-                        fixAction = {
-                            label: `Definir Efetivo Inicial Padrão = 1 homem`,
-                            execute: async () => {
-                                await API.put(`/api/items/${entity.id}`, { headcount: 1 });
-                                UI.showToast('Efetivo do item atualizado para 1!');
-                                if (window.Items) window.Items.load();
+                                await API.put(`/api/items/${entity.id}`, updates);
+                                UI.showToast('Item corrigido com sucesso para a conformidade SAP!', 'success');
+                                if (window.Items) await window.Items.load();
                             }
                         };
                     } else if (entity.plan_id === null) {
