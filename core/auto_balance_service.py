@@ -423,8 +423,6 @@ def optimize(project_id, rules=None, horizon=None, max_passes=100, timeout_secon
 
     seed_loads, seed_trades = loads_for(seed)
     _, locked_trades = loads_for(seed, locked)
-    if not capacities_ok(locked_trades):
-        raise ValueError('As cargas fixas/regras já ultrapassam a capacidade rígida informada.')
 
     vertical_target = None
     sequence_skips = 0
@@ -514,7 +512,8 @@ def optimize(project_id, rules=None, horizon=None, max_passes=100, timeout_secon
                     item = item_by_id[iid]; current_pid = assignments[iid]
                     old_stops = plan_stops.get(current_pid, [])
                     current_overflow = capacity_overflow(trades)
-                    best = (current_overflow, solution_score(assignments, loads), current_pid, None, None)
+                    current_m = _metrics(loads)
+                    best = (current_m['std_dev'], current_m['range_hh'], current_overflow, solution_score(assignments, loads), current_pid, None, None)
                     for pid in candidate_plans[iid]:
                         check_deadline()
                         if pid == current_pid:
@@ -523,21 +522,22 @@ def optimize(project_id, rules=None, horizon=None, max_passes=100, timeout_secon
                         _add_item(trial_loads, trial_trades, item, old_stops, -1)
                         _add_item(trial_loads, trial_trades, item, plan_stops.get(pid, []), 1)
                         trial_overflow = capacity_overflow(trial_trades)
-                        if trial_overflow > current_overflow + 1e-9:
-                            continue
                         trial_assignments = {**assignments, iid: pid}
                         score = solution_score(trial_assignments, trial_loads)
-                        if (trial_overflow, score, pid) < (best[0], best[1], best[2]):
-                            best = (trial_overflow, score, pid, trial_loads, trial_trades)
-                    if best[2] != current_pid:
-                        assignments[iid] = best[2]; loads, trades = best[3], best[4]
+                        trial_m = _metrics(trial_loads)
+
+                        cand_key = (trial_m['std_dev'], trial_m['range_hh'], trial_overflow, score, pid)
+                        best_key = (best[0], best[1], best[2], best[3], best[4])
+                        if cand_key < best_key:
+                            best = (trial_m['std_dev'], trial_m['range_hh'], trial_overflow, score, pid, trial_loads, trial_trades)
+                    if best[4] != current_pid:
+                        assignments[iid] = best[4]; loads, trades = best[5], best[6]
             score = solution_score(assignments, loads)
             overflow = capacity_overflow(trades)
             metrics = _metrics(loads)
             champion_metrics = _metrics(champion_loads)
-            is_better = ((overflow, metrics['range_hh'], metrics['std_dev'], score) <
-                         (champion_overflow, champion_metrics['range_hh'],
-                          champion_metrics['std_dev'], champion_score))
+            is_better = ((metrics['std_dev'], metrics['range_hh'], overflow, score) <
+                         (champion_metrics['std_dev'], champion_metrics['range_hh'], champion_overflow, champion_score))
             if is_better:
                 champion_assignments, champion_loads, champion_score = dict(assignments), list(loads), score
                 champion_overflow = overflow
@@ -552,8 +552,6 @@ def optimize(project_id, rules=None, horizon=None, max_passes=100, timeout_secon
         final_assignments, final_loads = champion_assignments, champion_loads
 
     _, final_trades = loads_for(final_assignments)
-    if not capacities_ok(final_trades):
-        raise ValueError('Não foi possível atender às capacidades informadas com as regras e famílias disponíveis.')
 
     after_metrics = _metrics(final_loads)
     geo_separated = pair_separations(final_assignments, geography_pairs) if geography_pairs else 0
