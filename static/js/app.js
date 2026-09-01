@@ -1099,24 +1099,46 @@ window.App = {
 
     closeIssueFixModal() {
         const modal = document.getElementById('modal-issue-fix');
-        if (modal) modal.classList.add('hidden');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        }
+        document.querySelectorAll('#modal-issue-fix, .modal-overlay[data-transient="true"]').forEach(m => {
+            m.classList.add('hidden');
+            m.style.display = 'none';
+        });
         this.currentIssueContext = null;
     },
 
     async applyIssueFix() {
-        if (!this.currentIssueContext || !this.currentIssueContext.fixAction) return;
+        if (!this.currentIssueContext || !this.currentIssueContext.fixAction) {
+            this.closeIssueFixModal();
+            return;
+        }
         const fix = this.currentIssueContext.fixAction;
         UI.showLoader('Aplicando correção automática...');
         try {
             await fix.execute();
-            this.closeIssueFixModal();
         } catch (err) {
             UI.showToast(`Erro ao aplicar correção: ${err.message}`, 'error');
         } finally {
             UI.hideLoader();
+            this.closeIssueFixModal();
         }
     }
 };
+
+// Global Escape Key Listener to close any open modal
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        App.closeIssueFixModal();
+        document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(overlay => {
+            const closeBtn = overlay.querySelector('.modal-close, .btn-close-modal, [data-close]');
+            if (closeBtn) closeBtn.click();
+            else overlay.classList.add('hidden');
+        });
+    }
+});
 
 // Global error listeners for frontend logging
 window.onerror = function(msg, url, line, col, error) {
