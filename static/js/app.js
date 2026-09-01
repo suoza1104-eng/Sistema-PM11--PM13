@@ -95,6 +95,12 @@ window.App = {
             window.StandardsManager.init();
         }
 
+        // Ensure all modal overlays are hidden on startup
+        document.querySelectorAll('.modal-overlay').forEach(m => {
+            m.classList.add('hidden');
+            m.style.display = 'none';
+        });
+
         // 2. Setup menu navigations and router
         window.addEventListener('hashchange', () => this.route());
         
@@ -201,6 +207,13 @@ window.App = {
             UI.showToast("Por favor, abra ou crie um projeto para acessar esta tela.", "warning");
             return;
         }
+
+        // Hide all modal overlays on route navigation or start
+        document.querySelectorAll('.modal-overlay').forEach(m => {
+            m.classList.add('hidden');
+            m.style.display = '';
+        });
+        this.currentIssueContext = null;
 
         // Hide all sections
         const sections = document.querySelectorAll('.content-section');
