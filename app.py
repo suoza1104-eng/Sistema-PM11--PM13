@@ -799,6 +799,12 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
             # GET /api/items
             if path == '/api/items':
                 proj_id = int(q_params.get('project_id', 0))
+                if proj_id:
+                    try:
+                        from core import validation_engine
+                        validation_engine.validate_pm13_project(proj_id)
+                    except Exception:
+                        pass
                 limit = int(q_params.get('limit', 25))
                 offset = int(q_params.get('offset', 0))
                 order_by = q_params.get('order_by', 'display_order')
@@ -2982,6 +2988,15 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                 except models.PlanCodeConflict as conflict:
                     self.send_plan_code_conflict(conflict)
                     return
+
+                target_proj_id = old_plan.get('project_id')
+                if target_proj_id:
+                    try:
+                        from core import validation_engine
+                        validation_engine.validate_pm13_project(target_proj_id)
+                    except Exception:
+                        pass
+
                 self.send_json({'message': 'Plano atualizado com sucesso!'})
                 return
 
@@ -3024,6 +3039,16 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                     item_id, identifier, p_id, obj_type, obj_code, gpm, wc, cond, priority, cnt_start, desc, dur, headcount, status, notes, t_id,
                     mec_headcount=mec_hc, mec_hours=mec_h, ele_headcount=ele_hc, ele_hours=ele_h, sol_headcount=sol_hc, sol_hours=sol_h
                 )
+
+                # Re-validate project rules to clear resolved issue badges immediately
+                target_proj_id = old_item.get('project_id')
+                if target_proj_id:
+                    try:
+                        from core import validation_engine
+                        validation_engine.validate_pm13_project(target_proj_id)
+                    except Exception:
+                        pass
+
                 self.send_json({'message': 'Item atualizado com sucesso!'})
                 return
 
