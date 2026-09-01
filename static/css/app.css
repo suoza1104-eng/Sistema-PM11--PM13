@@ -1959,7 +1959,8 @@ tr.row-color-red td {
 
 .wizard-steps-body {
     padding: 30px;
-    min-height: 250px;
+    min-height: 420px;
+    overflow: visible;
 }
 
 .wizard-steps-footer {

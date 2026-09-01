@@ -181,9 +181,24 @@ const ImportWizard = {
         overlay.querySelectorAll('[data-mode]').forEach(button => button.onclick = () => {
             const mode = button.dataset.mode;
             if (mode === 'cancel') {
-                document.querySelector('input[name="import-target-mode"][value="new"]').click();
+                const newRadio = document.querySelector('input[name="import-target-mode"][value="new"]');
+                if (newRadio) newRadio.click();
             } else {
-                document.getElementById('import-merge-mode').value = mode;
+                const existRadio = document.querySelector('input[name="import-target-mode"][value="existing"]');
+                if (existRadio && !existRadio.checked) {
+                    existRadio.checked = true;
+                    existRadio.dispatchEvent(new Event('change'));
+                }
+                const mergeSelect = document.getElementById('import-merge-mode');
+                if (mergeSelect) {
+                    mergeSelect.value = mode;
+                    mergeSelect.dispatchEvent(new Event('change'));
+                }
+                if (mode === 'replace') {
+                    UI.showToast('Opção selecionada: Substituir todos os dados do projeto (sobrescrever)', 'warning', 6000);
+                } else if (mode === 'merge') {
+                    UI.showToast('Opção selecionada: Adicionar e unificar dados (preservar existentes)', 'info', 5000);
+                }
             }
             overlay.remove();
         });
