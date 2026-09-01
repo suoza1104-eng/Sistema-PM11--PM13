@@ -163,26 +163,22 @@ def validate_pm13_project(project_id):
         is_first_0010 = (op_code == '0010' and is_sub_empty(subop_code))
 
         if is_first_0010:
-            if not op_lts:
-                msg = 'Regra Texto Longo PM13: A operação 0010 (sem suboperação) exige linha na aba Texto Longo.'
-                op_issues[opid].append({'severity': 'ERROR', 'field': 'long_text', 'message': msg})
+            # 0010 sem suboperação: DEVE SER VAZIA. Se estiver sem texto ou com texto vazio, está 100% OK!
+            non_empty = [lt for lt in op_lts if str(lt.get('text') or '').strip() != '']
+            if non_empty:
+                msg = 'Regra Texto Longo PM13: A operação 0010 (sem suboperação) deve possuir Texto Longo VAZIO (encontrado conteúdo preenchido).'
+                op_issues[opid].append({'code': 'header_has_long_text', 'severity': 'ERROR', 'field': 'long_text', 'message': msg})
                 if item_id and item_id in item_issues:
-                    item_issues[item_id].append({'severity': 'ERROR', 'field': 'long_text', 'message': msg})
-            else:
-                non_empty = [lt for lt in op_lts if str(lt.get('text') or '').strip() != '']
-                if non_empty:
-                    msg = 'Regra Texto Longo PM13: A operação 0010 (sem suboperação) deve possuir Texto Longo VAZIO (encontrado conteúdo preenchido).'
-                    op_issues[opid].append({'severity': 'ERROR', 'field': 'long_text', 'message': msg})
-                    if item_id and item_id in item_issues:
-                        item_issues[item_id].append({'severity': 'ERROR', 'field': 'long_text', 'message': msg})
+                    item_issues[item_id].append({'code': 'header_has_long_text', 'severity': 'ERROR', 'field': 'long_text', 'message': msg})
         else:
+            # Demais operações: DEVEM ter texto longo preenchido.
             non_empty = [lt for lt in op_lts if str(lt.get('text') or '').strip() != '']
             if not non_empty:
                 op_label = f"{op_code} {subop_code}".strip()
                 msg = f'Regra Texto Longo PM13: A operação {op_label} exige Texto Longo preenchido e não pode ficar em branco.'
-                op_issues[opid].append({'severity': 'ERROR', 'field': 'long_text', 'message': msg})
+                op_issues[opid].append({'code': 'missing_long_text', 'severity': 'ERROR', 'field': 'long_text', 'message': msg})
                 if item_id and item_id in item_issues:
-                    item_issues[item_id].append({'severity': 'ERROR', 'field': 'long_text', 'message': msg})
+                    item_issues[item_id].append({'code': 'missing_long_text', 'severity': 'ERROR', 'field': 'long_text', 'message': msg})
 
     # Regras das Linhas de Texto Longo
     for lt in lts:

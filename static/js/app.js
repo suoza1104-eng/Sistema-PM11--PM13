@@ -1010,13 +1010,42 @@ window.App = {
                 }
             } else if (type === 'long-text') {
                 const lts = window.Operations ? window.Operations.currentLongTexts : [];
-                entity = lts.find(t => t.id === id);
+                entity = lts.find(t => t.id === id || t.long_text_id === id);
                 if (entity) {
                     typeEl.textContent = 'TEXTO LONGO';
-                    nameEl.textContent = `[ID ${entity.legacy_identifier}] OP ${entity.operation_code || '-'} — ${entity.item_description || ''}`;
-                    issues = entity.computed_issues || [];
+                    nameEl.textContent = `[ID ${entity.legacy_identifier || entity.id}] OP ${entity.operation_code || '-'} — ${entity.item_description || entity.op_short_text || ''}`;
+                    issues = Array.isArray(entity.validation_issues) && entity.validation_issues.length ? entity.validation_issues : (entity.computed_issues || []);
 
-                    if (!entity.operation_id) {
+                    const isFirst0010 = (entity.operation_code === '0010' && (!entity.suboperation_code || ['','0000','-','None'].includes(String(entity.suboperation_code).trim())));
+
+                    if (isFirst0010 && String(entity.text || '').trim() !== '') {
+                        fixAction = {
+                            label: 'Limpar texto longo da operação 0010 (deixar em branco conforme regra PM13)',
+                            execute: async () => {
+                                const ltId = entity.long_text_id || entity.id;
+                                if (ltId) {
+                                    await API.put(`/api/long-texts/${ltId}`, { text: '' });
+                                } else if (entity.operation_id) {
+                                    const projectId = this.getValidProjectId();
+                                    const response = await API.get(`/api/long-texts?project_id=${projectId}&operation_id=${entity.operation_id}&limit=all`);
+                                    const texts = Array.isArray(response) ? response : (response.long_texts || []);
+                                    for (const t of texts) {
+                                        if (t.id) await API.put(`/api/long-texts/${t.id}`, { text: '' });
+                                    }
+                                }
+                                UI.showToast('Texto longo limpo com sucesso!', 'success');
+                                if (window.Operations) await window.Operations.loadLongTexts();
+                            }
+                        };
+                    } else if (!isFirst0010 && (!entity.text || String(entity.text).trim() === '')) {
+                        fixAction = {
+                            label: 'Abrir editor para preencher o texto longo obrigatório desta operação',
+                            execute: async () => {
+                                this.closeIssueFixModal();
+                                if (window.Operations) window.Operations.openEditLongTextModal(entity.long_text_id || entity.id);
+                            }
+                        };
+                    } else if (!entity.operation_id) {
                         fixAction = {
                             label: `Abrir modal de edição para re-vincular a operação correta`,
                             execute: async () => {
