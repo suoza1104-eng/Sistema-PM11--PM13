@@ -188,6 +188,10 @@ const Operations = {
             document.getElementById('btn-bulk-edit-long-texts').onclick = () => this.openBulkEditLongTexts();
             document.getElementById('btn-bulk-clone-operations').onclick = () => this.bulkClone('operations');
             document.getElementById('btn-bulk-clone-long-texts').onclick = () => this.bulkClone('long-texts');
+            const btnDeleteOps = document.getElementById('btn-bulk-delete-operations');
+            if (btnDeleteOps) btnDeleteOps.onclick = () => this.bulkDelete('operations');
+            const btnDeleteLts = document.getElementById('btn-bulk-delete-long-texts');
+            if (btnDeleteLts) btnDeleteLts.onclick = () => this.bulkDelete('long-texts');
             document.getElementById('btn-bulk-edit-operations-confirm').onclick = () => this.bulkEditOperationsConfirm();
             document.getElementById('btn-bulk-edit-long-texts-confirm').onclick = () => this.bulkEditLongTextsConfirm();
             ['operations', 'long-texts'].forEach(kind => {
@@ -1591,6 +1595,42 @@ const Operations = {
             UI.showToast(`${cloned} de ${ids.length} registros clonados. Erro: ${err.message}`, 'error', 5000);
             if (kind === 'operations') await this.loadOperations(); else await this.loadLongTexts();
         } finally { UI.hideLoader(); }
+    },
+
+    async bulkDelete(kind) {
+        const selectedSet = kind === 'operations' ? this.selectedOperationIds : this.selectedLongTextIds;
+        const ids = Array.from(selectedSet);
+        if (!ids.length) return;
+        const label = kind === 'operations' ? 'operações' : 'textos longos';
+        const impactMsg = kind === 'operations'
+            ? `Tem certeza que deseja excluir em massa as <strong>${ids.length} operações</strong> selecionadas?<br><br><span style="color:var(--danger-color);font-size:12px;">⚠️ Os textos longos vinculados a estas operações também serão removidos.</span>`
+            : `Tem certeza que deseja excluir em massa os <strong>${ids.length} textos longos</strong> selecionados?`;
+
+        window.App.confirm(`Excluir em Massa (${label})`, impactMsg, async () => {
+            let deleted = 0;
+            UI.showLoader(`Excluindo ${label} selecionados...`);
+            try {
+                for (const id of ids) {
+                    await API.delete(`/api/${kind}/${id}`);
+                    deleted++;
+                }
+                selectedSet.clear();
+                this.updateBulkToolbar(kind);
+                UI.showToast(`${deleted} ${label} excluído(s) com sucesso!`, 'success');
+                if (kind === 'operations') {
+                    await Promise.all([this.loadOperations(), this.loadLongTexts()]);
+                } else {
+                    await this.loadLongTexts();
+                }
+            } catch (err) {
+                UI.showToast(`${deleted} de ${ids.length} ${label} excluído(s). Erro: ${err.message}`, 'error', 5000);
+                selectedSet.clear();
+                this.updateBulkToolbar(kind);
+                if (kind === 'operations') await this.loadOperations(); else await this.loadLongTexts();
+            } finally {
+                UI.hideLoader();
+            }
+        });
     },
 
     _resetBulkForm(prefix, fields) {

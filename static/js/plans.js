@@ -376,17 +376,24 @@ const Plans = {
 
     bulkDelete() {
         const planIds = Array.from(this.selectedIds);
-        window.App.confirm("Excluir Planos em Massa", `Tem certeza que deseja excluir os ${planIds.length} planos selecionados? Os itens vinculados ficarão sem plano associado.`, async () => {
-            UI.showLoader("Excluindo planos...");
+        if (!planIds.length) return;
+        window.App.confirm("Excluir Planos em Massa", `Tem certeza que deseja excluir em massa os <strong>${planIds.length} planos</strong> selecionados?<br><br><span style="color:var(--text-muted);font-size:12px;">Os itens de manutenção vinculados ficarão sem plano associado.</span>`, async () => {
+            UI.showLoader("Excluindo planos em massa...");
+            let deleted = 0;
             try {
                 for (let id of planIds) {
                     await API.delete(`/api/plans/${id}`, { item_action: 'unbind' });
+                    deleted++;
                 }
-                UI.showToast("Planos excluídos com sucesso!");
+                UI.showToast(`${deleted} plano(s) excluído(s) com sucesso!`, 'success');
                 Plans.selectedIds.clear();
+                this.updateBulkToolbar();
                 await Plans.load();
             } catch (err) {
-                UI.showToast(`Erro ao excluir planos: ${err.message}`, 'error');
+                UI.showToast(`${deleted} de ${planIds.length} planos excluídos. Erro: ${err.message}`, 'error', 5000);
+                Plans.selectedIds.clear();
+                this.updateBulkToolbar();
+                await Plans.load();
             } finally {
                 UI.hideLoader();
             }
