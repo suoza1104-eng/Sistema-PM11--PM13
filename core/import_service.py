@@ -1384,7 +1384,7 @@ def confirm_import(project_id, preview_data, merge_mode='replace'):
         used_identifiers = set()
         next_identifier = 1
         if merge_mode == 'merge':
-            cursor.execute("SELECT legacy_identifier FROM maintenance_items WHERE project_id=? AND deleted_at IS NULL", (project_id,))
+            cursor.execute("SELECT legacy_identifier FROM maintenance_items WHERE project_id=?", (project_id,))
             numeric_ids = []
             for row in cursor.fetchall():
                 existing_identifier = normalize_identifier(row['legacy_identifier'])
