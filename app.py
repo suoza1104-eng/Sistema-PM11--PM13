@@ -2240,48 +2240,6 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                 self.send_json({'message': f'{count} registros atualizados com sucesso!', 'count': count})
                 return
 
-            # POST /api/items/bulk-delete
-            if path == '/api/items/bulk-delete':
-                data = self.read_json_body()
-                proj_id = int(data.get('project_id', 0) or 0)
-                raw_ids = data.get('ids', [])
-                ids = []
-                for x in raw_ids:
-                    try: ids.append(int(x))
-                    except (ValueError, TypeError): pass
-                cascade = bool(data.get('cascade_related', True))
-
-                if not ids:
-                    self.send_error_json("Nenhum item selecionado para exclusão.")
-                    return
-
-                conn = get_db_connection(); cur = conn.cursor()
-                placeholders = ','.join('?' for _ in ids)
-
-                if cascade:
-                    op_rows = cur.execute(f"SELECT id FROM item_operations WHERE item_id IN ({placeholders})", ids).fetchall()
-                    op_ids = [r[0] for r in op_rows if r[0]]
-                    if op_ids:
-                        op_placeholders = ','.join('?' for _ in op_ids)
-                        cur.execute(f"DELETE FROM operation_long_texts WHERE operation_id IN ({op_placeholders})", op_ids)
-                        cur.execute(f"DELETE FROM item_operations WHERE id IN ({op_placeholders})", op_ids)
-                else:
-                    cur.execute(f"UPDATE item_operations SET item_id = NULL WHERE item_id IN ({placeholders})", ids)
-
-                cur.execute(f"DELETE FROM maintenance_items WHERE id IN ({placeholders})", ids)
-                deleted_count = cur.rowcount
-                conn.commit(); conn.close()
-
-                if proj_id:
-                    try:
-                        from core import validation_engine
-                        validation_engine.validate_pm13_project(proj_id)
-                    except Exception:
-                        pass
-
-                self.send_json({'message': f'{deleted_count} itens excluídos com sucesso!', 'count': deleted_count})
-                return
-
             # POST /api/operations/bulk-delete
             if path == '/api/operations/bulk-delete':
                 data = self.read_json_body()
@@ -2318,11 +2276,11 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                 data = self.read_json_body()
                 proj_id = int(data.get('project_id', 0) or 0)
                 raw_ids = data.get('ids', [])
+                delete_ops = bool(data.get('delete_associated_operations', False))
                 ids = []
                 for x in raw_ids:
                     try: ids.append(int(x))
                     except (ValueError, TypeError): pass
-                delete_ops = bool(data.get('delete_associated_operations', False))
                 if not ids:
                     self.send_error_json("Nenhum texto longo fornecido para exclusão em massa.")
                     return
