@@ -414,6 +414,8 @@ window.StandardsManager = {
                 const ltJson = op.long_text_structure_json || (op.long_texts && op.long_texts[0] ? op.long_texts[0].structure_json : '') || '';
                 const ltSource = op.long_text_source_original || (op.long_texts && op.long_texts[0] ? op.long_texts[0].source_text_original : '') || '';
                 const hasLt = Boolean(ltText.trim());
+                const hcVal = (op.headcount !== null && op.headcount !== undefined && op.headcount !== '') ? op.headcount : '';
+                const hVal = (op.hours !== null && op.hours !== undefined && op.hours !== '') ? op.hours : '';
 
                 return `
                     <div class="edit-std-op-row" style="background:#F8FAFC; border:1px solid #CBD5E1; padding:12px; border-radius:8px;"
@@ -424,10 +426,10 @@ window.StandardsManager = {
                         <div style="display:grid; grid-template-columns: 72px 82px 92px 1fr 64px 64px 30px; gap:8px; align-items:center; margin-bottom:8px;">
                             <input type="text" class="op-code" value="${UI.escapeHTML(op.operation_code || '0010')}" placeholder="Op" style="padding:6px; font-weight:700;">
                             <input type="text" class="op-subcode" value="${UI.escapeHTML(op.suboperation_code || '')}" placeholder="Subop." style="padding:6px; font-weight:700;">
-                            <input type="text" class="op-wc" value="${UI.escapeHTML(op.work_center || 'MEC01')}" placeholder="CT" style="padding:6px;">
+                            <input type="text" class="op-wc" value="${UI.escapeHTML(op.work_center || '')}" placeholder="CT" style="padding:6px;">
                             <input type="text" class="op-short" value="${UI.escapeHTML(op.short_text || '')}" placeholder="Texto breve da operação" style="padding:6px;" required>
-                            <input type="number" class="op-hc" value="${op.headcount || 1}" placeholder="Hc" style="padding:6px;" min="1">
-                            <input type="number" step="0.5" class="op-hours" value="${op.hours || 1}" placeholder="Horas" style="padding:6px;" min="0.1">
+                            <input type="number" class="op-hc" value="${hcVal}" placeholder="Hc" style="padding:6px;" min="0">
+                            <input type="number" step="0.1" class="op-hours" value="${hVal}" placeholder="Horas" style="padding:6px;" min="0">
                             <button type="button" class="btn btn-xs btn-danger" onclick="this.closest('.edit-std-op-row').remove()" title="Remover operação">✕</button>
                         </div>
                         <div style="display:flex; flex-direction:column; gap:6px;">
@@ -518,10 +520,10 @@ window.StandardsManager = {
                 <div style="display:grid; grid-template-columns: 72px 82px 92px 1fr 64px 64px 30px; gap:8px; align-items:center; margin-bottom:8px;">
                     <input type="text" class="op-code" value="${nextOp}" placeholder="Op" style="padding:6px; font-weight:700;">
                     <input type="text" class="op-subcode" value="" placeholder="Subop." style="padding:6px; font-weight:700;">
-                    <input type="text" class="op-wc" value="MEC01" placeholder="CT" style="padding:6px;">
+                    <input type="text" class="op-wc" value="" placeholder="CT" style="padding:6px;">
                     <input type="text" class="op-short" value="" placeholder="Texto breve da operação" style="padding:6px;" required>
-                    <input type="number" class="op-hc" value="1" placeholder="Hc" style="padding:6px;" min="1">
-                    <input type="number" step="0.5" class="op-hours" value="1.0" placeholder="Horas" style="padding:6px;" min="0.1">
+                    <input type="number" class="op-hc" value="" placeholder="Hc" style="padding:6px;" min="0">
+                    <input type="number" step="0.1" class="op-hours" value="" placeholder="Horas" style="padding:6px;" min="0">
                     <button type="button" class="btn btn-xs btn-danger" onclick="this.closest('.edit-std-op-row').remove()" title="Remover operação">✕</button>
                 </div>
                 <div style="display:flex; flex-direction:column; gap:6px;">
@@ -551,14 +553,16 @@ window.StandardsManager = {
             const ltMode = row.dataset.ltMode || 'FREE';
             const ltJson = row.dataset.ltJson || '';
             const ltSource = row.dataset.ltSource || '';
+            const hcRaw = row.querySelector('.op-hc')?.value.trim();
+            const hRaw = row.querySelector('.op-hours')?.value.trim();
 
             return {
                 operation_code: row.querySelector('.op-code')?.value.trim() || '0010',
                 suboperation_code: row.querySelector('.op-subcode')?.value.trim() || '',
-                work_center: row.querySelector('.op-wc')?.value.trim() || 'MEC01',
+                work_center: row.querySelector('.op-wc')?.value.trim() || '',
                 short_text: row.querySelector('.op-short')?.value.trim() || '',
-                headcount: parseFloat(row.querySelector('.op-hc')?.value) || 1,
-                hours: parseFloat(row.querySelector('.op-hours')?.value) || 1.0,
+                headcount: (hcRaw !== undefined && hcRaw !== '' && !isNaN(hcRaw)) ? parseFloat(hcRaw) : null,
+                hours: (hRaw !== undefined && hRaw !== '' && !isNaN(hRaw)) ? parseFloat(hRaw) : null,
                 long_text: ltText,
                 long_text_structure_mode: ltMode,
                 long_text_structure_json: ltJson,

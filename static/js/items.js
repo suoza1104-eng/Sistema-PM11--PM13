@@ -1633,14 +1633,16 @@ const Items = {
                 group_counter: '',
                 text: row.querySelector('.bulk-std-lt-text')?.value || ''
             })).filter(lt => !strict || lt.text.trim());
+            const hcRaw = card.querySelector('.bulk-std-op-hc')?.value.trim();
+            const hRaw = card.querySelector('.bulk-std-op-hours')?.value.trim();
             return {
                 operation_code: code,
                 suboperation_code: card.querySelector('.bulk-std-op-subcode')?.value.trim() || '',
                 work_center: card.querySelector('.bulk-std-op-wc')?.value.trim() || '',
                 short_text: shortText,
                 unit: card.querySelector('.bulk-std-op-unit')?.value.trim() || 'H',
-                headcount: card.querySelector('.bulk-std-op-hc')?.value ?? '',
-                hours: card.querySelector('.bulk-std-op-hours')?.value ?? '',
+                headcount: (hcRaw !== undefined && hcRaw !== '' && !isNaN(hcRaw)) ? parseFloat(hcRaw) : null,
+                hours: (hRaw !== undefined && hRaw !== '' && !isNaN(hRaw)) ? parseFloat(hRaw) : null,
                 long_texts: longTexts
             };
         });
