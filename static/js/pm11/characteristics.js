@@ -246,12 +246,22 @@ window.PM11.Characteristics = {
         UI.toast(error.message || 'Nao foi possivel salvar.', 'error');
       }
     };
+    let isReadyForBlur = false;
+    setTimeout(() => { isReadyForBlur = true; }, 350);
+
     editor.onkeydown = e => {
       if (e.key === 'Escape') { e.preventDefault(); cancel(); }
       if (e.key === 'Enter') { e.preventDefault(); save(); }
     };
-    editor.onblur = () => save();
-    if (selectFields.includes(field)) editor.onchange = () => save();
+    if (selectFields.includes(field)) {
+      editor.onchange = () => save();
+      editor.onblur = () => {
+        if (!isReadyForBlur) return;
+        setTimeout(() => { if (!finished) save(); }, 150);
+      };
+    } else {
+      editor.onblur = () => save();
+    }
   },
   edit(id = null) {
     const UI = window.PM11.UI, API = window.PM11.API, App = window.PM11.App;

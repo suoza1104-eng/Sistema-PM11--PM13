@@ -117,6 +117,9 @@ window.PM11.Plans = {
     if (field === 'status') editor.innerHTML = '<option value="ACTIVE">ATIVO</option><option value="INACTIVE">INATIVO</option>';
     editor.className = 'table-inline-input'; editor.value = original; cell.classList.add('cell-editing'); cell.innerHTML = ''; cell.appendChild(editor); editor.focus(); if (editor.select) editor.select();
     let done = false;
+    let isReadyForBlur = false;
+    setTimeout(() => { isReadyForBlur = true; }, 350);
+
     const cancel = () => { if (done) return; done = true; cell.classList.remove('cell-editing'); cell.innerHTML = originalHtml; };
     const save = async () => {
       if (done) return;
@@ -151,7 +154,10 @@ window.PM11.Plans = {
     editor.onkeydown = e => { if (e.key === 'Escape') { e.preventDefault(); cancel(); } if (e.key === 'Enter') { e.preventDefault(); save(); } };
     if (isSelect) {
       editor.onchange = save;
-      editor.onblur = () => { setTimeout(() => { if (!done) save(); }, 150); };
+      editor.onblur = () => {
+        if (!isReadyForBlur) return;
+        setTimeout(() => { if (!done) save(); }, 150);
+      };
     } else {
       editor.onblur = save;
     }

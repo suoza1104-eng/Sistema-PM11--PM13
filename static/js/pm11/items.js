@@ -185,10 +185,20 @@ window.PM11.Items = {
     }
     editor.className = 'table-inline-input'; editor.value = original; cell.classList.add('cell-editing'); cell.innerHTML = ''; cell.appendChild(editor); editor.focus(); if (editor.select) editor.select();
     let done = false;
+    let isReadyForBlur = false;
+    setTimeout(() => { isReadyForBlur = true; }, 350);
     const cancel = () => { if (done) return; done = true; cell.classList.remove('cell-editing'); cell.innerHTML = originalHtml; };
     const save = async () => { if (done) return; let value = editor.value.trim(); if (field === 'priority') value = Number(value); if (field === 'inspection_minutes') value = Number(value || 0); if (String(value) === String(original)) return cancel(); done = true; editor.disabled = true; try { await API.put('/api/items/' + id, { ...row, [field]: value }); UI.toast('Item atualizado.'); await this.render(); } catch (e) { done = false; editor.disabled = false; editor.focus(); UI.toast(e.message, 'error'); } };
     editor.onkeydown = e => { if (e.key === 'Escape') { e.preventDefault(); cancel(); } if (e.key === 'Enter') { e.preventDefault(); save(); } };
-    editor.onblur = save; if (editor.tagName === 'SELECT') editor.onchange = save;
+    if (editor.tagName === 'SELECT') {
+      editor.onchange = save;
+      editor.onblur = () => {
+        if (!isReadyForBlur) return;
+        setTimeout(() => { if (!done) save(); }, 150);
+      };
+    } else {
+      editor.onblur = save;
+    }
   },
   edit(id = null) {
     const UI = window.PM11.UI, API = window.PM11.API, App = window.PM11.App;
