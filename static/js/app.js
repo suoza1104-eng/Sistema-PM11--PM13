@@ -629,6 +629,29 @@ window.App = {
         if (actions) actions.classList.remove('hidden');
     },
 
+    async preserveScroll(targetElementOrId, asyncTask) {
+        let container = typeof targetElementOrId === 'string'
+            ? document.getElementById(targetElementOrId)
+            : targetElementOrId;
+        
+        const scrollTarget = container?.closest('.table-responsive-container') || container || document.documentElement;
+        const savedScrollTop = scrollTarget ? scrollTarget.scrollTop : 0;
+        const savedWindowScrollY = window.scrollY;
+
+        try {
+            return await asyncTask();
+        } finally {
+            requestAnimationFrame(() => {
+                if (scrollTarget && savedScrollTop > 0) {
+                    scrollTarget.scrollTop = savedScrollTop;
+                }
+                if (savedWindowScrollY > 0) {
+                    window.scrollTo(0, savedWindowScrollY);
+                }
+            });
+        }
+    },
+
     openStopDetailsDrawer(stopCounter) {
         // Delegate to Balance controller
         Balance.openStopDetails(stopCounter);

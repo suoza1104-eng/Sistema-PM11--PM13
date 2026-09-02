@@ -291,7 +291,7 @@ const Operations = {
         this.loadOperations();
     },
 
-    async loadOperations() {
+    async loadOperations(options = {}) {
         const tbody = document.getElementById('operations-table-body');
         const countLbl = document.getElementById('operations-total-count');
         if (!tbody) return;
@@ -303,19 +303,23 @@ const Operations = {
             return;
         }
 
-        tbody.innerHTML = '<tr><td colspan="10" class="empty-table-cell">Carregando operações...</td></tr>';
+        const isSilent = options.silent || (tbody.children.length > 0 && !tbody.querySelector('.empty-table-cell'));
+        if (!isSilent) {
+            tbody.innerHTML = '<tr><td colspan="10" class="empty-table-cell">Carregando operações...</td></tr>';
+        }
 
-        try {
-            await this.loadItemDescriptions(projectId);
-            const res = await API.get('/api/operations', {
-                project_id: projectId,
-                search: this.opFilters.search,
-                work_center: this.opFilters.work_center,
-                order_by: this.opFilters.order_by,
-                order_dir: this.opFilters.order_dir,
-                limit: this.opFilters.limit,
-                offset: this.opFilters.offset
-            });
+        return window.App ? App.preserveScroll(tbody, async () => {
+            try {
+                await this.loadItemDescriptions(projectId);
+                const res = await API.get('/api/operations', {
+                    project_id: projectId,
+                    search: this.opFilters.search,
+                    work_center: this.opFilters.work_center,
+                    order_by: this.opFilters.order_by,
+                    order_dir: this.opFilters.order_dir,
+                    limit: this.opFilters.limit,
+                    offset: this.opFilters.offset
+                });
 
             let ops = res.operations || [];
             if (this.opFilters.row_color) ops = ops.filter(o => o.row_color === this.opFilters.row_color);
@@ -438,6 +442,7 @@ const Operations = {
             tbody.innerHTML = `<tr><td colspan="10" class="empty-table-cell" style="color:var(--color-danger);">Erro ao carregar operações: ${this.esc(err.message)}</td></tr>`;
             UI.showToast(err.message, 'error');
         }
+        });
     },
 
     _filterRowsByItemId(rows, query) {
@@ -635,7 +640,7 @@ const Operations = {
         this.loadLongTexts();
     },
 
-    async loadLongTexts() {
+    async loadLongTexts(options = {}) {
         const tbody = document.getElementById('long-texts-table-body');
         const countLbl = document.getElementById('long-texts-total-count');
         if (!tbody) return;
@@ -647,11 +652,15 @@ const Operations = {
             return;
         }
 
-        tbody.innerHTML = '<tr><td colspan="7" class="empty-table-cell">Carregando textos longos...</td></tr>';
+        const isSilent = options.silent || (tbody.children.length > 0 && !tbody.querySelector('.empty-table-cell'));
+        if (!isSilent) {
+            tbody.innerHTML = '<tr><td colspan="7" class="empty-table-cell">Carregando textos longos...</td></tr>';
+        }
 
-        try {
-            await this.loadItemDescriptions(projectId);
-            const res = await API.get('/api/long-texts', {
+        return window.App ? App.preserveScroll(tbody, async () => {
+            try {
+                await this.loadItemDescriptions(projectId);
+                const res = await API.get('/api/long-texts', {
                 project_id: projectId,
                 search: this.ltFilters.search,
                 limit: this.ltFilters.limit,
@@ -771,6 +780,7 @@ const Operations = {
             tbody.innerHTML = `<tr><td colspan="7" class="empty-table-cell" style="color:var(--color-danger);">Erro ao carregar textos longos: ${this.esc(err.message)}</td></tr>`;
             UI.showToast(err.message, 'error');
         }
+        });
     },
 
     async openCreateLongTextModal(presetOpId = null, presetItemId = null) {

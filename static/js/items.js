@@ -316,7 +316,7 @@ const Items = {
         this.filters.long_desc = this.filters.alert === 'long_desc' ? 'true' : '';
     },
 
-    async load() {
+    async load(options = {}) {
         const projId = window.App.currentProjectId;
         if (!projId) return;
 
@@ -351,101 +351,108 @@ const Items = {
             }
         }
 
-        UI.showLoader("Carregando itens de manutenção...");
-        try {
-            // Load unique lists for filter select options
-            await this.loadUniqueLists(projId);
-
-            // Load items
-            const params = {
-                project_id: projId,
-                search: this.filters.search,
-                work_center: this.filters.work_center,
-                gpm: this.filters.gpm,
-                condition_code: this.filters.condition_code,
-                priority: this.filters.priority,
-                plan_id: this.filters.plan_id,
-                status: this.filters.status,
-                row_color: this.filters.row_color,
-                without_plan: this.filters.without_plan,
-                without_headcount: this.filters.without_headcount,
-                duration_zero: this.filters.duration_zero,
-                long_desc: this.filters.long_desc,
-                limit: this.filters.limit,
-                offset: this.filters.offset,
-                order_by: this.filters.order_by,
-                order_dir: this.filters.order_dir
-            };
-
-            const data = await API.get('/api/items', params);
-            this.rawItemsList = data.items || [];
-
-            // Apply client-side column filters if present
-            let displayItems = this.rawItemsList;
-            if (window.ColumnFilter) {
-                displayItems = window.ColumnFilter.applyFiltersToDataset('items-table', this.rawItemsList);
-            }
-
-            if (this.filters.alert === 'all_issues' || this.filters.alert === 'error' || this.filters.alert === 'warning') {
-                displayItems = displayItems.filter(item => {
-                    const issues = [];
-                    if (item.validation_issues_json) {
-                        try {
-                            const parsed = typeof item.validation_issues_json === 'string' ? JSON.parse(item.validation_issues_json) : item.validation_issues_json;
-                            if (Array.isArray(parsed)) issues.push(...parsed);
-                        } catch(e) {}
-                    }
-                    if (item.validation_issues && Array.isArray(item.validation_issues)) issues.push(...item.validation_issues);
-                    if (item.plan_id === null) issues.push({ severity: 'WARNING', message: 'Item sem plano' });
-                    if (item.headcount === null || item.headcount === 0) issues.push({ severity: 'WARNING', message: 'Item sem efetivo' });
-                    if (item.duration_hours === 0) issues.push({ severity: 'WARNING', message: 'Duração zerada' });
-                    if (item.character_count > 35) issues.push({ severity: 'WARNING', message: 'Descrição extensa' });
-
-                    const isError = issues.some(i => i.severity === 'ERROR');
-                    const isWarning = issues.length > 0 && !isError;
-                    if (this.filters.alert === 'all_issues') return issues.length > 0;
-                    if (this.filters.alert === 'error') return isError;
-                    if (this.filters.alert === 'warning') return isWarning;
-                    return true;
-                });
-            }
-
-            this.renderTable(displayItems, displayItems.length !== this.rawItemsList.length ? displayItems.length : data.total);
-
-            // Initialize or update column filters on table headers
-            if (window.ColumnFilter) {
-                window.ColumnFilter.init('items-table', () => this.rawItemsList, (sortCol, sortDir, activeFilters) => {
-                    if (sortCol && sortDir) {
-                        this.filters.order_by = sortCol;
-                        this.filters.order_dir = sortDir;
-                    }
-                    this.load();
-                }, {
-                    plan_code: {
-                        popoverClass: 'col-filter-popover-plan',
-                        searchPlaceholder: 'Pesquisar código, título ou ciclo...',
-                        getOptionMeta: (item, value) => ({
-                            primary: value,
-                            secondary: item.plan_description || (value === '(Vazio)' ? 'Item sem plano' : 'Plano sem título'),
-                            badge: item.plan_cycle ? `${item.plan_cycle}P` : '',
-                            searchText: `${item.plan_cycle || ''} ${item.plan_cycle_text || ''} ${item.plan_unit || ''}`
-                        })
-                    }
-                });
-            }
-            
-            // Sync check all state
-            const checkAll = document.getElementById('check-all-items');
-            if (checkAll) {
-                checkAll.checked = displayItems.length > 0 && displayItems.every(i => this.selectedIds.has(i.id));
-            }
-            this.updateBulkToolbar();
-
-        } catch (err) {
-            UI.showToast(`Erro ao carregar itens: ${err.message}`, 'error');
-        } finally {
-            UI.hideLoader();
+        const tbody = document.getElementById('tbody-items');
+        const isSilent = options.silent || (tbody && tbody.children.length > 0 && !tbody.querySelector('.empty-table-cell'));
+        if (!isSilent) {
+            UI.showLoader("Carregando itens de manutenção...");
         }
+
+        return window.App ? App.preserveScroll(tbody || 'tbody-items', async () => {
+            try {
+                // Load unique lists for filter select options
+                await this.loadUniqueLists(projId);
+
+                // Load items
+                const params = {
+                    project_id: projId,
+                    search: this.filters.search,
+                    work_center: this.filters.work_center,
+                    gpm: this.filters.gpm,
+                    condition_code: this.filters.condition_code,
+                    priority: this.filters.priority,
+                    plan_id: this.filters.plan_id,
+                    status: this.filters.status,
+                    row_color: this.filters.row_color,
+                    without_plan: this.filters.without_plan,
+                    without_headcount: this.filters.without_headcount,
+                    duration_zero: this.filters.duration_zero,
+                    long_desc: this.filters.long_desc,
+                    limit: this.filters.limit,
+                    offset: this.filters.offset,
+                    order_by: this.filters.order_by,
+                    order_dir: this.filters.order_dir
+                };
+
+                const data = await API.get('/api/items', params);
+                this.rawItemsList = data.items || [];
+
+                // Apply client-side column filters if present
+                let displayItems = this.rawItemsList;
+                if (window.ColumnFilter) {
+                    displayItems = window.ColumnFilter.applyFiltersToDataset('items-table', this.rawItemsList);
+                }
+
+                if (this.filters.alert === 'all_issues' || this.filters.alert === 'error' || this.filters.alert === 'warning') {
+                    displayItems = displayItems.filter(item => {
+                        const issues = [];
+                        if (item.validation_issues_json) {
+                            try {
+                                const parsed = typeof item.validation_issues_json === 'string' ? JSON.parse(item.validation_issues_json) : item.validation_issues_json;
+                                if (Array.isArray(parsed)) issues.push(...parsed);
+                            } catch(e) {}
+                        }
+                        if (item.validation_issues && Array.isArray(item.validation_issues)) issues.push(...item.validation_issues);
+                        if (item.plan_id === null) issues.push({ severity: 'WARNING', message: 'Item sem plano' });
+                        if (item.headcount === null || item.headcount === 0) issues.push({ severity: 'WARNING', message: 'Item sem efetivo' });
+                        if (item.duration_hours === 0) issues.push({ severity: 'WARNING', message: 'Duração zerada' });
+                        if (item.character_count > 35) issues.push({ severity: 'WARNING', message: 'Descrição extensa' });
+
+                        const isError = issues.some(i => i.severity === 'ERROR');
+                        const isWarning = issues.length > 0 && !isError;
+                        if (this.filters.alert === 'all_issues') return issues.length > 0;
+                        if (this.filters.alert === 'error') return isError;
+                        if (this.filters.alert === 'warning') return isWarning;
+                        return true;
+                    });
+                }
+
+                this.renderTable(displayItems, displayItems.length !== this.rawItemsList.length ? displayItems.length : data.total);
+
+                // Initialize or update column filters on table headers
+                if (window.ColumnFilter) {
+                    window.ColumnFilter.init('items-table', () => this.rawItemsList, (sortCol, sortDir, activeFilters) => {
+                        if (sortCol && sortDir) {
+                            this.filters.order_by = sortCol;
+                            this.filters.order_dir = sortDir;
+                        }
+                        this.load();
+                    }, {
+                        plan_code: {
+                            popoverClass: 'col-filter-popover-plan',
+                            searchPlaceholder: 'Pesquisar código, título ou ciclo...',
+                            getOptionMeta: (item, value) => ({
+                                primary: value,
+                                secondary: item.plan_description || (value === '(Vazio)' ? 'Item sem plano' : 'Plano sem título'),
+                                badge: item.plan_cycle ? `${item.plan_cycle}P` : '',
+                                searchText: `${item.plan_cycle || ''} ${item.plan_cycle_text || ''} ${item.plan_unit || ''}`
+                            })
+                        }
+                    });
+                }
+                
+                // Sync check all state
+                const checkAll = document.getElementById('check-all-items');
+                if (checkAll) {
+                    checkAll.checked = displayItems.length > 0 && displayItems.every(i => this.selectedIds.has(i.id));
+                }
+                this.updateBulkToolbar();
+
+            } catch (err) {
+                UI.showToast(`Erro ao carregar itens: ${err.message}`, 'error');
+            } finally {
+                if (!isSilent) UI.hideLoader();
+            }
+        }) : null;
     },
 
     async reorderIdentifiers() {

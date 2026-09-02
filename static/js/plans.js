@@ -400,7 +400,7 @@ const Plans = {
         });
     },
 
-    async load() {
+    async load(options = {}) {
         const projId = window.App.currentProjectId;
         if (!projId) return;
 
@@ -423,78 +423,79 @@ const Plans = {
             if (filterCard) filterCard.classList.remove('collapsed');
         }
 
-        UI.showLoader("Carregando catálogo de planos...");
-        try {
-            // Load cycles catalog
-            await this.loadCycleCatalog(projId);
-
-            // Fetch plans list
-            const queryParams = {
-                project_id: projId,
-                search: this.filters.search,
-                cycle: this.filters.cycle,
-                status: this.filters.status,
-                row_color: this.filters.row_color,
-                with_items: this.filters.with_items,
-                without_items: this.filters.without_items,
-                no_counter: this.filters.no_counter,
-                long_desc: this.filters.long_desc,
-                limit: this.filters.limit,
-                offset: this.filters.offset,
-                order_by: this.filters.order_by,
-                order_dir: this.filters.order_dir
-            };
-
-            const data = await API.get('/api/plans', queryParams);
-            this.rawPlansList = data.plans || [];
-
-            // Apply client-side column filters if present
-            let displayPlans = this.rawPlansList;
-            if (window.ColumnFilter) {
-                displayPlans = window.ColumnFilter.applyFiltersToDataset('plans-table', this.rawPlansList);
-            }
-
-            if (this.filters.alert === 'all_issues' || this.filters.alert === 'error' || this.filters.alert === 'warning') {
-                displayPlans = displayPlans.filter(p => {
-                    const issues = [];
-                    if (p.character_count > 40) issues.push({ severity: 'WARNING', message: 'Descrição extensa' });
-                    if (p.items_count === 0) issues.push({ severity: 'WARNING', message: 'Sem itens' });
-                    if (!p.phase || p.phase <= 0) issues.push({ severity: 'WARNING', message: 'Sem parada de início' });
-                    if (p.validation_issues_json) {
-                        try {
-                            const parsed = typeof p.validation_issues_json === 'string' ? JSON.parse(p.validation_issues_json) : p.validation_issues_json;
-                            if (Array.isArray(parsed)) issues.push(...parsed);
-                        } catch(e) {}
-                    }
-                    if (p.validation_issues && Array.isArray(p.validation_issues)) issues.push(...p.validation_issues);
-
-                    const isError = issues.some(i => i.severity === 'ERROR');
-                    const isWarning = issues.length > 0 && !isError;
-                    if (this.filters.alert === 'all_issues') return issues.length > 0;
-                    if (this.filters.alert === 'error') return isError;
-                    if (this.filters.alert === 'warning') return isWarning;
-                    return true;
-                });
-            }
-
-            this.renderTable(displayPlans, displayPlans.length !== this.rawPlansList.length ? displayPlans.length : data.total);
-
-            // Initialize or update column filters on table headers
-            if (window.ColumnFilter) {
-                window.ColumnFilter.init('plans-table', () => this.rawPlansList, (sortCol, sortDir, activeFilters) => {
-                    if (sortCol && sortDir) {
-                        this.filters.order_by = sortCol;
-                        this.filters.order_dir = sortDir;
-                    }
-                    this.load();
-                });
-            }
-
-        } catch (err) {
-            UI.showToast(`Erro ao carregar planos: ${err.message}`, 'error');
-        } finally {
-            UI.hideLoader();
+        const tbody = document.getElementById('tbody-plans');
+        const isSilent = options.silent || (tbody && tbody.children.length > 0 && !tbody.querySelector('.empty-table-cell'));
+        if (!isSilent) {
+            UI.showLoader("Carregando catálogo de planos...");
         }
+
+        return window.App ? App.preserveScroll(tbody || 'tbody-plans', async () => {
+            try {
+                // Load cycles catalog
+                await this.loadCycleCatalog(projId);
+
+                // Fetch plans list
+                const queryParams = {
+                    project_id: projId,
+                    search: this.filters.search,
+                    cycle: this.filters.cycle,
+                    status: this.filters.status,
+                    row_color: this.filters.row_color,
+                    with_items: this.filters.with_items,
+                    without_items: this.filters.without_items,
+                    no_counter: this.filters.no_counter,
+                    long_desc: this.filters.long_desc,
+                    limit: this.filters.limit,
+                    offset: this.filters.offset,
+                    order_by: this.filters.order_by,
+                    order_dir: this.filters.order_dir
+                };
+
+                const data = await API.get('/api/plans', queryParams);
+                this.rawPlansList = data.plans || [];
+
+                // Apply client-side column filters if present
+                let displayPlans = this.rawPlansList;
+                if (window.ColumnFilter) {
+                    displayPlans = window.ColumnFilter.applyFiltersToDataset('plans-table', this.rawPlansList);
+                }
+
+                if (this.filters.alert === 'all_issues' || this.filters.alert === 'error' || this.filters.alert === 'warning') {
+                    displayPlans = displayPlans.filter(plan => {
+                        const issues = [];
+                        if (plan.validation_issues && Array.isArray(plan.validation_issues)) issues.push(...plan.validation_issues);
+                        if (!plan.reference_counter && plan.reference_counter !== 0) issues.push({ severity: 'WARNING', message: 'Sem parada inicial' });
+                        if (plan.item_count === 0) issues.push({ severity: 'WARNING', message: 'Sem itens vinculados' });
+                        if (plan.character_count > 35) issues.push({ severity: 'WARNING', message: 'Descrição extensa' });
+
+                        const isError = issues.some(i => i.severity === 'ERROR');
+                        const isWarning = issues.length > 0 && !isError;
+                        if (this.filters.alert === 'all_issues') return issues.length > 0;
+                        if (this.filters.alert === 'error') return isError;
+                        if (this.filters.alert === 'warning') return isWarning;
+                        return true;
+                    });
+                }
+
+                this.renderTable(displayPlans, displayPlans.length !== this.rawPlansList.length ? displayPlans.length : data.total);
+
+                // Initialize or update column filters on table headers
+                if (window.ColumnFilter) {
+                    window.ColumnFilter.init('plans-table', () => this.rawPlansList, (sortCol, sortDir, activeFilters) => {
+                        if (sortCol && sortDir) {
+                            this.filters.order_by = sortCol;
+                            this.filters.order_dir = sortDir;
+                        }
+                        this.load();
+                    });
+                }
+
+            } catch (err) {
+                UI.showToast(`Erro ao carregar planos: ${err.message}`, 'error');
+            } finally {
+                if (!isSilent) UI.hideLoader();
+            }
+        }) : null;
     },
 
     async loadCycleCatalog(projId) {
