@@ -280,11 +280,13 @@ window.StandardsManager = {
                 ? '<p class="text-muted">Nenhuma operação SAP cadastrada neste modelo.</p>'
                 : (detail.operations || []).map(op => {
                     const ltText = op.long_text || (op.long_texts && op.long_texts[0] ? op.long_texts[0].text : '') || '';
+                    const hcDisp = (op.headcount !== null && op.headcount !== undefined && op.headcount !== '') ? `${op.headcount} H.` : '—';
+                    const hDisp = (op.hours !== null && op.hours !== undefined && op.hours !== '') ? `${op.hours}h` : '—';
                     return `
                         <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:12px; margin-bottom:10px;">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                                 <strong style="color:#0F172A; font-size:13px;">Op. ${UI.escapeHTML(op.operation_code || '0010')} | CT: ${UI.escapeHTML(op.work_center || '-')}</strong>
-                                <span class="badge badge-outline" style="font-size:11px;">👥 ${op.headcount || 1} H. • ⏱️ ${op.hours || 1}h (${op.unit || 'H'})</span>
+                                <span class="badge badge-outline" style="font-size:11px;">👥 ${hcDisp} • ⏱️ ${hDisp} (${op.unit || 'H'})</span>
                             </div>
                             <div style="font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">${UI.escapeHTML(op.short_text || '')}</div>
                             ${ltText ? `<pre style="background:#FFFFFF; border:1px solid #CBD5E1; padding:8px 10px; border-radius:6px; font-size:11.5px; color:#475569; white-space:pre-wrap; font-family:inherit; margin:0;">${UI.escapeHTML(ltText)}</pre>` : '<small class="muted">Sem texto longo</small>'}
