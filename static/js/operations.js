@@ -1470,7 +1470,12 @@ const Operations = {
             } else if (entity === 'long-text') {
                 const textRow = this.sapOrder.operations.flatMap(row => row.long_texts || []).find(row => row.id === id);
                 if (field === 'text' && !String(value).trim()) throw new Error('O texto longo não pode ficar vazio.');
-                await API.put(`/api/long-texts/${id}`, { ...textRow, [field]: value });
+                await API.put(`/api/long-texts/${id}`, {
+                    ...textRow,
+                    [field]: value,
+                    structure_mode: 'FREE',
+                    structure_json: null
+                });
             } else if (entity === 'item') {
                 const item = this.sapOrder.item;
                 const payload = { ...item, [field]: value, plan_id: item.plan_id, team_id: null };

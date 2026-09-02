@@ -365,20 +365,22 @@ def prepare_for_save(text: Any = "", structure_mode: Optional[str] = None,
     Otherwise the parser detects existing numbering. Free text is never numbered.
     """
     requested_mode = str(structure_mode or "").upper().strip()
+    raw = _normalize_eol(text)
     nodes = normalize_nodes(structure_json)
     if nodes and requested_mode in {MODE_STRUCTURED, MODE_MIXED}:
-        nodes = _restore_blank_line_layout(nodes, text)
+        nodes = _restore_blank_line_layout(nodes, raw)
         has_topic = any(n["type"] == "topic" for n in nodes)
         has_free = any(n["type"] == "free" and str(n.get("text") or "").strip() for n in nodes)
         mode = MODE_MIXED if has_topic and has_free else MODE_STRUCTURED if has_topic else MODE_FREE
         if mode != MODE_FREE:
             rendered = render_nodes(nodes)
-            return {
-                "text": rendered,
-                "structure_mode": mode,
-                "structure_json": json.dumps(nodes, ensure_ascii=False),
-                "source_text_original": _normalize_eol(source_text_original) if source_text_original is not None else None,
-            }
+            if not raw.strip() or rendered.strip() == raw.strip():
+                return {
+                    "text": rendered,
+                    "structure_mode": mode,
+                    "structure_json": json.dumps(nodes, ensure_ascii=False),
+                    "source_text_original": _normalize_eol(source_text_original) if source_text_original is not None else None,
+                }
 
     raw = _normalize_eol(text)
     if requested_mode == MODE_FREE:
@@ -408,7 +410,13 @@ def materialize_record(record: Dict[str, Any]) -> str:
         if nodes:
             nodes = _restore_blank_line_layout(nodes, record.get("text") or "")
             return render_nodes(nodes)
-    return _normalize_eol(record.get("text") or "")
+    # Some legacy/model assignments retained the original SAP text while the
+    # rendered column was left empty.  The original value is still real content
+    # and must be considered by validation, preview and export.
+    rendered = _normalize_eol(record.get("text") or "")
+    if rendered.strip():
+        return rendered
+    return _normalize_eol(record.get("source_text_original") or "")
 
 
 def extract_block(nodes: Any, index: int) -> List[Dict[str, Any]]:
