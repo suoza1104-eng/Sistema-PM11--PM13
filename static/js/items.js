@@ -351,13 +351,13 @@ const Items = {
             }
         }
 
-        const tbody = document.getElementById('tbody-items');
+        const tbody = document.getElementById('items-table-body');
         const isSilent = options.silent || (tbody && tbody.children.length > 0 && !tbody.querySelector('.empty-table-cell'));
         if (!isSilent) {
             UI.showLoader("Carregando itens de manutenção...");
         }
 
-        return window.App ? App.preserveScroll(tbody || 'tbody-items', async () => {
+        const runTask = async () => {
             try {
                 // Load unique lists for filter select options
                 await this.loadUniqueLists(projId);
@@ -452,7 +452,13 @@ const Items = {
             } finally {
                 if (!isSilent) UI.hideLoader();
             }
-        }) : null;
+        };
+
+        if (window.App && typeof App.preserveScroll === 'function') {
+            return App.preserveScroll(tbody || 'items-table-body', runTask);
+        } else {
+            return runTask();
+        }
     },
 
     async reorderIdentifiers() {

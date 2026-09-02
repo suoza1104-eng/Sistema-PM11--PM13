@@ -423,13 +423,13 @@ const Plans = {
             if (filterCard) filterCard.classList.remove('collapsed');
         }
 
-        const tbody = document.getElementById('tbody-plans');
+        const tbody = document.getElementById('plans-table-body');
         const isSilent = options.silent || (tbody && tbody.children.length > 0 && !tbody.querySelector('.empty-table-cell'));
         if (!isSilent) {
             UI.showLoader("Carregando catálogo de planos...");
         }
 
-        return window.App ? App.preserveScroll(tbody || 'tbody-plans', async () => {
+        const runTask = async () => {
             try {
                 // Load cycles catalog
                 await this.loadCycleCatalog(projId);
@@ -495,7 +495,13 @@ const Plans = {
             } finally {
                 if (!isSilent) UI.hideLoader();
             }
-        }) : null;
+        };
+
+        if (window.App && typeof App.preserveScroll === 'function') {
+            return App.preserveScroll(tbody || 'plans-table-body', runTask);
+        } else {
+            return runTask();
+        }
     },
 
     async loadCycleCatalog(projId) {
