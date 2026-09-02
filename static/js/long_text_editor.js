@@ -7,6 +7,8 @@ window.LongTextEditor = {
     mode: 'FREE',
     nodes: [],
     selectedIndex: null,
+    selectedIndices: new Set(),
+    lastSelectedIndex: null,
     dragIndex: null,
     blocks: [],
     sourceOriginal: '',
@@ -188,6 +190,52 @@ window.LongTextEditor = {
                 }
             });
         }
+        if (!document.dataset.ltGlobalKeyBound) {
+            document.dataset.ltGlobalKeyBound = '1';
+            document.addEventListener('keydown', event => {
+                const modal = document.getElementById('modal-long-text');
+                if (!modal || modal.classList.contains('hidden') || modal.style.display === 'none') return;
+                if (window.LongTextEditor.mode === 'FREE') return;
+
+                const activeEl = document.activeElement;
+                const isEditingText = activeEl && activeEl.classList && activeEl.classList.contains('lt-node-text');
+                const mod = event.ctrlKey || event.metaKey;
+                const key = String(event.key || '').toLowerCase();
+
+                // Ctrl+Z / Ctrl+Y
+                if (mod && key === 'z') {
+                    event.preventDefault();
+                    if (event.shiftKey) window.LongTextEditor.redo(); else window.LongTextEditor.undo();
+                    return;
+                }
+                if (mod && key === 'y') {
+                    event.preventDefault();
+                    window.LongTextEditor.redo();
+                    return;
+                }
+
+                // Delete / Backspace when selection exists or not actively editing text
+                if (event.key === 'Delete' || (event.key === 'Backspace' && !isEditingText)) {
+                    const hasSelection = window.LongTextEditor.selectedIndices && window.LongTextEditor.selectedIndices.size > 0;
+                    if (hasSelection || (!isEditingText && (window.LongTextEditor.selectedIndex != null || window.LongTextEditor.lastFocusedIndex != null))) {
+                        event.preventDefault();
+                        window.LongTextEditor.deleteSelected();
+                        return;
+                    }
+                }
+
+                // ArrowUp / ArrowDown navigation between rows
+                if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+                    if (!isEditingText || event.altKey) {
+                        event.preventDefault();
+                        const current = window.LongTextEditor.lastSelectedIndex ?? window.LongTextEditor.lastFocusedIndex ?? 0;
+                        const target = event.key === 'ArrowUp' ? Math.max(0, current - 1) : Math.min(window.LongTextEditor.nodes.length - 1, current + 1);
+                        window.LongTextEditor.selectRow(target, event.ctrlKey || event.metaKey, event.shiftKey);
+                        window.LongTextEditor.focusEditable(target, false);
+                    }
+                }
+            });
+        }
         this.updateHistoryButtons();
         this.setFullscreen(false);
     },
@@ -342,14 +390,17 @@ window.LongTextEditor = {
         if (isFree) return;
 
         const numbered = this.numberedNodes();
-        const selectedSet = new Set(this.getBlockIndices(this.selectedIndex));
+        const selectedSet = this.selectedIndices && this.selectedIndices.size > 0
+            ? this.selectedIndices
+            : new Set(this.getBlockIndices(this.selectedIndex));
+
         host.innerHTML = numbered.length ? numbered.map((node, index) => {
             const isSelected = selectedSet.has(index);
             const indent = node.type === 'topic' ? Math.max(0, node.level - 1) * 24 : 0;
-            return `<div class="lt-node-row ${node.type === 'free' ? 'free-line' : 'topic-line'} ${isSelected ? 'block-selected' : ''}" data-index="${index}" draggable="true" ondragstart="LongTextEditor.onDragStart(event,${index})" ondragover="LongTextEditor.onDragOver(event)" ondrop="LongTextEditor.onDrop(event,${index})">
+            return `<div class="lt-node-row ${node.type === 'free' ? 'free-line' : 'topic-line'} ${isSelected ? 'block-selected' : ''}" data-index="${index}" onclick="LongTextEditor.onRowClick(event, ${index})" draggable="true" ondragstart="LongTextEditor.onDragStart(event,${index})" ondragover="LongTextEditor.onDragOver(event)" ondrop="LongTextEditor.onDrop(event,${index})">
                 <div class="lt-node-indent" style="width:${indent}px"></div>
                 ${node.type === 'topic'
-                    ? `<button type="button" class="lt-node-number" title="Selecionar este bloco" onclick="LongTextEditor.selectBlock(${index})">${this.esc(node.number)}</button>`
+                    ? `<button type="button" class="lt-node-number" title="Clique para selecionar este bloco (${this.esc(node.number)})" onclick="LongTextEditor.onNumberClick(event, ${index})">${this.esc(node.number)}</button>`
                     : `<span class="lt-free-marker" title="Parágrafo livre">¶</span>`}
                 <div class="lt-node-text" contenteditable="true" spellcheck="true" lang="pt-BR" data-index="${index}" oninput="LongTextEditor.onNodeInput(${index},this)" onkeydown="LongTextEditor.onNodeKeydown(event,${index},this)" onpaste="LongTextEditor.onNodePaste(event,${index},this)" onfocus="LongTextEditor.focusNode(${index})">${this.esc(node.text)}</div>
                 <span class="lt-node-more" title="Clique e arraste para mover esta linha ou bloco" style="cursor:grab; user-select:none; padding:2px 6px;">⋮⋮</span>
@@ -667,13 +718,129 @@ window.LongTextEditor = {
         return Array.from({ length: end - index }, (_, i) => index + i);
     },
 
-    selectBlock(index) {
-        this.syncAllFromDom();
-        this.selectedIndex = this.selectedIndex === index ? null : index;
-        if (this.selectedIndex != null) {
-            this.lastFocusedIndex = this.selectedIndex;
+    onRowClick(event, index) {
+        if (event.target.classList.contains('lt-node-text')) {
+            if (!event.ctrlKey && !event.shiftKey && !this.selectedIndices.has(index)) {
+                this.selectedIndices.clear();
+                this.selectedIndices.add(index);
+                this.selectedIndex = index;
+                this.lastSelectedIndex = index;
+            }
+            this.focusNode(index);
+            return;
         }
+        if (event.target.classList.contains('lt-node-number')) {
+            this.onNumberClick(event, index);
+            return;
+        }
+        this.selectRow(index, event.ctrlKey || event.metaKey, event.shiftKey);
+    },
+
+    onNumberClick(event, index) {
+        event.stopPropagation();
+        this.selectBlock(index, event.ctrlKey || event.metaKey, event.shiftKey);
+    },
+
+    selectRow(index, isCtrl = false, isShift = false) {
+        this.syncAllFromDom();
+        if (index < 0 || index >= this.nodes.length) return;
+        if (!this.selectedIndices) this.selectedIndices = new Set();
+
+        if (isShift && this.lastSelectedIndex != null) {
+            const start = Math.min(this.lastSelectedIndex, index);
+            const end = Math.max(this.lastSelectedIndex, index);
+            const range = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+            if (isCtrl) {
+                range.forEach(i => this.selectedIndices.add(i));
+            } else {
+                this.selectedIndices = new Set(range);
+            }
+        } else if (isCtrl) {
+            if (this.selectedIndices.has(index)) {
+                this.selectedIndices.delete(index);
+            } else {
+                this.selectedIndices.add(index);
+            }
+            this.lastSelectedIndex = index;
+        } else {
+            this.selectedIndices = new Set([index]);
+            this.lastSelectedIndex = index;
+        }
+        this.selectedIndex = this.selectedIndices.size ? Math.min(...Array.from(this.selectedIndices)) : null;
         this.render();
+    },
+
+    selectBlock(index, isCtrl = false, isShift = false) {
+        this.syncAllFromDom();
+        if (index < 0 || index >= this.nodes.length) return;
+        if (!this.selectedIndices) this.selectedIndices = new Set();
+        const blockIndices = this.getBlockIndices(index);
+        if (!blockIndices.length) {
+            this.selectRow(index, isCtrl, isShift);
+            return;
+        }
+
+        if (isShift && this.lastSelectedIndex != null) {
+            const start = Math.min(this.lastSelectedIndex, index);
+            const end = Math.max(this.lastSelectedIndex, ...blockIndices);
+            const range = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+            if (isCtrl) {
+                range.forEach(i => this.selectedIndices.add(i));
+            } else {
+                this.selectedIndices = new Set(range);
+            }
+        } else if (isCtrl) {
+            const hasAll = blockIndices.every(i => this.selectedIndices.has(i));
+            if (hasAll) {
+                blockIndices.forEach(i => this.selectedIndices.delete(i));
+            } else {
+                blockIndices.forEach(i => this.selectedIndices.add(i));
+            }
+            this.lastSelectedIndex = index;
+        } else {
+            this.selectedIndices = new Set(blockIndices);
+            this.lastSelectedIndex = index;
+        }
+        this.selectedIndex = index;
+        this.render();
+    },
+
+    deleteSelectedBlock() {
+        this.deleteSelected();
+    },
+
+    deleteSelected() {
+        this.syncAllFromDom();
+        if (!this.selectedIndices) this.selectedIndices = new Set();
+        let indicesToDelete = Array.from(this.selectedIndices);
+        if (!indicesToDelete.length && this.selectedIndex != null) {
+            indicesToDelete = this.getBlockIndices(this.selectedIndex);
+        }
+        if (!indicesToDelete.length && this.lastFocusedIndex != null) {
+            indicesToDelete = [this.lastFocusedIndex];
+        }
+        if (!indicesToDelete.length) {
+            return UI.showToast('Nenhuma linha selecionada para excluir.', 'info');
+        }
+        indicesToDelete.sort((a, b) => b - a);
+        indicesToDelete.forEach(i => {
+            if (i >= 0 && i < this.nodes.length) {
+                this.nodes.splice(i, 1);
+            }
+        });
+
+        this.selectedIndices.clear();
+        this.selectedIndex = null;
+        const minDeleted = Math.min(...indicesToDelete);
+        this.lastFocusedIndex = Math.max(0, Math.min(minDeleted, this.nodes.length - 1));
+
+        const hasTopic = this.nodes.some(n => n.type === 'topic');
+        const hasFree = this.nodes.some(n => n.type === 'free' && String(n.text || '').trim());
+        this.mode = hasTopic ? (hasFree ? 'MIXED' : 'STRUCTURED') : 'FREE';
+
+        this.render();
+        this.pushHistory(false);
+        UI.showToast(`${indicesToDelete.length} linha(s)/bloco(s) excluído(s).`, 'success');
     },
 
     updateBlockActionState() {

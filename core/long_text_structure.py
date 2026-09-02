@@ -401,21 +401,27 @@ def prepare_for_save(text: Any = "", structure_mode: Optional[str] = None,
 
 
 def materialize_record(record: Dict[str, Any]) -> str:
-    """Return the exact SAP/export text, always including generated topic numbers."""
+    """Return the exact SAP/export text, preserving canonical saved text when consistent."""
     if not record:
         return ""
     mode = str(record.get("structure_mode") or "").upper()
     if mode in {MODE_STRUCTURED, MODE_MIXED} and record.get("structure_json"):
         nodes = normalize_nodes(record.get("structure_json"))
         if nodes:
-            nodes = _restore_blank_line_layout(nodes, record.get("text") or "")
-            return render_nodes(nodes)
-    # Some legacy/model assignments retained the original SAP text while the
-    # rendered column was left empty.  The original value is still real content
-    # and must be considered by validation, preview and export.
-    rendered = _normalize_eol(record.get("text") or "")
-    if rendered.strip():
-        return rendered
+            text_val = _normalize_eol(record.get("text") or "")
+            rendered = render_nodes(_restore_blank_line_layout(nodes, text_val))
+            
+            def _strip_marker(s: str) -> str:
+                return _MARKER_RE.sub(r"\g<body>", str(s or "")).strip()
+
+            raw_node_texts = [_strip_marker(n.get("text")) for n in nodes if _strip_marker(n.get("text"))]
+            raw_val_lines = [_strip_marker(line) for line in text_val.split("\n") if _strip_marker(line)]
+            if text_val.strip() and raw_val_lines == raw_node_texts:
+                return text_val
+            return rendered
+    text_val = _normalize_eol(record.get("text") or "")
+    if text_val.strip():
+        return text_val
     return _normalize_eol(record.get("source_text_original") or "")
 
 
