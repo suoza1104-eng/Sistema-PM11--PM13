@@ -3082,13 +3082,13 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                 if not old_plan:
                     self.send_error_json("Plano não encontrado.", 404)
                     return
-                code = data.get('legacy_code', old_plan['legacy_code'])
+                code = data.get('legacy_code') or data.get('code') or old_plan['legacy_code']
                 desc = data.get('description', old_plan['description'])
-                cycle = data.get('cycle', old_plan['cycle'])
+                cycle = data.get('cycle') or data.get('cycle_code') or old_plan['cycle']
                 unit = data.get('unit', old_plan['unit'])
-                text = data.get('cycle_text', old_plan.get('cycle_text') or '')
-                horiz = data.get('opening_horizon', old_plan.get('opening_horizon') or 0.0)
-                start_stop = data.get('start_stop', old_plan.get('phase'))
+                text = data.get('cycle_text') if 'cycle_text' in data else (data.get('text_cycle') if 'text_cycle' in data else (old_plan.get('cycle_text') or ''))
+                horiz = data.get('opening_horizon') if 'opening_horizon' in data else (data.get('horizon') if 'horizon' in data else (old_plan.get('opening_horizon') or 0.0))
+                start_stop = data.get('start_stop') if 'start_stop' in data else (data.get('offset_days') if 'offset_days' in data else old_plan.get('phase'))
                 ref_cnt = data.get('reference_counter', old_plan.get('reference_counter'))
                 status = data.get('status', old_plan.get('status') or 'ACTIVE')
                 notes = data.get('notes', old_plan.get('notes'))

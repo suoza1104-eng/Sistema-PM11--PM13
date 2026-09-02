@@ -109,17 +109,52 @@ window.PM11.Plans = {
     const UI = window.PM11.UI, API = window.PM11.API, row = this.rows.find(x => x.id === id);
     if (!row) return;
     const originalHtml = cell.innerHTML, original = row[field] ?? '';
-    const editor = document.createElement(['cycle_code', 'status', 'text_cycle'].includes(field) ? 'select' : 'input');
+    const isSelect = ['cycle_code', 'status', 'text_cycle'].includes(field);
+    const editor = document.createElement(isSelect ? 'select' : 'input');
     if (field === 'offset_days') { editor.type = 'number'; editor.min = '1'; }
-    if (field === 'cycle_code') editor.innerHTML = this.catalogs.cycles.map(c => `<option value="${UI.esc(c.code)}">${UI.esc(c.code)} — ${UI.esc(c.text_cycle)}</option>`).join('');
+    if (field === 'cycle_code') editor.innerHTML = this.catalogs.cycles.map(c => `<option value="${UI.esc(c.code)}" ${c.code === original ? 'selected' : ''}>${UI.esc(c.code)} — ${UI.esc(c.text_cycle)}</option>`).join('');
     if (field === 'text_cycle') editor.innerHTML = '<option value="">— Selecionar Ciclo SAP —</option>' + this.sapCycles.map(t => `<option value="${UI.esc(t)}" ${t.toUpperCase() === String(original).toUpperCase() ? 'selected' : ''}>${UI.esc(t)}</option>`).join('');
     if (field === 'status') editor.innerHTML = '<option value="ACTIVE">ATIVO</option><option value="INACTIVE">INATIVO</option>';
     editor.className = 'table-inline-input'; editor.value = original; cell.classList.add('cell-editing'); cell.innerHTML = ''; cell.appendChild(editor); editor.focus(); if (editor.select) editor.select();
     let done = false;
     const cancel = () => { if (done) return; done = true; cell.classList.remove('cell-editing'); cell.innerHTML = originalHtml; };
-    const save = async () => { if (done) return; const value = editor.value.trim(); if (String(value) === String(original)) return cancel(); done = true; editor.disabled = true; try { await API.put('/api/plans/' + id, { ...row, [field]: field === 'code' ? value.toUpperCase() : value }); UI.toast('Plano atualizado.'); await this.render(); } catch (e) { done = false; editor.disabled = false; editor.focus(); UI.toast(e.message, 'error'); } };
+    const save = async () => {
+      if (done) return;
+      const value = editor.value.trim();
+      if (String(value) === String(original)) return cancel();
+      done = true;
+      editor.disabled = true;
+      try {
+        const payload = { ...row, [field]: field === 'code' ? value.toUpperCase() : value };
+        if (field === 'text_cycle') {
+          payload.cycle_text = value;
+          payload.text_cycle = value;
+        } else if (field === 'cycle_code') {
+          payload.cycle = value;
+          payload.cycle_code = value;
+          const match = this.catalogs.cycles.find(c => c.code === value);
+          if (match) {
+            payload.cycle_text = match.text_cycle;
+            payload.text_cycle = match.text_cycle;
+          }
+        }
+        await API.put('/api/plans/' + id, payload);
+        UI.toast('Plano atualizado.');
+        await this.render();
+      } catch (e) {
+        done = false;
+        editor.disabled = false;
+        editor.focus();
+        UI.toast(e.message, 'error');
+      }
+    };
     editor.onkeydown = e => { if (e.key === 'Escape') { e.preventDefault(); cancel(); } if (e.key === 'Enter') { e.preventDefault(); save(); } };
-    editor.onblur = save; if (editor.tagName === 'SELECT') editor.onchange = save;
+    if (isSelect) {
+      editor.onchange = save;
+      editor.onblur = () => { setTimeout(() => { if (!done) save(); }, 150); };
+    } else {
+      editor.onblur = save;
+    }
   },
   planForm(p = {}) {
     const UI = window.PM11.UI;
