@@ -1172,7 +1172,7 @@ const Operations = {
         };
 
         try {
-            if (id) {
+            if (id && String(id) !== '0') {
                 await API.put(`/api/long-texts/${id}`, payload);
                 UI.showToast('Texto longo atualizado com sucesso!', 'success');
             } else {
@@ -1873,9 +1873,19 @@ const Operations = {
                 } else {
                     const current = this.currentLongTexts.find(t => t.id === recId) || {};
                     const patch = { ...current, text: newValue };
-                    await API.put(`/api/long-texts/${recId}`, patch);
+                    if (!recId || String(recId) === '0') {
+                        const projectId = window.App ? App.getValidProjectId() : null;
+                        const payload = {
+                            project_id: projectId,
+                            operation_id: current.operation_id,
+                            text: newValue
+                        };
+                        await API.post('/api/long-texts', payload);
+                    } else {
+                        await API.put(`/api/long-texts/${recId}`, patch);
+                    }
                     UI.showToast('Texto atualizado!', 'success', 1500);
-                    await this.loadLongTexts();
+                    await this.loadLongTexts({ silent: true });
                 }
             } catch (err) {
                 UI.showToast(`Erro ao salvar: ${err.message}`, 'error');

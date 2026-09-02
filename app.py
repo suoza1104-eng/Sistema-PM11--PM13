@@ -3273,6 +3273,21 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                 conn = get_db_connection(); cur = conn.cursor()
                 existing = cur.execute("SELECT * FROM operation_long_texts WHERE id=?", (text_id,)).fetchone()
                 if not existing:
+                    op_id = int(data.get('operation_id', 0) or 0)
+                    if op_id > 0:
+                        op_row = cur.execute("SELECT project_id FROM item_operations WHERE id=?", (op_id,)).fetchone()
+                        if op_row:
+                            p_id = op_row[0]
+                            cur.execute("""INSERT INTO operation_long_texts 
+                                (project_id, operation_id, group_code, group_counter, text, structure_mode, structure_json, source_text_original, validation_status, validation_issues_json)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'OK', '[]')""",
+                                (p_id, op_id, data.get('group_code'), data.get('group_counter'), prepared['text'],
+                                 prepared['structure_mode'], prepared['structure_json'], prepared['source_text_original']))
+                            conn.commit()
+                            new_id = cur.lastrowid
+                            conn.close()
+                            self.send_json({'message': 'Texto longo criado com sucesso!', 'id': new_id, 'text': prepared['text'], 'structure_mode': prepared['structure_mode']})
+                            return
                     conn.close(); self.send_error_json('Texto longo não encontrado.', 404); return
                 operation_id = int(data.get('operation_id') or existing['operation_id'])
                 pending = existing['pending_item_identifier']
