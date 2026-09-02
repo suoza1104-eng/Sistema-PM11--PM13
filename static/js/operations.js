@@ -308,7 +308,7 @@ const Operations = {
             tbody.innerHTML = '<tr><td colspan="10" class="empty-table-cell">Carregando operações...</td></tr>';
         }
 
-        return window.App ? App.preserveScroll(tbody, async () => {
+        const runTask = async () => {
             try {
                 await this.loadItemDescriptions(projectId);
                 const res = await API.get('/api/operations', {
@@ -321,128 +321,139 @@ const Operations = {
                     offset: this.opFilters.offset
                 });
 
-            let ops = res.operations || [];
-            if (this.opFilters.row_color) ops = ops.filter(o => o.row_color === this.opFilters.row_color);
+                let ops = res.operations || [];
+                if (this.opFilters.row_color) ops = ops.filter(o => o.row_color === this.opFilters.row_color);
 
-            // Filter by issue status
-            if (this.opFilters.issue_status) {
-                const st = this.opFilters.issue_status;
-                if (st === 'issues') ops = ops.filter(o => (o.validation_issues || []).length > 0);
-                else if (st === 'ERROR') ops = ops.filter(o => (o.validation_issues || []).some(x => x.severity === 'ERROR'));
-                else if (st === 'WARNING') ops = ops.filter(o => (o.validation_issues || []).some(x => x.severity === 'WARNING'));
-                else if (st === 'OK') ops = ops.filter(o => !o.validation_issues || o.validation_issues.length === 0);
+                // Filter by issue status
+                if (this.opFilters.issue_status) {
+                    const st = this.opFilters.issue_status;
+                    if (st === 'issues') ops = ops.filter(o => (o.validation_issues || []).length > 0);
+                    else if (st === 'ERROR') ops = ops.filter(o => (o.validation_issues || []).some(x => x.severity === 'ERROR'));
+                    else if (st === 'WARNING') ops = ops.filter(o => (o.validation_issues || []).some(x => x.severity === 'WARNING'));
+                    else if (st === 'OK') ops = ops.filter(o => !o.validation_issues || o.validation_issues.length === 0);
+                }
+
+                const total = res.total || ops.length;
+                this.currentOperations = ops;
+
+                // Apply column filters client-side
+                if (window.ColumnFilter) {
+                    ops = window.ColumnFilter.applyFiltersToDataset('operations-table', ops);
+                }
+
+                if (countLbl) {
+                    countLbl.textContent = `${total} ${total === 1 ? 'operação cadastrada' : 'operações cadastradas'}`;
+                }
+
+                // Update WC filter options dynamically
+                const wcSel = document.getElementById('filter-ops-wc');
+                if (wcSel) {
+                    const allWcs = [...new Set(this.currentOperations.map(o => o.work_center).filter(Boolean))].sort();
+                    const curVal = wcSel.value;
+                    wcSel.innerHTML = '<option value="">Todos os C.T.</option>' +
+                        allWcs.map(wc => `<option value="${this.esc(wc)}" ${wc === curVal ? 'selected' : ''}>${this.esc(wc)}</option>`).join('');
+                }
+
+                if (ops.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="10" class="empty-table-cell">${this.opFilters.search || this.opFilters.work_center || this.opFilters.issue_status ? 'Nenhuma operação encontrada para os filtros aplicados.' : 'Nenhuma operação cadastrada neste projeto.'}</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = ops.map(o => {
+                    const safeIdent = this.esc(o.legacy_identifier);
+                    const safeItemDescription = this.esc(o.item_description || this.itemDescriptions.get(String(o.legacy_identifier)) || '-');
+                    const safeCode = this.esc(o.operation_code);
+                    const safeSub = this.esc(o.suboperation_code);
+                    const safeWc = this.esc(o.work_center);
+                    const safeShort = this.esc(o.short_text);
+                    const safeHc = o.headcount !== null && o.headcount !== undefined ? o.headcount : '';
+                    const rawHours = o.hours !== null && o.hours !== undefined ? o.hours : '';
+                    const safeHours = rawHours !== '' ? Number(rawHours).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) : '';
+                    const safeObj = this.esc(o.object_code || '');
+
+                    const validationIssues = o.validation_issues || [];
+                    const issueMessages = [...new Set(validationIssues.map(x => x.message))];
+                    const isError = validationIssues.some(x => x.severity === 'ERROR');
+                    const isWarning = validationIssues.length > 0 && !isError;
+
+                    let rowClass = '';
+                    if (isError) rowClass = 'table-alert-red';
+                    else if (isWarning) rowClass = 'table-alert-yellow';
+
+                    const issuesText = issueMessages.map(m => `• ${m}`).join('\n');
+                    const indicator = validationIssues.length > 0
+                        ? `<span class="row-issue-indicator issue-${isError ? 'error' : 'warning'}" style="cursor:pointer;" onclick="event.stopPropagation(); App.openIssueFixModal('operation', ${o.id})" title="Clique para abrir o diagnóstico e aplicar a correção automática: ${this.esc(issuesText)}">${isError ? '⛔' : '⚠️'}</span>`
+                        : '';
+
+                    if (o.row_color) rowClass += ` item-row-marked item-row-color-${o.row_color}`;
+                    const shownIdentifier = this.esc(o.pending_item_identifier || o.legacy_identifier);
+                    return `<tr class="${rowClass}" ${validationIssues.length ? `title="${this.esc(issuesText)}"` : ''}>
+                        <td class="text-center" style="display:flex; align-items:center; justify-content:center; gap:4px; height:100%; padding: 8px 4px;">
+                            ${indicator}<button class="row-color-brush" onclick="RowTools.open(event,'operations',${o.id},'()=>Operations.loadOperations()')">🖌️</button><input type="checkbox" class="operation-row-checkbox" data-id="${o.id}" ${this.selectedOperationIds.has(o.id) ? 'checked' : ''} onchange="Operations.toggleBulkSelection('operations',this,${o.id})">
+                        </td>
+                        <td class="text-center">
+                            <span class="badge badge-neutral" title="${safeObj}">${shownIdentifier}</span>
+                        </td>
+                        <td class="management-description-cell" style="font-weight: 500;">${safeItemDescription}</td>
+                        <td class="text-center editable-cell" title="2x para editar" ondblclick="Operations.makeCellEditable(this,${o.id},'operation_code','${o.operation_code || ''}','op','text',4)">
+                            <strong>${safeCode || '-'}</strong>
+                        </td>
+                        <td class="text-center editable-cell" title="2x para editar" ondblclick="Operations.makeCellEditable(this,${o.id},'suboperation_code','${o.suboperation_code || ''}','op','text',4)">
+                            <span style="color:var(--text-muted);">${safeSub || '-'}</span>
+                        </td>
+                        <td class="text-center editable-cell" title="2x para editar" ondblclick="Operations.makeCellEditable(this,${o.id},'work_center','${o.work_center || ''}','op','text',8)">
+                            <span class="badge badge-active">${safeWc || '-'}</span>
+                        </td>
+                        <td class="editable-cell" style="font-weight:500;" title="2x para editar" ondblclick="Operations.makeCellEditable(this,${o.id},'short_text','${(o.short_text||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')}','op','text',40)">
+                            ${safeShort}
+                        </td>
+                        <td class="text-center editable-cell" title="2x para editar" ondblclick="Operations.makeCellEditable(this,${o.id},'headcount','${safeHc}','op','number',4)">
+                            ${safeHc !== '' ? safeHc : '<span style="color:var(--text-muted);">-</span>'}
+                        </td>
+                        <td class="text-center editable-cell" title="2x para editar" ondblclick="Operations.makeCellEditable(this,${o.id},'hours','${rawHours}','op','number',8)">
+                            ${safeHours !== '' ? safeHours : '<span style="color:var(--text-muted);">-</span>'}
+                        </td>
+                        <td class="text-center">
+                            <div class="actions-cell" style="justify-content: center; gap: 4px;">
+                                <button class="btn btn-xs btn-primary" title="Pré-visualizar ordem no modelo SAP" onclick="Operations.openSapOrder(${o.item_id})">SAP</button>
+                                ${((String(o.operation_code) === '0010' || String(o.operation_code) === '10') && (!o.suboperation_code || o.suboperation_code === '' || o.suboperation_code === '-'))
+                                    ? ''
+                                    : ((o.long_text_count || 0) > 0 
+                                        ? `<button class="btn btn-xs btn-success" title="Ver / Editar texto longo desta operação" onclick="Operations.openEditLongTextModalForOp(${o.id})">📝 Texto Longo</button>` 
+                                        : `<button class="btn btn-xs btn-outline" style="color:#0284C7; border-color:#38BDF8;" title="Criar texto longo / procedimento para esta operação" onclick="Operations.openCreateLongTextModalForOp(${o.id}, ${o.item_id})">+ Texto Longo</button>`
+                                    )
+                                }
+                                ${((String(o.operation_code) === '0010' || String(o.operation_code) === '10') && (!o.suboperation_code || o.suboperation_code === '' || o.suboperation_code === '-')) ? '' : `<button class="btn btn-xs btn-outline" style="color:#6B4E00;border-color:#E6C85C;" title="Inserir um bloco padrão diretamente no texto longo desta operação" onclick="Operations.openBlockLibraryForOp(${o.id},${o.item_id})">🧩 + Bloco</button>`}
+                                <button class="btn btn-xs btn-outline" title="Editar operação" onclick="Operations.openEditModal(${o.id})">Editar</button>
+                                <button class="btn btn-xs btn-outline" title="Clonar como cópia pendente" onclick="Operations.cloneOperation(${o.id})">Clonar</button>
+                                <button class="btn btn-xs btn-danger" title="Excluir operação" onclick="Operations.deleteOperation(${o.id})">Excluir</button>
+                            </div>
+                        </td>
+                    </tr>`;
+                }).join('');
+
+                // Init / refresh column filters
+                if (window.ColumnFilter) {
+                    window.ColumnFilter.init('operations-table', () => this.currentOperations, (sortCol, sortDir) => {
+                        if (sortCol && sortDir) {
+                            this.opFilters.order_by = sortCol;
+                            this.opFilters.order_dir = sortDir;
+                        }
+                        this.loadOperations();
+                    });
+                }
+
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="10" class="empty-table-cell" style="color:var(--color-danger);">Erro ao carregar operações: ${this.esc(err.message)}</td></tr>`;
+                UI.showToast(err.message, 'error');
             }
+        };
 
-            const total = res.total || ops.length;
-            this.currentOperations = ops;
-
-            // Apply column filters client-side
-            if (window.ColumnFilter) {
-                ops = window.ColumnFilter.applyFiltersToDataset('operations-table', ops);
-            }
-
-            if (countLbl) {
-                countLbl.textContent = `${total} ${total === 1 ? 'operação cadastrada' : 'operações cadastradas'}`;
-            }
-
-            // Update WC filter options dynamically
-            const wcSel = document.getElementById('filter-ops-wc');
-            if (wcSel) {
-                const allWcs = [...new Set(this.currentOperations.map(o => o.work_center).filter(Boolean))].sort();
-                const curVal = wcSel.value;
-                wcSel.innerHTML = '<option value="">Todos os C.T.</option>' +
-                    allWcs.map(wc => `<option value="${this.esc(wc)}" ${wc === curVal ? 'selected' : ''}>${this.esc(wc)}</option>`).join('');
-            }
-
-            if (ops.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="10" class="empty-table-cell">${this.opFilters.search || this.opFilters.work_center || this.opFilters.issue_status ? 'Nenhuma operação encontrada para os filtros aplicados.' : 'Nenhuma operação cadastrada neste projeto.'}</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = ops.map(o => {
-                const safeIdent = this.esc(o.legacy_identifier);
-                const safeItemDescription = this.esc(o.item_description || this.itemDescriptions.get(String(o.legacy_identifier)) || '-');
-                const safeObj = this.esc(o.object_code || '');
-                const safeCode = this.esc(o.operation_code);
-                const safeSub = this.esc(o.suboperation_code || '');
-                const safeWc = this.esc(o.work_center || '');
-                const safeShort = this.esc(o.short_text);
-                const safeHc = o.headcount !== null && o.headcount !== undefined ? o.headcount : '';
-                const safeHours = o.hours !== null && o.hours !== undefined ? parseFloat(o.hours).toFixed(1).replace('.', ',') : '';
-                const rawHours = o.hours !== null && o.hours !== undefined ? o.hours : '';
-
-                const validationIssues = o.validation_issues || [];
-                const isError = validationIssues.some(x => x.severity === 'ERROR');
-                const isWarning = validationIssues.length > 0 && !isError;
-                const rowClass = isError ? 'table-alert-red' : (isWarning ? 'table-alert-yellow' : '');
-                const issuesText = validationIssues.map(issue => `• ${issue.message}`).join('\n');
-                const indicator = validationIssues.length
-                    ? `<span class="row-issue-indicator issue-${isError ? 'error' : 'warning'}" style="cursor:pointer;" onclick="event.stopPropagation(); App.openIssueFixModal('operation', ${o.id})" title="Clique para abrir o diagnóstico e aplicar a correção automática: ${this.esc(issuesText)}">${isError ? '⛔' : '⚠️'}</span>`
-                    : '';
-
-                if (o.row_color) rowClass += ` item-row-marked item-row-color-${o.row_color}`;
-                const shownIdentifier = this.esc(o.pending_item_identifier || o.legacy_identifier);
-                return `<tr class="${rowClass}" ${validationIssues.length ? `title="${this.esc(issuesText)}"` : ''}>
-                    <td class="text-center" style="display:flex; align-items:center; justify-content:center; gap:4px; height:100%; padding: 8px 4px;">
-                        ${indicator}<button class="row-color-brush" onclick="RowTools.open(event,'operations',${o.id},'()=>Operations.loadOperations()')">🖌️</button><input type="checkbox" class="operation-row-checkbox" data-id="${o.id}" ${this.selectedOperationIds.has(o.id) ? 'checked' : ''} onchange="Operations.toggleBulkSelection('operations',this,${o.id})">
-                    </td>
-                    <td class="text-center">
-                        <span class="badge badge-neutral" title="${safeObj}">${shownIdentifier}</span>
-                    </td>
-                    <td class="management-description-cell" style="font-weight: 500;">${safeItemDescription}</td>
-                    <td class="text-center editable-cell" title="2x para editar" ondblclick="Operations.makeCellEditable(this,${o.id},'operation_code','${o.operation_code || ''}','op','text',4)">
-                        <strong>${safeCode || '-'}</strong>
-                    </td>
-                    <td class="text-center editable-cell" title="2x para editar" ondblclick="Operations.makeCellEditable(this,${o.id},'suboperation_code','${o.suboperation_code || ''}','op','text',4)">
-                        <span style="color:var(--text-muted);">${safeSub || '-'}</span>
-                    </td>
-                    <td class="text-center editable-cell" title="2x para editar" ondblclick="Operations.makeCellEditable(this,${o.id},'work_center','${o.work_center || ''}','op','text',8)">
-                        <span class="badge badge-active">${safeWc || '-'}</span>
-                    </td>
-                    <td class="editable-cell" style="font-weight:500;" title="2x para editar" ondblclick="Operations.makeCellEditable(this,${o.id},'short_text','${(o.short_text||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')}','op','text',40)">
-                        ${safeShort}
-                    </td>
-                    <td class="text-center editable-cell" title="2x para editar" ondblclick="Operations.makeCellEditable(this,${o.id},'headcount','${safeHc}','op','number',4)">
-                        ${safeHc !== '' ? safeHc : '<span style="color:var(--text-muted);">-</span>'}
-                    </td>
-                    <td class="text-center editable-cell" title="2x para editar" ondblclick="Operations.makeCellEditable(this,${o.id},'hours','${rawHours}','op','number',8)">
-                        ${safeHours !== '' ? safeHours : '<span style="color:var(--text-muted);">-</span>'}
-                    </td>
-                    <td class="text-center">
-                        <div class="actions-cell" style="justify-content: center; gap: 4px;">
-                            <button class="btn btn-xs btn-primary" title="Pré-visualizar ordem no modelo SAP" onclick="Operations.openSapOrder(${o.item_id})">SAP</button>
-                            ${((String(o.operation_code) === '0010' || String(o.operation_code) === '10') && (!o.suboperation_code || o.suboperation_code === '' || o.suboperation_code === '-'))
-                                ? ''
-                                : ((o.long_text_count || 0) > 0 
-                                    ? `<button class="btn btn-xs btn-success" title="Ver / Editar texto longo desta operação" onclick="Operations.openEditLongTextModalForOp(${o.id})">📝 Texto Longo</button>` 
-                                    : `<button class="btn btn-xs btn-outline" style="color:#0284C7; border-color:#38BDF8;" title="Criar texto longo / procedimento para esta operação" onclick="Operations.openCreateLongTextModalForOp(${o.id}, ${o.item_id})">+ Texto Longo</button>`
-                                )
-                            }
-                            ${((String(o.operation_code) === '0010' || String(o.operation_code) === '10') && (!o.suboperation_code || o.suboperation_code === '' || o.suboperation_code === '-')) ? '' : `<button class="btn btn-xs btn-outline" style="color:#6B4E00;border-color:#E6C85C;" title="Inserir um bloco padrão diretamente no texto longo desta operação" onclick="Operations.openBlockLibraryForOp(${o.id},${o.item_id})">🧩 + Bloco</button>`}
-                            <button class="btn btn-xs btn-outline" title="Editar operação" onclick="Operations.openEditModal(${o.id})">Editar</button>
-                            <button class="btn btn-xs btn-outline" title="Clonar como cópia pendente" onclick="Operations.cloneOperation(${o.id})">Clonar</button>
-                            <button class="btn btn-xs btn-danger" title="Excluir operação" onclick="Operations.deleteOperation(${o.id})">Excluir</button>
-                        </div>
-                    </td>
-                </tr>`;
-            }).join('');
-
-            // Init / refresh column filters
-            if (window.ColumnFilter) {
-                window.ColumnFilter.init('operations-table', () => this.currentOperations, (sortCol, sortDir) => {
-                    if (sortCol && sortDir) {
-                        this.opFilters.order_by = sortCol;
-                        this.opFilters.order_dir = sortDir;
-                    }
-                    this.loadOperations();
-                });
-            }
-
-        } catch (err) {
-            tbody.innerHTML = `<tr><td colspan="10" class="empty-table-cell" style="color:var(--color-danger);">Erro ao carregar operações: ${this.esc(err.message)}</td></tr>`;
-            UI.showToast(err.message, 'error');
+        if (window.App && typeof App.preserveScroll === 'function') {
+            return App.preserveScroll(tbody, runTask);
+        } else {
+            return runTask();
         }
-        });
     },
 
     _filterRowsByItemId(rows, query) {
@@ -657,130 +668,139 @@ const Operations = {
             tbody.innerHTML = '<tr><td colspan="7" class="empty-table-cell">Carregando textos longos...</td></tr>';
         }
 
-        return window.App ? App.preserveScroll(tbody, async () => {
+        const runTask = async () => {
             try {
                 await this.loadItemDescriptions(projectId);
                 const res = await API.get('/api/long-texts', {
-                project_id: projectId,
-                search: this.ltFilters.search,
-                limit: this.ltFilters.limit,
-                offset: this.ltFilters.offset,
-                order_by: this.ltFilters.order_by || 'legacy_identifier',
-                order_dir: this.ltFilters.order_dir || 'asc'
-            });
-
-            let texts = res.long_texts || [];
-            if (this.ltFilters.row_color) texts = texts.filter(t => t.row_color === this.ltFilters.row_color);
-
-            texts.forEach(t => {
-                const issues = Array.isArray(t.validation_issues) ? [...t.validation_issues] : [];
-                if (!t.operation_id) {
-                    issues.push({ severity: 'ERROR', message: 'Texto longo sem correspondência com nenhuma operação.' });
-                }
-                if (t.validation_status === 'ERROR' && !issues.some(issue => issue.severity === 'ERROR')) {
-                    issues.push({ severity: 'ERROR', message: 'Inconsistência no texto longo ou vínculo.' });
-                }
-                t.computed_issues = issues;
-            });
-
-            if (this.ltFilters.issue_status) {
-                const st = this.ltFilters.issue_status;
-                if (st === 'issues') texts = texts.filter(t => t.computed_issues.length > 0);
-                else if (st === 'ERROR') texts = texts.filter(t => t.computed_issues.some(x => x.severity === 'ERROR'));
-                else if (st === 'WARNING') texts = texts.filter(t => t.computed_issues.some(x => x.severity === 'WARNING'));
-                else if (st === 'OK') texts = texts.filter(t => t.computed_issues.length === 0);
-            }
-
-            const total = res.total || texts.length;
-            this.currentLongTexts = texts;
-
-            // Apply column filters client-side
-            if (window.ColumnFilter) {
-                texts = window.ColumnFilter.applyFiltersToDataset('long-texts-table', texts);
-            }
-
-            if (countLbl) {
-                countLbl.textContent = `${total} ${total === 1 ? 'texto longo cadastrado' : 'textos longos cadastrados'}`;
-            }
-
-            if (texts.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="empty-table-cell">${this.ltFilters.search || this.ltFilters.issue_status ? 'Nenhum texto longo encontrado para a busca.' : 'Nenhum texto longo cadastrado neste projeto.'}</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = texts.map(t => {
-                const safeIdent = this.esc(t.pending_item_identifier || t.legacy_identifier || '-');
-                const safeObj = this.esc(t.object_code || '');
-                const safeOp = this.esc(t.operation_code || '');
-                const safeSub = this.esc(t.suboperation_code || '-');
-                const safeItemDescription = this.esc(t.item_description || this.itemDescriptions.get(String(t.legacy_identifier)) || '-');
-                const safeOpShortText = this.esc(t.op_short_text || '-');
-
-                const rawTxt = String(t.text || '').replace(/^[ \t]+/, '');
-                const subStr = str => str === null || str === undefined ? '' : String(str).trim();
-                const cleanSub = subStr(t.suboperation_code);
-                const isFirst0010 = (safeOp === '0010' && ['', '0000', '-', 'None'].includes(cleanSub));
-
-                let safeText = '';
-                if (rawTxt !== '') {
-                    safeText = this.esc(rawTxt);
-                } else if (isFirst0010) {
-                    safeText = '<span style="color: var(--text-muted); font-style: italic;">(vazio)</span>';
-                } else {
-                    safeText = '<span style="color: #ef4444; font-style: italic;">(Sem texto longo obrigatório)</span>';
-                }
-
-                const rowId = t.long_text_id || t.id || 0;
-                const opId = t.operation_id || 0;
-
-                const issues = Array.isArray(t.validation_issues) ? [...t.validation_issues] : (t.computed_issues || []);
-                const isError = issues.some(x => x.severity === 'ERROR');
-                const isWarning = issues.length > 0 && !isError;
-                let rowClass = isError ? 'table-alert-red' : (isWarning ? 'table-alert-yellow' : '');
-                if (t.row_color) rowClass += ` item-row-marked item-row-color-${t.row_color}`;
-                const issuesText = issues.map(i => `• ${i.message}`).join('\n');
-                const indicator = issues.length
-                    ? `<span class="row-issue-indicator issue-${isError ? 'error' : 'warning'}" style="cursor:pointer;" onclick="event.stopPropagation(); App.openIssueFixModal('long-text', ${rowId})" title="Clique para abrir o diagnóstico e aplicar a correção automática: ${this.esc(issuesText)}">${isError ? '⛔' : '⚠️'}</span>`
-                    : '';
-
-                return `<tr class="${rowClass}" ${issues.length ? `title="${this.esc(issuesText)}"` : ''}>
-                    <td class="text-center" style="display:flex; align-items:center; justify-content:center; gap:4px; height:100%; padding: 8px 4px;">
-                        ${indicator}<button class="row-color-brush" onclick="RowTools.open(event,'long-texts',${rowId},'()=>Operations.loadLongTexts()')">🖌️</button><input type="checkbox" class="long-text-row-checkbox" data-id="${rowId}" ${this.selectedLongTextIds.has(rowId) ? 'checked' : ''} onchange="Operations.toggleBulkSelection('long-texts',this,${rowId})">
-                    </td>
-                    <td class="text-center">
-                        <span class="badge badge-neutral" title="${safeObj}">${safeIdent}</span>
-                    </td>
-                    <td class="text-center"><strong>${safeOp}</strong></td>
-                    <td class="text-center" style="color: var(--text-muted);">${safeSub}</td>
-                    <td class="management-description-cell" style="font-weight: 500; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${safeItemDescription}">${safeItemDescription}</td>
-                    <td class="management-description-cell" style="font-weight: 500; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-secondary);" title="${safeOpShortText}">${safeOpShortText}</td>
-                    <td class="editable-cell long-text-content-cell" style="white-space: pre-wrap; word-break: break-word; font-size: 12px; line-height: 1.5; color: var(--text-primary); cursor:pointer;" title="Duplo clique para abrir o editor de blocos" ondblclick="Operations.openEditLongTextModal(${rowId})">${safeText}</td>
-                    <td class="text-center">
-                        <div class="actions-cell" style="justify-content: center; gap: 4px; flex-wrap:wrap;">
-                            <button class="btn btn-xs btn-outline" style="color:#0F766E;border-color:#5EEAD4;" title="Abrir editor estruturado de tópicos, subtópicos e blocos" onclick="Operations.openEditLongTextModal(${rowId})">🧩 Editar blocos</button>
-                            <button class="btn btn-xs btn-outline" title="Clonar como cópia pendente" onclick="Operations.cloneLongText(${rowId})">Clonar</button>
-                            <button class="btn btn-xs btn-danger" title="Excluir texto" onclick="Operations.deleteLongText(${rowId})">Excluir</button>
-                        </div>
-                    </td>
-                </tr>`;
-            }).join('');
-
-            // Init / refresh column filters
-            if (window.ColumnFilter) {
-                window.ColumnFilter.init('long-texts-table', () => this.currentLongTexts, (sortCol, sortDir) => {
-                    if (sortCol && sortDir) {
-                        this.ltFilters.order_by = sortCol;
-                        this.ltFilters.order_dir = sortDir;
-                    }
-                    this.loadLongTexts();
+                    project_id: projectId,
+                    search: this.ltFilters.search,
+                    limit: this.ltFilters.limit,
+                    offset: this.ltFilters.offset,
+                    order_by: this.ltFilters.order_by || 'legacy_identifier',
+                    order_dir: this.ltFilters.order_dir || 'asc'
                 });
-            }
 
-        } catch (err) {
-            tbody.innerHTML = `<tr><td colspan="7" class="empty-table-cell" style="color:var(--color-danger);">Erro ao carregar textos longos: ${this.esc(err.message)}</td></tr>`;
-            UI.showToast(err.message, 'error');
+                let texts = res.long_texts || [];
+                if (this.ltFilters.row_color) texts = texts.filter(t => t.row_color === this.ltFilters.row_color);
+
+                texts.forEach(t => {
+                    const issues = Array.isArray(t.validation_issues) ? [...t.validation_issues] : [];
+                    if (!t.operation_id) {
+                        issues.push({ severity: 'ERROR', message: 'Texto longo sem correspondência com nenhuma operação.' });
+                    }
+                    if (t.validation_status === 'ERROR' && !issues.some(issue => issue.severity === 'ERROR')) {
+                        issues.push({ severity: 'ERROR', message: 'Inconsistência no texto longo ou vínculo.' });
+                    }
+                    t.computed_issues = issues;
+                });
+
+                if (this.ltFilters.issue_status) {
+                    const st = this.ltFilters.issue_status;
+                    if (st === 'issues') texts = texts.filter(t => t.computed_issues.length > 0);
+                    else if (st === 'ERROR') texts = texts.filter(t => t.computed_issues.some(x => x.severity === 'ERROR'));
+                    else if (st === 'WARNING') texts = texts.filter(t => t.computed_issues.some(x => x.severity === 'WARNING'));
+                    else if (st === 'OK') texts = texts.filter(t => t.computed_issues.length === 0);
+                }
+
+                const total = res.total || texts.length;
+                this.currentLongTexts = texts;
+
+                // Apply column filters client-side
+                if (window.ColumnFilter) {
+                    texts = window.ColumnFilter.applyFiltersToDataset('long-texts-table', texts);
+                }
+
+                if (countLbl) {
+                    countLbl.textContent = `${total} ${total === 1 ? 'texto longo cadastrado' : 'textos longos cadastrados'}`;
+                }
+
+                if (texts.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" class="empty-table-cell">${this.ltFilters.search || this.ltFilters.issue_status ? 'Nenhum texto longo encontrado para a busca.' : 'Nenhum texto longo cadastrado neste projeto.'}</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = texts.map(t => {
+                    const safeIdent = this.esc(t.pending_item_identifier || t.legacy_identifier || '-');
+                    const safeObj = this.esc(t.object_code || '');
+                    const safeOp = this.esc(t.operation_code || '');
+                    const safeSub = this.esc(t.suboperation_code || '-');
+                    const safeItemDescription = this.esc(t.item_description || this.itemDescriptions.get(String(t.legacy_identifier)) || '-');
+                    const safeOpShortText = this.esc(t.op_short_text || '-');
+
+                    const rawTxt = String(t.text || '').replace(/^[ \t]+/, '');
+                    const subStr = str => str === null || str === undefined ? '' : String(str).trim();
+                    const cleanSub = subStr(t.suboperation_code);
+                    const isFirst0010 = (safeOp === '0010' && ['', '0000', '-', 'None'].includes(cleanSub));
+
+                    let safeText = '';
+                    if (rawTxt !== '') {
+                        safeText = this.esc(rawTxt);
+                    } else if (isFirst0010) {
+                        safeText = '<span style="color: var(--text-muted); font-style: italic;">(vazio)</span>';
+                    } else {
+                        safeText = '<span style="color: var(--text-muted); font-style: italic;">(vazio)</span>';
+                    }
+
+                    const validationIssues = t.computed_issues || [];
+                    const issueMessages = [...new Set(validationIssues.map(x => x.message))];
+                    const isError = validationIssues.some(x => x.severity === 'ERROR');
+                    const isWarning = validationIssues.length > 0 && !isError;
+                    const rowId = t.id;
+
+                    let rowClass = '';
+                    if (isError) rowClass = 'table-alert-red';
+                    else if (isWarning) rowClass = 'table-alert-yellow';
+
+                    const issuesText = issueMessages.map(m => `• ${m}`).join('\n');
+                    const indicator = validationIssues.length > 0
+                        ? `<span class="row-issue-indicator issue-${isError ? 'error' : 'warning'}" style="cursor:pointer;" onclick="event.stopPropagation(); App.openIssueFixModal('long-text', ${rowId})" title="Clique para abrir o diagnóstico e aplicar a correção automática: ${this.esc(issuesText)}">${isError ? '⛔' : '⚠️'}</span>`
+                        : '';
+
+                    if (t.row_color) rowClass += ` item-row-marked item-row-color-${t.row_color}`;
+                    return `<tr class="${rowClass}" ${validationIssues.length ? `title="${this.esc(issuesText)}"` : ''}>
+                        <td class="text-center" style="display:flex; align-items:center; justify-content:center; gap:4px; height:100%; padding: 8px 4px;">
+                            ${indicator}<button class="row-color-brush" onclick="RowTools.open(event,'long-texts',${rowId},'()=>Operations.loadLongTexts()')">🖌️</button><input type="checkbox" class="long-text-row-checkbox" data-id="${rowId}" ${this.selectedLongTextIds.has(rowId) ? 'checked' : ''} onchange="Operations.toggleBulkSelection('long-texts',this,${rowId})">
+                        </td>
+                        <td class="text-center">
+                            <span class="badge badge-neutral" title="${safeObj}">${safeIdent}</span>
+                        </td>
+                        <td class="text-center"><strong>${safeOp}</strong></td>
+                        <td class="text-center"><span style="color:var(--text-muted);">${safeSub}</span></td>
+                        <td class="management-description-cell" style="font-weight: 500;">${safeItemDescription}</td>
+                        <td class="management-description-cell">${safeOpShortText}</td>
+                        <td class="editable-cell" style="white-space: pre-wrap; font-family: inherit; font-size: 0.85rem; line-height: 1.45;" title="2x para editar" ondblclick="Operations.makeCellEditable(this,${rowId},'text','${(t.text||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')}','lt','text',4000)">${safeText}</td>
+                        <td class="text-center">
+                            <div class="actions-cell" style="justify-content: center; gap: 4px; flex-wrap:wrap;">
+                                <button class="btn btn-xs btn-outline" style="color:#0F766E;border-color:#5EEAD4;" title="Abrir editor estruturado de tópicos, subtópicos e blocos" onclick="Operations.openEditLongTextModal(${rowId})">🧩 Editar blocos</button>
+                                <button class="btn btn-xs btn-outline" title="Clonar como cópia pendente" onclick="Operations.cloneLongText(${rowId})">Clonar</button>
+                                <button class="btn btn-xs btn-danger" title="Excluir texto" onclick="Operations.deleteLongText(${rowId})">Excluir</button>
+                            </div>
+                        </td>
+                    </tr>`;
+                }).join('');
+
+                // Init / refresh column filters
+                if (window.ColumnFilter) {
+                    window.ColumnFilter.init('long-texts-table', () => this.currentLongTexts, (sortCol, sortDir) => {
+                        if (sortCol && sortDir) {
+                            this.ltFilters.order_by = sortCol;
+                            this.ltFilters.order_dir = sortDir;
+                        }
+                        this.loadLongTexts();
+                    });
+                }
+
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="7" class="empty-table-cell" style="color:var(--color-danger);">Erro ao carregar textos longos: ${this.esc(err.message)}</td></tr>`;
+                UI.showToast(err.message, 'error');
+            }
+        };
+
+        if (window.App && typeof App.preserveScroll === 'function') {
+            return App.preserveScroll(tbody, runTask);
+        } else {
+            return runTask();
         }
-        });
     },
 
     async openCreateLongTextModal(presetOpId = null, presetItemId = null) {
