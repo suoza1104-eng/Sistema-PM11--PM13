@@ -141,8 +141,8 @@ def detect_structure(text: Any) -> Dict[str, Any]:
     score += 2 if candidate_ratio >= 0.5 else 0
     score -= suspicious * 3
 
-    # Minimum evidence: two coherent markers, or a parent/child pair.
-    coherent = len(candidates) >= 2 and (score >= 3 or parent_child_pairs > 0)
+    # Minimum evidence: two coherent markers, a parent/child pair, or explicit subtopics.
+    coherent = (len(candidates) >= 2 and (score >= 3 or parent_child_pairs > 0)) or any(len(c["path"]) > 1 and not c.get("suspicious_measurement") for _, c in candidates)
     if not coherent:
         return {
             "mode": MODE_FREE,
@@ -176,6 +176,7 @@ def detect_structure(text: Any) -> Dict[str, Any]:
                 "type": "topic",
                 "level": max(1, min(8, int(cand["level"]))),
                 "text": cand["body"],
+                "path": cand["path"],
             }
             if should_restart:
                 node["restart_numbering"] = True
@@ -185,9 +186,6 @@ def detect_structure(text: Any) -> Dict[str, Any]:
             last_topic_first_num = first_num
             had_free_line_since_last_topic = False
         elif not line.strip():
-            # Blank lines are meaningful formatting in SAP procedures. Keep an
-            # explicit free node so imports, standards and subsequent edits can
-            # reproduce the source text instead of compacting its sections.
             nodes.append({
                 "id": _uid(),
                 "type": "free",
@@ -254,7 +252,6 @@ def normalize_nodes(nodes: Any) -> List[Dict[str, Any]]:
             except (TypeError, ValueError):
                 level = 1
             level = max(1, min(8, level))
-            # Word-like editors do not permit jumping more than one level deeper.
             if previous_topic_level and level > previous_topic_level + 1:
                 level = previous_topic_level + 1
             previous_topic_level = level
@@ -266,6 +263,8 @@ def normalize_nodes(nodes: Any) -> List[Dict[str, Any]]:
             "text": text,
         }
         if node_type == "topic":
+            if isinstance(raw.get("path"), list):
+                n_dict["path"] = [int(x) for x in raw.get("path") if str(x).isdigit()]
             if raw.get("restart_numbering"):
                 n_dict["restart_numbering"] = True
             if raw.get("resume_numbering"):
@@ -279,23 +278,28 @@ def number_nodes(nodes: Any) -> List[Dict[str, Any]]:
     counters: List[int] = []
     suspended_counters: List[List[int]] = []
     numbered: List[Dict[str, Any]] = []
-    for node in normalize_nodes(nodes):
+    all_nodes = normalize_nodes(nodes)
+    for node in all_nodes:
         item = dict(node)
         if item["type"] != "topic":
             item["number"] = ""
             numbered.append(item)
             continue
         level = node["level"]
+        path = node.get("path")
         if node.get("restart_numbering"):
             if counters:
                 suspended_counters.append(list(counters))
-            counters = [1] * level
+            counters = list(path) if isinstance(path, list) and len(path) == level else [1] * level
         elif node.get("resume_numbering") and suspended_counters:
             counters = suspended_counters.pop()
             level = len(counters)
             counters[-1] += 1
         elif not counters:
-            counters = [1] * level
+            if len(all_nodes) == 1 and isinstance(path, list) and len(path) == level:
+                counters = list(path)
+            else:
+                counters = [1] * level
         elif level > len(counters):
             counters.extend([1] * (level - len(counters)))
         elif level == len(counters):
