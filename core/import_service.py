@@ -379,11 +379,13 @@ def parse_operation_sheets(reader, sheet_names, column_mapping=None, selected_en
         h, start_row = detect_headers(rows) if rows else (None, 0)
         op_map = (column_mapping or {}).get('operations', {}) if column_mapping else {}
         
-        def get_op_col(row, mapping_key, candidates):
+        def get_op_col(row, mapping_key, candidates, is_exact=False):
             if mapping_key in op_map and isinstance(op_map[mapping_key], int) and op_map[mapping_key] < len(row):
-                return row[op_map[mapping_key]]
+                val = row[op_map[mapping_key]]
+                if val is not None and str(val).strip() != '':
+                    return val
             if h:
-                return find_val(row, h, *candidates)
+                return find_exact_val(row, h, *candidates) if is_exact else find_val(row, h, *candidates)
             return None
 
         if rows and len(rows) > 1:
@@ -392,10 +394,24 @@ def parse_operation_sheets(reader, sheet_names, column_mapping=None, selected_en
                 row = rows[rn]
                 if not row: continue
                 ident = get_op_col(row, 'legacy_identifier', ['identificador', 'id'])
-                code = get_op_col(row, 'operation_code', ['opera', 'oper', 'código', 'codigo'])
-                short = get_op_col(row, 'short_text', ['texto breve', 'descri', 'texto'])
+                
+                # Prioritize exact numeric column (e.g. 'oper.', 'oper', 'op') over description ('OPERAÇÃO')
+                code = get_op_col(row, 'operation_code', ['oper.', 'oper', 'op', 'oper.sap', 'cod.oper'], is_exact=True)
+                if code is None or str(code).strip() == '':
+                    code = get_op_col(row, 'operation_code', ['opera', 'código', 'codigo'])
+
+                short = get_op_col(row, 'short_text', ['texto breve', 'operação', 'operacao', 'descri', 'denominação', 'denominacao'])
+                
+                # Defensive Swap Guard: if code is non-numeric text and short is numeric (or oper. column exists)
+                code_raw = str(code or '').strip().replace('.0', '')
+                if not code_raw.isdigit() and h:
+                    numeric_code = find_exact_val(row, h, 'oper.', 'oper', 'op')
+                    if numeric_code is not None and str(numeric_code).strip().replace('.0', '').isdigit():
+                        short = code
+                        code = numeric_code
+
                 if ident is None or code is None or short is None: continue
-                sub_code = get_op_col(row, 'suboperation_code', ['sub opera', 'suboper', 'sub']) or ''
+                sub_code = get_op_col(row, 'suboperation_code', ['sub oper.', 'sub oper', 'suboper', 'sub']) or ''
                 wc = get_op_col(row, 'work_center', ['centro de trabalho', 'centro trabalho', 'ct']) or ''
                 unit = get_op_col(row, 'unit', ['unidade', 'unid']) or 'H'
                 hc = get_op_col(row, 'headcount', ['efetivo', 'homens', 'pess'])
@@ -488,12 +504,14 @@ def parse_operation_sheets(reader, sheet_names, column_mapping=None, selected_en
                 row = rows[rn]
                 if not row: continue
                 ident = get_lt_col(row, 'legacy_identifier', ['identificador', 'id'])
-                code_candidates = ['oper.', 'oper', 'operação', 'operacao']
-                code = get_lt_col(row, 'operation_code', code_candidates, is_exact=True) or ''
+                code_candidates_numeric = ['oper.', 'oper', 'op', 'oper.sap', 'cod.oper']
+                code = get_lt_col(row, 'operation_code', code_candidates_numeric, is_exact=True) or ''
+                if not str(code).strip().replace('.0', '').isdigit():
+                    code = get_lt_col(row, 'operation_code', ['operação', 'operacao']) or ''
                 # Defensive correction for cached/legacy mappings that chose
                 # the descriptive OPERAÇÃO column instead of numeric `oper`.
                 if not str(code).strip().replace('.0', '').isdigit() and h:
-                    numeric_code = find_exact_val(row, h, 'oper.', 'oper')
+                    numeric_code = find_exact_val(row, h, 'oper.', 'oper', 'op')
                     if numeric_code is not None and str(numeric_code).strip().replace('.0', '').isdigit():
                         code = numeric_code
                 has_mapped_code = isinstance(lt_map.get('operation_code'), int)
@@ -1385,7 +1403,6 @@ def confirm_import(project_id, preview_data, merge_mode='replace'):
         next_identifier = 1
         if merge_mode == 'merge':
             cursor.execute("SELECT legacy_identifier FROM maintenance_items WHERE project_id=?", (project_id,))
-            numeric_ids = []
             for row in cursor.fetchall():
                 existing_identifier = normalize_identifier(row['legacy_identifier'])
                 used_identifiers.add(existing_identifier)
