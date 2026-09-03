@@ -347,18 +347,23 @@ window.ExportManager = {
     submitSelectedExport() {
         const projectId = window.App ? App.getValidProjectId() : null;
         if (!projectId) return UI.showToast('Selecione um projeto para exportar.', 'warning');
-        if (this.selectedItemIds.size === 0) {
+        
+        let targetIds = Array.from(this.selectedItemIds);
+        if (targetIds.length === 0 && this.filteredItems.length > 0) {
+            targetIds = this.filteredItems.map(i => i.id);
+        }
+        if (targetIds.length === 0) {
             return UI.showToast('Selecione ao menos 1 item para exportar.', 'warning');
         }
 
-        const itemIdsArray = Array.from(this.selectedItemIds).join(',');
+        const itemIdsArray = targetIds.join(',');
         this.closeSelectModal();
         if (this.exportKind === 'systems') {
             window.open(`/api/export/systems?project_id=${projectId}&item_ids=${encodeURIComponent(itemIdsArray)}`, '_blank');
         } else {
             window.open(`/api/export?type=full&scope=full&project_id=${projectId}&item_ids=${encodeURIComponent(itemIdsArray)}`, '_blank');
         }
-        UI.showToast(`Gerando exportação de ${this.selectedItemIds.size} item(ns) selecionado(s)...`, 'info');
+        UI.showToast(`Gerando exportação de ${targetIds.length} item(ns) selecionado(s)...`, 'info');
     }
 };
 

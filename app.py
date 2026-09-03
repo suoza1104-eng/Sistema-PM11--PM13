@@ -1508,14 +1508,9 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
             if path == '/api/export/systems':
                 proj_id = int(q_params.get('project_id', 0))
                 raw_item_ids = q_params.get('item_ids')
-                item_ids = [int(x.strip()) for x in str(raw_item_ids).split(',') if x.strip().isdigit()] if raw_item_ids else None
-                content = export_service.export_pm13_systems_xlsx(proj_id, item_ids=item_ids)
-                project = models.get_project(proj_id) or {'name': 'PM13'}
                 safe_name = re.sub(r'[^A-Za-z0-9_-]+', '_', project.get('name') or 'PM13')
                 stamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
                 filename = f"CARGA_SISTEMAS_PM13_SELECIONADOS_{stamp}.xlsx" if item_ids else f"CARGA_SISTEMAS_PM13_{safe_name}_{stamp}.xlsx"
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
                 self.send_header('Content-Disposition', f'attachment; filename="{filename}"')
                 self.send_header('Content-Length', len(content))
                 self.end_headers()
@@ -1565,21 +1560,19 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
 
                     # Filtering for specific items if item_ids or item_identifiers is specified in query parameters
                     has_item_filter = False
-                    raw_item_ids = q_params.get('item_ids') or filters.get('item_ids')
-                    raw_item_idents = q_params.get('item_identifiers') or filters.get('item_identifiers')
+                    raw_item_ids = q_params.get('item_ids') or filters.get('item_ids') or q_params.get('item_identifiers') or filters.get('item_identifiers')
 
                     if raw_item_ids:
                         target_ids = set()
+                        target_idents = set()
                         for part in str(raw_item_ids).split(','):
-                            if part.strip().isdigit():
-                                target_ids.add(int(part.strip()))
-                        if target_ids:
-                            items = [i for i in items if i['id'] in target_ids]
-                            has_item_filter = True
-                    elif raw_item_idents:
-                        target_idents = {x.strip() for x in str(raw_item_idents).split(',') if x.strip()}
-                        if target_idents:
-                            items = [i for i in items if str(i.get('legacy_identifier', '')).strip() in target_idents]
+                            p = part.strip()
+                            if p:
+                                target_idents.add(p)
+                                if p.isdigit():
+                                    target_ids.add(int(p))
+                        if target_ids or target_idents:
+                            items = [i for i in items if (i.get('id') in target_ids) or (str(i.get('legacy_identifier') or '').strip() in target_idents)]
                             has_item_filter = True
 
                     if has_item_filter:

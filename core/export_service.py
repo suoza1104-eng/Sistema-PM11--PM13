@@ -1067,12 +1067,21 @@ def export_pm13_systems_xlsx(project_id, item_ids=None):
             WHERE t.project_id=? ORDER BY i.legacy_identifier,o.id,COALESCE(t.display_order,t.line_sequence),t.id""",(project_id,)).fetchall()]
 
         if item_ids:
-            target_ids = set(item_ids) if isinstance(item_ids, (list, set, tuple)) else set()
-            if target_ids:
-                items = [i for i in items if i['id'] in target_ids]
+            raw_str_ids = set()
+            raw_int_ids = set()
+            raw_input = item_ids if isinstance(item_ids, (list, set, tuple)) else str(item_ids).split(',')
+            for x in raw_input:
+                s = str(x).strip()
+                if s:
+                    raw_str_ids.add(s)
+                    if s.isdigit():
+                        raw_int_ids.add(int(s))
+            if raw_int_ids or raw_str_ids:
+                items = [i for i in items if (i.get('id') in raw_int_ids) or (str(i.get('legacy_identifier') or '').strip() in raw_str_ids)]
                 bound_plan_ids = {i['plan_id'] for i in items if i.get('plan_id')}
                 plans = [p for p in plans if p['id'] in bound_plan_ids]
-                operations = [o for o in operations if o['item_id'] in target_ids]
+                selected_item_ids = {i['id'] for i in items}
+                operations = [o for o in operations if o['item_id'] in selected_item_ids]
                 bound_op_ids = {o['id'] for o in operations}
                 long_texts = [t for t in long_texts if t['operation_id'] in bound_op_ids]
 
