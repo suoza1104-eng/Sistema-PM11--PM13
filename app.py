@@ -1576,12 +1576,25 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                             has_item_filter = True
 
                     if has_item_filter:
-                        selected_item_ids = {i['id'] for i in items}
+                        selected_item_ids = {i['id'] for i in items if i.get('id') is not None}
+                        selected_idents = {str(i.get('legacy_identifier') or '').strip() for i in items if i.get('legacy_identifier')}
+                        
                         bound_plan_ids = {i['plan_id'] for i in items if i.get('plan_id')}
-                        plans = [p for p in plans if p['id'] in bound_plan_ids]
-                        operations = [o for o in operations if o['item_id'] in selected_item_ids]
-                        selected_op_ids = {o['id'] for o in operations}
-                        long_texts = [t for t in long_texts if t['operation_id'] in selected_op_ids]
+                        plans = [p for p in plans if p.get('id') in bound_plan_ids]
+                        
+                        operations = [
+                            o for o in operations 
+                            if (o.get('item_id') in selected_item_ids) 
+                            or (str(o.get('legacy_identifier') or '').strip() in selected_idents)
+                        ]
+                        
+                        selected_op_ids = {o['id'] for o in operations if o.get('id') is not None}
+                        long_texts = [
+                            t for t in long_texts 
+                            if (t.get('operation_id') in selected_op_ids) 
+                            or (t.get('item_id') in selected_item_ids) 
+                            or (str(t.get('legacy_identifier') or '').strip() in selected_idents)
+                        ]
 
                     balance = calculations.project_balance(proj_id, {}) if scope == 'full' else {'stops': []}
                     # The available-HH line is the project's current managerial target.
@@ -1590,8 +1603,13 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                         stop['available_hh'] = target_hh
                     priorimeter_rows = models.list_priorimeter(proj_id, status='') if scope == 'full' else []
                     if has_item_filter and priorimeter_rows:
-                        selected_item_ids = {i['id'] for i in items}
-                        priorimeter_rows = [r for r in priorimeter_rows if r.get('item_id') in selected_item_ids]
+                        selected_item_ids = {i['id'] for i in items if i.get('id') is not None}
+                        selected_idents = {str(i.get('legacy_identifier') or '').strip() for i in items if i.get('legacy_identifier')}
+                        priorimeter_rows = [
+                            r for r in priorimeter_rows 
+                            if (r.get('item_id') in selected_item_ids) 
+                            or (str(r.get('legacy_identifier') or '').strip() in selected_idents)
+                        ]
 
                     content = export_service.export_sap_workbook(
                         plans, items, operations, long_texts, balance,

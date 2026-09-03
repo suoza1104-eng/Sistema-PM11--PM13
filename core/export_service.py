@@ -1122,11 +1122,23 @@ def export_pm13_systems_xlsx(project_id, item_ids=None):
             if raw_int_ids or raw_str_ids:
                 items = [i for i in items if (i.get('id') in raw_int_ids) or (str(i.get('legacy_identifier') or '').strip() in raw_str_ids)]
                 bound_plan_ids = {i['plan_id'] for i in items if i.get('plan_id')}
-                plans = [p for p in plans if p['id'] in bound_plan_ids]
-                selected_item_ids = {i['id'] for i in items}
-                operations = [o for o in operations if o['item_id'] in selected_item_ids]
-                bound_op_ids = {o['id'] for o in operations}
-                long_texts = [t for t in long_texts if t['operation_id'] in bound_op_ids]
+                plans = [p for p in plans if p.get('id') in bound_plan_ids]
+                selected_item_ids = {i['id'] for i in items if i.get('id') is not None}
+                selected_idents = {str(i.get('legacy_identifier') or '').strip() for i in items if i.get('legacy_identifier')}
+                
+                operations = [
+                    o for o in operations 
+                    if (o.get('item_id') in selected_item_ids) 
+                    or (str(o.get('legacy_identifier') or '').strip() in selected_idents)
+                ]
+                
+                bound_op_ids = {o['id'] for o in operations if o.get('id') is not None}
+                long_texts = [
+                    t for t in long_texts 
+                    if (t.get('operation_id') in bound_op_ids) 
+                    or (t.get('item_id') in selected_item_ids) 
+                    or (str(t.get('legacy_identifier') or '').strip() in selected_idents)
+                ]
 
         def clean_object_code(value):
             value = str(value or '').strip()
@@ -1299,8 +1311,16 @@ def export_pm13_systems_xlsx(project_id, item_ids=None):
             'tanks_gases', 'leak_exposure', 'pressurized_systems', 'energized_electrical',
             'confined_spaces', 'height_over_2m', 'hot_metal', 'difficult_technical', 'hydraulic_jack'
         ]
-        priorimeter_rows = [priorimeter_headers]
-        for row in list_priorimeter(project_id, status=''):
+        prio_all = list_priorimeter(project_id, status='')
+        if item_ids and (raw_int_ids or raw_str_ids):
+            selected_item_ids = {i['id'] for i in items if i.get('id') is not None}
+            selected_idents = {str(i.get('legacy_identifier') or '').strip() for i in items if i.get('legacy_identifier')}
+            prio_all = [
+                r for r in prio_all 
+                if (r.get('item_id') in selected_item_ids) 
+                or (str(r.get('legacy_identifier') or '').strip() in selected_idents)
+            ]
+        for row in prio_all:
             priorimeter_rows.append([row.get(field, '') for field in priorimeter_fields])
 
         sheets = [
