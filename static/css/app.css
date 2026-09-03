@@ -780,10 +780,51 @@ tr.row-color-red td {
     align-items: flex-end;
 }
 
-/* Multi-select dropdowns need to escape the generic .card overflow clipping. */
-.filters-card { overflow: visible; position: relative; z-index: 30; }
-.filters-card .card-body { overflow: visible; }
-.balance-filters-grid { overflow: visible; }
+/* Multi-select and searchable dropdowns need to escape generic .card overflow clipping across ALL tabs. */
+.card.filter-card,
+.card.filters-card,
+.card.priorimeter-filter-card,
+.filter-card,
+.filters-card,
+.priorimeter-filter-card,
+.balance-filter-card,
+.items-filter-card,
+.plans-filter-card,
+.chars-filter-card,
+.tpl-filter-card,
+[class*="filter-card"] {
+    overflow: visible !important;
+    position: relative;
+    z-index: 100 !important;
+}
+
+/* When collapsed, keep overflow hidden to maintain clean rounded borders */
+.card.filter-card.collapsed,
+.card.filters-card.collapsed,
+.filter-card.collapsed,
+.filters-card.collapsed,
+[class*="filter-card"].collapsed {
+    overflow: hidden !important;
+}
+
+/* All filter container bodies, grids and input wrappers must allow overflow */
+.filter-card .card-body,
+.filter-card .filter-body,
+.filters-card .card-body,
+.filters-card .filter-body,
+.priorimeter-filter-card .card-body,
+.priorimeter-filter-card .filter-body,
+[class*="filter-card"] .card-body,
+[class*="filter-card"] .filter-body,
+.filters-grid,
+.filters-actions,
+.form-group,
+.form-group-compact,
+.searchable-select-wrapper,
+.custom-select-container,
+.balance-filters-grid {
+    overflow: visible !important;
+}
 
 .form-group-compact {
     display: flex;
@@ -1960,7 +2001,6 @@ tr.row-color-red td {
 .wizard-steps-body {
     padding: 30px;
     min-height: 420px;
-    overflow: visible;
 }
 
 .wizard-steps-footer {
