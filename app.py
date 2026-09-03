@@ -845,9 +845,9 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                     where.append("o.work_center = ?")
                     params.append(work_center)
                 if search:
-                    where.append("(i.legacy_identifier LIKE ? OR o.operation_code LIKE ? OR o.suboperation_code LIKE ? OR o.work_center LIKE ? OR o.short_text LIKE ? OR i.object_code LIKE ?)")
+                    where.append("(CAST(i.legacy_identifier AS TEXT) LIKE ? OR CAST(i.id AS TEXT) LIKE ? OR CAST(o.id AS TEXT) LIKE ? OR CAST(o.item_id AS TEXT) LIKE ? OR COALESCE(o.operation_code, '') LIKE ? OR COALESCE(o.suboperation_code, '') LIKE ? OR COALESCE(o.work_center, '') LIKE ? OR COALESCE(o.short_text, '') LIKE ? OR COALESCE(i.object_code, '') LIKE ? OR COALESCE(i.description, '') LIKE ?)")
                     s_term = f"%{search}%"
-                    params.extend([s_term, s_term, s_term, s_term, s_term, s_term])
+                    params.extend([s_term] * 10)
                 where_str = " AND ".join(where)
 
                 cursor.execute(f"SELECT COUNT(*) FROM item_operations o LEFT JOIN maintenance_items i ON i.id=o.item_id AND i.deleted_at IS NULL WHERE {where_str}", params)
@@ -1014,9 +1014,9 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                     where.append("o.id = ?")
                     params.append(int(operation_id))
                 if search:
-                    where.append("(i.legacy_identifier LIKE ? OR o.operation_code LIKE ? OR o.short_text LIKE ? OR t.text LIKE ?)")
+                    where.append("(CAST(i.legacy_identifier AS TEXT) LIKE ? OR CAST(i.id AS TEXT) LIKE ? OR CAST(o.id AS TEXT) LIKE ? OR CAST(o.item_id AS TEXT) LIKE ? OR CAST(t.id AS TEXT) LIKE ? OR COALESCE(o.operation_code, '') LIKE ? OR COALESCE(o.suboperation_code, '') LIKE ? OR COALESCE(o.short_text, '') LIKE ? OR COALESCE(t.text, '') LIKE ? OR COALESCE(i.object_code, '') LIKE ? OR COALESCE(i.description, '') LIKE ?)")
                     s_term = f"%{search}%"
-                    params.extend([s_term, s_term, s_term, s_term])
+                    params.extend([s_term] * 11)
                 where_str = " AND ".join(where)
 
                 cursor.execute(f"""SELECT COUNT(*) FROM item_operations o

@@ -763,18 +763,18 @@
                     <!-- Filtros gerais - Operações -->
                     <div class="card filters-card" style="margin-bottom: 16px; padding: 10px 16px;">
                         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                            <input type="search" id="filter-ops-search" placeholder="Pesquisar por ID, operação, C.T. ou texto breve..." style="flex: 2; min-width: 220px; height: 34px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-primary); font-size: 13px;">
-                            <select id="filter-ops-wc" style="height: 34px; min-width: 150px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-primary); font-size: 13px;"><option value="">Todos os C.T.</option></select>
-                            <select id="filter-ops-issues" style="height: 34px; min-width: 170px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-primary); font-size: 13px;">
+                            <input type="search" id="filter-ops-search" placeholder="Pesquisar por ID, operação, C.T. ou texto breve..." style="flex: 2; min-width: 220px; height: 34px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-primary); font-size: 13px;" onkeydown="if(event.key==='Enter'){ event.preventDefault(); Operations.applyOpFilters(); }" onsearch="Operations.applyOpFilters()">
+                            <select id="filter-ops-wc" style="height: 34px; min-width: 150px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-primary); font-size: 13px;" onchange="Operations.applyOpFilters()"><option value="">Todos os C.T.</option></select>
+                            <select id="filter-ops-issues" style="height: 34px; min-width: 170px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-primary); font-size: 13px;" onchange="Operations.applyOpFilters()">
                                 <option value="">Todas as Operações</option>
                                 <option value="issues">⚠️ / ⛔ Com Inconsistências</option>
                                 <option value="ERROR">⛔ Apenas Erros</option>
                                 <option value="WARNING">⚠️ Apenas Avisos</option>
                                 <option value="OK">✓ Apenas Operações Limpas</option>
                             </select>
-                            <select id="filter-ops-row-color" style="height:34px;min-width:155px;"><option value="">⬜ Todas as cores</option><option value="red">🟥 Vermelho</option><option value="green">🟩 Verde</option><option value="light_blue">🔹 Azul claro</option><option value="dark_blue">🟦 Azul escuro</option><option value="purple">🟪 Roxo</option><option value="pink">🌸 Rosa</option><option value="orange">🟧 Laranja</option><option value="yellow">🟨 Amarelo</option><option value="black">⬛ Preto</option></select>
-                            <button class="btn btn-primary" style="height: 34px;" id="btn-apply-ops-filters">Buscar</button>
-                            <button class="btn btn-outline" style="height: 34px;" id="btn-clear-ops-filters">Limpar</button>
+                            <select id="filter-ops-row-color" style="height:34px;min-width:155px;" onchange="Operations.applyOpFilters()"><option value="">⬜ Todas as cores</option><option value="red">🟥 Vermelho</option><option value="green">🟩 Verde</option><option value="light_blue">🔹 Azul claro</option><option value="dark_blue">🟦 Azul escuro</option><option value="purple">🟪 Roxo</option><option value="pink">🌸 Rosa</option><option value="orange">🟧 Laranja</option><option value="yellow">🟨 Amarelo</option><option value="black">⬛ Preto</option></select>
+                            <button class="btn btn-primary" style="height: 34px;" id="btn-apply-ops-filters" onclick="Operations.applyOpFilters()">Buscar</button>
+                            <button class="btn btn-outline" style="height: 34px;" id="btn-clear-ops-filters" onclick="Operations.clearOpFilters()">Limpar</button>
                             <span id="operations-total-count" style="font-size: 12px; color: var(--text-muted); font-weight: 600; margin-left: 4px;">Carregando...</span>
                         </div>
                     </div>
@@ -835,17 +835,17 @@
                     <!-- Filtros gerais - Textos Longos -->
                     <div class="card filters-card" style="margin-bottom: 16px; padding: 10px 16px;">
                         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                            <input type="search" id="filter-lt-search" placeholder="Pesquisar por ID, operação ou conteúdo do procedimento..." style="flex: 2; min-width: 280px; height: 34px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-primary); font-size: 13px;">
-                            <select id="filter-lt-issues" style="height: 34px; min-width: 170px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-primary); font-size: 13px;">
+                            <input type="search" id="filter-lt-search" placeholder="Pesquisar por ID, operação ou conteúdo do procedimento..." style="flex: 2; min-width: 280px; height: 34px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-primary); font-size: 13px;" onkeydown="if(event.key==='Enter'){ event.preventDefault(); Operations.applyLtFilters(); }" onsearch="Operations.applyLtFilters()">
+                            <select id="filter-lt-issues" style="height: 34px; min-width: 170px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-primary); font-size: 13px;" onchange="Operations.applyLtFilters()">
                                 <option value="">Todos os Textos Longos</option>
                                 <option value="issues">⚠️ / ⛔ Com Inconsistências</option>
                                 <option value="ERROR">⛔ Apenas Erros</option>
                                 <option value="WARNING">⚠️ Apenas Avisos</option>
                                 <option value="OK">✓ Apenas Textos Limpos</option>
                             </select>
-                            <select id="filter-lt-row-color" style="height:34px;min-width:155px;"><option value="">⬜ Todas as cores</option><option value="red">🟥 Vermelho</option><option value="green">🟩 Verde</option><option value="light_blue">🔹 Azul claro</option><option value="dark_blue">🟦 Azul escuro</option><option value="purple">🟪 Roxo</option><option value="pink">🌸 Rosa</option><option value="orange">🟧 Laranja</option><option value="yellow">🟨 Amarelo</option><option value="black">⬛ Preto</option></select>
-                            <button class="btn btn-primary" style="height: 34px;" id="btn-apply-lt-filters">Buscar</button>
-                            <button class="btn btn-outline" style="height: 34px;" id="btn-clear-lt-filters">Limpar</button>
+                            <select id="filter-lt-row-color" style="height:34px;min-width:155px;" onchange="Operations.applyLtFilters()"><option value="">⬜ Todas as cores</option><option value="red">🟥 Vermelho</option><option value="green">🟩 Verde</option><option value="light_blue">🔹 Azul claro</option><option value="dark_blue">🟦 Azul escuro</option><option value="purple">🟪 Roxo</option><option value="pink">🌸 Rosa</option><option value="orange">🟧 Laranja</option><option value="yellow">🟨 Amarelo</option><option value="black">⬛ Preto</option></select>
+                            <button class="btn btn-primary" style="height: 34px;" id="btn-apply-lt-filters" onclick="Operations.applyLtFilters()">Buscar</button>
+                            <button class="btn btn-outline" style="height: 34px;" id="btn-clear-lt-filters" onclick="Operations.clearLtFilters()">Limpar</button>
                             <span id="long-texts-total-count" style="font-size: 12px; color: var(--text-muted); font-weight: 600; margin-left: 4px;">Carregando...</span>
                         </div>
                     </div>
