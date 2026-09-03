@@ -784,52 +784,7 @@ tr.row-color-red td {
 .card.filter-card,
 .card.filters-card,
 .card.priorimeter-filter-card,
-.filter-card,
-.filters-card,
-.priorimeter-filter-card,
-.balance-filter-card,
-.items-filter-card,
-.plans-filter-card,
-.chars-filter-card,
-.tpl-filter-card,
-[class*="filter-card"] {
-    overflow: visible !important;
-    position: relative;
-    z-index: 100 !important;
-}
-
-/* When collapsed, keep overflow hidden to maintain clean rounded borders */
-.card.filter-card.collapsed,
-.card.filters-card.collapsed,
 .filter-card.collapsed,
-.filters-card.collapsed,
-[class*="filter-card"].collapsed {
-    overflow: hidden !important;
-}
-
-/* All filter container bodies, grids and input wrappers must allow overflow */
-.filter-card .card-body,
-.filter-card .filter-body,
-.filters-card .card-body,
-.filters-card .filter-body,
-.priorimeter-filter-card .card-body,
-.priorimeter-filter-card .filter-body,
-[class*="filter-card"] .card-body,
-[class*="filter-card"] .filter-body,
-.filters-grid,
-.filters-actions,
-.form-group,
-.form-group-compact,
-.searchable-select-wrapper,
-.custom-select-container,
-.balance-filters-grid {
-    overflow: visible !important;
-}
-
-.form-group-compact {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
 }
 
 .form-group-compact label {
@@ -4700,6 +4655,165 @@ body:has(.selection-bar:not(.hidden)) .data-table.header-pinned thead th {
     font-size: 12px;
     color: var(--text-muted, #94A3B8);
     text-align: center;
+}
+
+/* Export Modal Multi-Select Dropdowns */
+.export-multiselect-container {
+    position: relative;
+    width: 100%;
+}
+
+.export-filter-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.export-ms-trigger {
+    width: 100%;
+    padding: 7px 10px;
+    font-size: 12px;
+    background: #ffffff;
+    border: 1px solid #CBD5E1;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #1E293B;
+    text-align: left;
+    transition: all 0.15s ease;
+    user-select: none;
+    box-sizing: border-box;
+}
+
+.export-ms-trigger:hover {
+    border-color: #94A3B8;
+    background: #F8FAFC;
+}
+
+.export-ms-trigger.open {
+    border-color: #15803D;
+    box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.15);
+}
+
+.export-ms-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.export-ms-arrow {
+    font-size: 9px;
+    color: #64748B;
+    margin-left: 6px;
+    transition: transform 0.15s ease;
+}
+
+.export-ms-trigger.open .export-ms-arrow {
+    transform: rotate(180deg);
+}
+
+.export-ms-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 240px;
+    width: max(100%, 280px);
+    max-width: 420px;
+    z-index: 3500;
+    background: #ffffff;
+    border: 1px solid #CBD5E1;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.2);
+    overflow: hidden;
+}
+
+.export-ms-search-wrap {
+    padding: 8px 10px;
+    background: #F8FAFC;
+    border-bottom: 1px solid #E2E8F0;
+}
+
+.export-ms-search-input {
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 12px;
+    border: 1px solid #CBD5E1;
+    border-radius: 5px;
+    outline: none;
+    background: #ffffff;
+    box-sizing: border-box;
+}
+
+.export-ms-search-input:focus {
+    border-color: #15803D;
+    box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.15);
+}
+
+.export-ms-actions {
+    padding: 6px 10px;
+    background: #F1F5F9;
+    border-bottom: 1px solid #E2E8F0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+}
+
+.export-ms-select-all {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #334155;
+    user-select: none;
+    margin: 0;
+}
+
+.export-ms-count {
+    color: #0284C7;
+    font-weight: 700;
+}
+
+.export-ms-options-list {
+    max-height: 220px;
+    overflow-y: auto;
+    padding: 4px 0;
+}
+
+.export-ms-option {
+    padding: 7px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #334155;
+    cursor: pointer;
+    transition: background 0.1s ease;
+    user-select: none;
+    margin: 0;
+}
+
+.export-ms-option:hover {
+    background: #F1F5F9;
+}
+
+.export-ms-option.selected {
+    background: #F0FDF4;
+    color: #15803D;
+    font-weight: 600;
+}
+
+.export-ms-option input[type="checkbox"] {
+    cursor: pointer;
+    width: 14px;
+    height: 14px;
+    accent-color: #15803D;
 }
 
 /* Project Cards Grid */

@@ -8,8 +8,71 @@ window.ExportManager = {
     allPlans: [],
     filteredItems: [],
 
+    // Multi-select filters state
+    selectedFilters: {
+        wc: new Set(),
+        gpm: new Set(),
+        parada: new Set(),
+        plan: new Set()
+    },
+    optionsData: {
+        wc: [],
+        gpm: [],
+        parada: [],
+        plan: []
+    },
+    searchQueries: {
+        wc: '',
+        gpm: '',
+        parada: '',
+        plan: ''
+    },
+
     init() {
         this.ensureModals();
+        this.bindClickOutside();
+    },
+
+    bindClickOutside() {
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.export-multiselect-container')) {
+                this.closeAllMultiSelectDropdowns();
+            }
+        });
+    },
+
+    closeAllMultiSelectDropdowns() {
+        document.querySelectorAll('.export-ms-dropdown').forEach(d => d.classList.add('hidden'));
+        document.querySelectorAll('.export-ms-trigger').forEach(t => t.classList.remove('open'));
+    },
+
+    toggleMultiSelectDropdown(type, event) {
+        if (event) event.stopPropagation();
+        const dropdown = document.getElementById(`export-ms-dropdown-${type}`);
+        const trigger = dropdown?.previousElementSibling;
+        const willOpen = dropdown?.classList.contains('hidden');
+
+        this.closeAllMultiSelectDropdowns();
+
+        if (willOpen && dropdown && trigger) {
+            dropdown.classList.remove('hidden');
+            trigger.classList.add('open');
+            const searchInput = dropdown.querySelector('.export-ms-search-input');
+            if (searchInput) searchInput.focus();
+        }
+    },
+
+    getItemParada(item) {
+        if (item.plan_phase) return `P${item.plan_phase}`;
+        if (item.plan_cycle_phase) {
+            const match = item.plan_cycle_phase.match(/P(\d+)/i);
+            if (match) return `P${match[1]}`;
+            return item.plan_cycle_phase;
+        }
+        const text = `${item.plan_code || ''} ${item.plan_description || ''} ${item.description || ''}`;
+        const match = text.match(/\bP(\d+)\b/i) || text.match(/\d+P(\d+)\b/i);
+        if (match) return `P${match[1]}`;
+        return '(Sem Parada)';
     },
 
     ensureModals() {
@@ -33,7 +96,7 @@ window.ExportManager = {
                                 <div class="export-scope-card" onclick="ExportManager.openItemSelectionModal()" style="background:#F0F9FF; border:2px solid #BAE6FD; border-radius:10px; padding:18px; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.borderColor='#0284C7'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='#BAE6FD'; this.style.transform='none'">
                                     <div style="font-size:28px; margin-bottom:8px;">🎯</div>
                                     <h3 style="font-size:15px; font-weight:700; color:#0369A1; margin-bottom:6px;">Itens Específicos</h3>
-                                    <p style="font-size:12px; color:#1E40AF; line-height:1.4; margin:0;">Escolha itens específicos via busca/filtros. As abas de planos, operações e textos longos serão filtradas para estes itens.</p>
+                                    <p style="font-size:12px; color:#1E40AF; line-height:1.4; margin:0;">Escolha itens específicos via busca/filtros múltiplos. As abas vinculadas serão filtradas automaticamente.</p>
                                     <span class="badge" style="background:#E0F2FE; color:#0369A1; margin-top:12px; display:inline-block; font-size:11px;">Seleção com Filtros</span>
                                 </div>
                             </div>
@@ -50,7 +113,7 @@ window.ExportManager = {
         if (!document.getElementById('modal-export-select-items')) {
             const selectModalHtml = `
                 <div id="modal-export-select-items" class="modal-overlay hidden" style="z-index:2650">
-                    <div class="modal modal-lg" style="max-width:960px;">
+                    <div class="modal modal-lg" style="max-width:1080px;">
                         <div class="modal-header" style="background:#F8FAFC; border-bottom:1px solid #E2E8F0; padding:16px 20px;">
                             <div>
                                 <h2>🎯 Selecionar Itens para Exportação</h2>
@@ -58,33 +121,104 @@ window.ExportManager = {
                             </div>
                             <button class="btn-icon" onclick="ExportManager.closeSelectModal()">✕</button>
                         </div>
-                        <div class="modal-body" style="padding:16px 20px;">
-                            <!-- BARRA DE FILTROS -->
-                            <div style="background:#F1F5F9; border:1px solid #CBD5E1; border-radius:8px; padding:12px; margin-bottom:14px; display:grid; grid-template-columns: 2fr 1fr 1fr 1.2fr auto; gap:10px; align-items:center;">
+                        <div class="modal-body" style="padding:16px 20px; overflow:visible;">
+                            <!-- BARRA DE FILTROS COM MULTI-SELECT E PARADA -->
+                            <div style="background:#F1F5F9; border:1px solid #CBD5E1; border-radius:8px; padding:12px; margin-bottom:14px; display:grid; grid-template-columns: 1.8fr 1fr 1fr 1fr 1.4fr auto; gap:10px; align-items:flex-end; overflow:visible; position:relative; z-index:10;">
                                 <div>
-                                    <label style="font-size:11px; font-weight:700; color:#475569; display:block; margin-bottom:3px;">Busca rápida</label>
-                                    <input type="text" id="export-filter-search" placeholder="Buscar por descrição, equipamento, ID ou plano..." style="width:100%; padding:6px 8px; font-size:12px; border-radius:6px; border:1px solid #CBD5E1;" oninput="ExportManager.renderItemList()">
+                                    <label class="export-filter-label">Busca rápida</label>
+                                    <input type="text" id="export-filter-search" placeholder="Buscar por descrição, equipamento, ID ou plano..." style="width:100%; padding:7px 10px; font-size:12px; border-radius:6px; border:1px solid #CBD5E1;" oninput="ExportManager.renderItemList()">
                                 </div>
+
+                                <!-- CT Multi-Select -->
+                                <div class="export-multiselect-container" id="export-ms-container-wc">
+                                    <label class="export-filter-label">Centro de Trabalho (CT)</label>
+                                    <button type="button" class="export-ms-trigger" onclick="ExportManager.toggleMultiSelectDropdown('wc', event)">
+                                        <span class="export-ms-label" id="export-ms-label-wc">Todos os CTs</span>
+                                        <span class="export-ms-arrow">▼</span>
+                                    </button>
+                                    <div class="export-ms-dropdown hidden" id="export-ms-dropdown-wc">
+                                        <div class="export-ms-search-wrap">
+                                            <input type="text" class="export-ms-search-input" placeholder="🔍 Digite para buscar CT..." oninput="ExportManager.filterMultiSelectOptions('wc', this.value)">
+                                        </div>
+                                        <div class="export-ms-actions">
+                                            <label class="export-ms-select-all">
+                                                <input type="checkbox" id="export-ms-chk-all-wc" onchange="ExportManager.toggleMultiSelectAll('wc', this.checked)">
+                                                <span>Selecionar Todos</span>
+                                            </label>
+                                            <span class="export-ms-count" id="export-ms-count-wc">0 selec.</span>
+                                        </div>
+                                        <div class="export-ms-options-list" id="export-ms-options-wc"></div>
+                                    </div>
+                                </div>
+
+                                <!-- GPM Multi-Select -->
+                                <div class="export-multiselect-container" id="export-ms-container-gpm">
+                                    <label class="export-filter-label">GPM</label>
+                                    <button type="button" class="export-ms-trigger" onclick="ExportManager.toggleMultiSelectDropdown('gpm', event)">
+                                        <span class="export-ms-label" id="export-ms-label-gpm">Todos os GPMs</span>
+                                        <span class="export-ms-arrow">▼</span>
+                                    </button>
+                                    <div class="export-ms-dropdown hidden" id="export-ms-dropdown-gpm">
+                                        <div class="export-ms-search-wrap">
+                                            <input type="text" class="export-ms-search-input" placeholder="🔍 Digite para buscar GPM..." oninput="ExportManager.filterMultiSelectOptions('gpm', this.value)">
+                                        </div>
+                                        <div class="export-ms-actions">
+                                            <label class="export-ms-select-all">
+                                                <input type="checkbox" id="export-ms-chk-all-gpm" onchange="ExportManager.toggleMultiSelectAll('gpm', this.checked)">
+                                                <span>Selecionar Todos</span>
+                                            </label>
+                                            <span class="export-ms-count" id="export-ms-count-gpm">0 selec.</span>
+                                        </div>
+                                        <div class="export-ms-options-list" id="export-ms-options-gpm"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Parada Multi-Select (NOVO!) -->
+                                <div class="export-multiselect-container" id="export-ms-container-parada">
+                                    <label class="export-filter-label">Parada (Fase)</label>
+                                    <button type="button" class="export-ms-trigger" onclick="ExportManager.toggleMultiSelectDropdown('parada', event)">
+                                        <span class="export-ms-label" id="export-ms-label-parada">Todas as Paradas</span>
+                                        <span class="export-ms-arrow">▼</span>
+                                    </button>
+                                    <div class="export-ms-dropdown hidden" id="export-ms-dropdown-parada">
+                                        <div class="export-ms-search-wrap">
+                                            <input type="text" class="export-ms-search-input" placeholder="🔍 Buscar P1, P2, P3..." oninput="ExportManager.filterMultiSelectOptions('parada', this.value)">
+                                        </div>
+                                        <div class="export-ms-actions">
+                                            <label class="export-ms-select-all">
+                                                <input type="checkbox" id="export-ms-chk-all-parada" onchange="ExportManager.toggleMultiSelectAll('parada', this.checked)">
+                                                <span>Selecionar Todos</span>
+                                            </label>
+                                            <span class="export-ms-count" id="export-ms-count-parada">0 selec.</span>
+                                        </div>
+                                        <div class="export-ms-options-list" id="export-ms-options-parada"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Plano Multi-Select -->
+                                <div class="export-multiselect-container" id="export-ms-container-plan">
+                                    <label class="export-filter-label">Plano Vinculado</label>
+                                    <button type="button" class="export-ms-trigger" onclick="ExportManager.toggleMultiSelectDropdown('plan', event)">
+                                        <span class="export-ms-label" id="export-ms-label-plan">Todos os Planos</span>
+                                        <span class="export-ms-arrow">▼</span>
+                                    </button>
+                                    <div class="export-ms-dropdown hidden" id="export-ms-dropdown-plan">
+                                        <div class="export-ms-search-wrap">
+                                            <input type="text" class="export-ms-search-input" placeholder="🔍 Buscar por código/nome do plano..." oninput="ExportManager.filterMultiSelectOptions('plan', this.value)">
+                                        </div>
+                                        <div class="export-ms-actions">
+                                            <label class="export-ms-select-all">
+                                                <input type="checkbox" id="export-ms-chk-all-plan" onchange="ExportManager.toggleMultiSelectAll('plan', this.checked)">
+                                                <span>Selecionar Todos</span>
+                                            </label>
+                                            <span class="export-ms-count" id="export-ms-count-plan">0 selec.</span>
+                                        </div>
+                                        <div class="export-ms-options-list" id="export-ms-options-plan"></div>
+                                    </div>
+                                </div>
+
                                 <div>
-                                    <label style="font-size:11px; font-weight:700; color:#475569; display:block; margin-bottom:3px;">Centro de Trabalho (CT)</label>
-                                    <select id="export-filter-wc" style="width:100%; padding:6px; font-size:12px; border-radius:6px; border:1px solid #CBD5E1;" onchange="ExportManager.renderItemList()">
-                                        <option value="">Todos os CTs</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label style="font-size:11px; font-weight:700; color:#475569; display:block; margin-bottom:3px;">GPM</label>
-                                    <select id="export-filter-gpm" style="width:100%; padding:6px; font-size:12px; border-radius:6px; border:1px solid #CBD5E1;" onchange="ExportManager.renderItemList()">
-                                        <option value="">Todos os GPMs</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label style="font-size:11px; font-weight:700; color:#475569; display:block; margin-bottom:3px;">Plano Vinculado</label>
-                                    <select id="export-filter-plan" style="width:100%; padding:6px; font-size:12px; border-radius:6px; border:1px solid #CBD5E1;" onchange="ExportManager.renderItemList()">
-                                        <option value="">Todos os Planos</option>
-                                    </select>
-                                </div>
-                                <div style="padding-top:16px;">
-                                    <button class="btn btn-xs btn-outline" style="white-space:nowrap;" onclick="ExportManager.clearFilters()">Limpar Filtros</button>
+                                    <button class="btn btn-xs btn-outline" style="white-space:nowrap; padding:7px 10px; font-weight:600;" onclick="ExportManager.clearFilters()">Limpar Filtros</button>
                                 </div>
                             </div>
 
@@ -109,12 +243,13 @@ window.ExportManager = {
                                             <th style="width:150px;">Equipamento / Nota</th>
                                             <th>Descrição do Item</th>
                                             <th>Plano Vinculado</th>
+                                            <th style="width:75px;">Parada</th>
                                             <th style="width:80px;">CT</th>
                                             <th style="width:65px;">GPM</th>
                                         </tr>
                                     </thead>
                                     <tbody id="export-items-tbody">
-                                        <tr><td colspan="7" class="text-center py-12">Carregando itens do projeto...</td></tr>
+                                        <tr><td colspan="8" class="text-center py-12">Carregando itens do projeto...</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -164,6 +299,7 @@ window.ExportManager = {
     },
 
     closeSelectModal() {
+        this.closeAllMultiSelectDropdowns();
         const selectModal = document.getElementById('modal-export-select-items');
         if (selectModal) {
             selectModal.classList.add('hidden');
@@ -224,32 +360,170 @@ window.ExportManager = {
     },
 
     populateFilterDropdowns() {
-        const wcSelect = document.getElementById('export-filter-wc');
-        const gpmSelect = document.getElementById('export-filter-gpm');
-        const planSelect = document.getElementById('export-filter-plan');
-
         const wcs = [...new Set(this.allItems.map(i => i.work_center).filter(Boolean))].sort();
         const gpms = [...new Set(this.allItems.map(i => i.gpm).filter(Boolean))].sort();
-        const plans = this.allPlans.map(p => ({ id: p.id, label: `${p.legacy_code} - ${p.description || ''}` })).sort((a,b) => a.label.localeCompare(b.label));
 
-        if (wcSelect) {
-            wcSelect.innerHTML = '<option value="">Todos os CTs</option>' + wcs.map(wc => `<option value="${UI.escapeHTML(wc)}">${UI.escapeHTML(wc)}</option>`).join('');
-        }
-        if (gpmSelect) {
-            gpmSelect.innerHTML = '<option value="">Todos os GPMs</option>' + gpms.map(gpm => `<option value="${UI.escapeHTML(gpm)}">${UI.escapeHTML(gpm)}</option>`).join('');
-        }
-        if (planSelect) {
-            planSelect.innerHTML = '<option value="">Todos os Planos</option>' + plans.map(p => `<option value="${p.id}">${UI.escapeHTML(p.label)}</option>`).join('');
-        }
+        // Extract unique paradas (P1, P2, P3, P4...)
+        const paradasSet = new Set();
+        this.allItems.forEach(i => {
+            const p = this.getItemParada(i);
+            if (p) paradasSet.add(p);
+        });
+        const paradas = [...paradasSet].sort((a, b) => {
+            const numA = parseInt(a.replace(/\D/g, '') || '0', 10);
+            const numB = parseInt(b.replace(/\D/g, '') || '0', 10);
+            return numA - numB || a.localeCompare(b);
+        });
+
+        // Unique plans
+        const plans = this.allPlans.map(p => ({
+            id: String(p.id),
+            label: `${p.legacy_code} - ${p.description || ''}`
+        })).sort((a, b) => a.label.localeCompare(b.label));
+
+        this.optionsData = {
+            wc: wcs.map(v => ({ id: v, label: v })),
+            gpm: gpms.map(v => ({ id: v, label: v })),
+            parada: paradas.map(v => ({ id: v, label: v })),
+            plan: plans
+        };
+
+        // Reset filter selections
+        this.selectedFilters.wc.clear();
+        this.selectedFilters.gpm.clear();
+        this.selectedFilters.parada.clear();
+        this.selectedFilters.plan.clear();
+
+        this.searchQueries = { wc: '', gpm: '', parada: '', plan: '' };
+
+        ['wc', 'gpm', 'parada', 'plan'].forEach(type => {
+            const searchInput = document.querySelector(`#export-ms-dropdown-${type} .export-ms-search-input`);
+            if (searchInput) searchInput.value = '';
+            this.renderMultiSelectOptions(type);
+        });
 
         document.getElementById('export-filter-search').value = '';
     },
 
+    renderMultiSelectOptions(type) {
+        const container = document.getElementById(`export-ms-options-${type}`);
+        if (!container) return;
+
+        const options = this.optionsData[type] || [];
+        const selectedSet = this.selectedFilters[type];
+        const query = (this.searchQueries[type] || '').toLowerCase().trim();
+
+        const filteredOpts = options.filter(opt => opt.label.toLowerCase().includes(query));
+
+        if (filteredOpts.length === 0) {
+            container.innerHTML = '<div style="padding:10px; font-size:11.5px; color:#94A3B8; text-align:center;">Nenhuma opção encontrada</div>';
+        } else {
+            container.innerHTML = filteredOpts.map(opt => {
+                const isChecked = selectedSet.has(opt.id);
+                return `
+                    <label class="export-ms-option ${isChecked ? 'selected' : ''}" onclick="event.stopPropagation();">
+                        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="ExportManager.toggleMultiSelectOption('${type}', '${UI.escapeHTML(opt.id)}')">
+                        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${UI.escapeHTML(opt.label)}</span>
+                    </label>
+                `;
+            }).join('');
+        }
+
+        // Update select all checkbox state
+        const chkAll = document.getElementById(`export-ms-chk-all-${type}`);
+        if (chkAll) {
+            chkAll.checked = filteredOpts.length > 0 && filteredOpts.every(o => selectedSet.has(o.id));
+        }
+
+        // Update count badge & trigger label
+        const countBadge = document.getElementById(`export-ms-count-${type}`);
+        if (countBadge) {
+            countBadge.textContent = `${selectedSet.size} selec.`;
+        }
+
+        this.updateTriggerLabel(type);
+    },
+
+    updateTriggerLabel(type) {
+        const labelEl = document.getElementById(`export-ms-label-${type}`);
+        if (!labelEl) return;
+
+        const selectedSet = this.selectedFilters[type];
+        const count = selectedSet.size;
+        const total = (this.optionsData[type] || []).length;
+
+        const titles = {
+            wc: 'Todos os CTs',
+            gpm: 'Todos os GPMs',
+            parada: 'Todas as Paradas',
+            plan: 'Todos os Planos'
+        };
+
+        const unitNames = {
+            wc: 'CT(s)',
+            gpm: 'GPM(s)',
+            parada: 'Parada(s)',
+            plan: 'Plano(s)'
+        };
+
+        if (count === 0 || count === total) {
+            labelEl.textContent = titles[type] || 'Todos';
+        } else if (count === 1) {
+            const singleId = Array.from(selectedSet)[0];
+            const opt = (this.optionsData[type] || []).find(o => String(o.id) === String(singleId));
+            labelEl.textContent = opt ? opt.label : `1 ${unitNames[type]}`;
+        } else {
+            labelEl.textContent = `${count} ${unitNames[type]} selec.`;
+        }
+    },
+
+    filterMultiSelectOptions(type, query) {
+        this.searchQueries[type] = query;
+        this.renderMultiSelectOptions(type);
+    },
+
+    toggleMultiSelectOption(type, value) {
+        const selectedSet = this.selectedFilters[type];
+        if (selectedSet.has(value)) {
+            selectedSet.delete(value);
+        } else {
+            selectedSet.add(value);
+        }
+        this.renderMultiSelectOptions(type);
+        this.renderItemList();
+    },
+
+    toggleMultiSelectAll(type, checked) {
+        const options = this.optionsData[type] || [];
+        const query = (this.searchQueries[type] || '').toLowerCase().trim();
+        const visibleOpts = options.filter(opt => opt.label.toLowerCase().includes(query));
+
+        visibleOpts.forEach(opt => {
+            if (checked) {
+                this.selectedFilters[type].add(opt.id);
+            } else {
+                this.selectedFilters[type].delete(opt.id);
+            }
+        });
+
+        this.renderMultiSelectOptions(type);
+        this.renderItemList();
+    },
+
     clearFilters() {
         document.getElementById('export-filter-search').value = '';
-        document.getElementById('export-filter-wc').value = '';
-        document.getElementById('export-filter-gpm').value = '';
-        document.getElementById('export-filter-plan').value = '';
+        this.selectedFilters.wc.clear();
+        this.selectedFilters.gpm.clear();
+        this.selectedFilters.parada.clear();
+        this.selectedFilters.plan.clear();
+
+        ['wc', 'gpm', 'parada', 'plan'].forEach(type => {
+            this.searchQueries[type] = '';
+            const searchInput = document.querySelector(`#export-ms-dropdown-${type} .export-ms-search-input`);
+            if (searchInput) searchInput.value = '';
+            this.renderMultiSelectOptions(type);
+        });
+
         this.renderItemList();
     },
 
@@ -258,23 +532,26 @@ window.ExportManager = {
         if (!tbody) return;
 
         const q = (document.getElementById('export-filter-search')?.value || '').toLowerCase().trim();
-        const selectedWc = document.getElementById('export-filter-wc')?.value || '';
-        const selectedGpm = document.getElementById('export-filter-gpm')?.value || '';
-        const selectedPlanId = document.getElementById('export-filter-plan')?.value || '';
+        const selWcs = this.selectedFilters.wc;
+        const selGpms = this.selectedFilters.gpm;
+        const selParadas = this.selectedFilters.parada;
+        const selPlans = this.selectedFilters.plan;
 
         this.filteredItems = this.allItems.filter(item => {
-            if (selectedWc && item.work_center !== selectedWc) return false;
-            if (selectedGpm && item.gpm !== selectedGpm) return false;
-            if (selectedPlanId && String(item.plan_id) !== String(selectedPlanId)) return false;
+            if (selWcs.size > 0 && (!item.work_center || !selWcs.has(item.work_center))) return false;
+            if (selGpms.size > 0 && (!item.gpm || !selGpms.has(item.gpm))) return false;
+            if (selParadas.size > 0 && !selParadas.has(this.getItemParada(item))) return false;
+            if (selPlans.size > 0 && (!item.plan_id || !selPlans.has(String(item.plan_id)))) return false;
+
             if (q) {
-                const searchStr = `${item.legacy_identifier} ${item.object_code} ${item.description} ${item.plan_code} ${item.plan_description} ${item.work_center} ${item.gpm}`.toLowerCase();
+                const searchStr = `${item.legacy_identifier} ${item.object_code} ${item.description} ${item.plan_code} ${item.plan_description} ${item.work_center} ${item.gpm} ${this.getItemParada(item)}`.toLowerCase();
                 if (!searchStr.includes(q)) return false;
             }
             return true;
         });
 
         if (!this.filteredItems.length) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-12 muted">Nenhum item encontrado com os filtros selecionados.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-12 muted">Nenhum item encontrado com os filtros selecionados.</td></tr>';
             this.updateCounter();
             return;
         }
@@ -285,6 +562,7 @@ window.ExportManager = {
 
         tbody.innerHTML = this.filteredItems.map(item => {
             const isChecked = this.selectedItemIds.has(item.id);
+            const paradaLabel = this.getItemParada(item);
             return `
                 <tr style="background:${isChecked ? '#F0FDF4' : 'transparent'}; cursor:pointer;" onclick="ExportManager.handleRowClick(event, ${item.id})">
                     <td style="text-align:center;">
@@ -294,6 +572,7 @@ window.ExportManager = {
                     <td>${UI.escapeHTML(item.object_code || '-')}</td>
                     <td style="font-weight:600; color:#1E293B;">${UI.escapeHTML(item.description || '')}</td>
                     <td><small style="color:#475569;">${UI.escapeHTML(item.plan_code ? `${item.plan_code} - ${item.plan_description || ''}` : 'Sem plano')}</small></td>
+                    <td><span class="badge" style="background:#F1F5F9; color:#334155; font-size:10.5px;">${UI.escapeHTML(paradaLabel)}</span></td>
                     <td>${UI.escapeHTML(item.work_center || '-')}</td>
                     <td>${UI.escapeHTML(item.gpm || '-')}</td>
                 </tr>
@@ -339,8 +618,8 @@ window.ExportManager = {
             counterBadge.textContent = `${count} de ${total} itens selecionados (${visible} visíveis)`;
         }
         if (submitBtn) {
-            submitBtn.disabled = count === 0;
-            submitBtn.textContent = `📥 Exportar Itens Selecionados (${count})`;
+            submitBtn.disabled = count === 0 && visible === 0;
+            submitBtn.textContent = `📥 Exportar Itens Selecionados (${count || visible})`;
         }
     },
 
@@ -372,4 +651,3 @@ if (document.readyState === 'loading') {
 } else {
     window.ExportManager.init();
 }
-
