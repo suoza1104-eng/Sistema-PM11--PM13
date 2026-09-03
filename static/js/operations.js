@@ -1181,8 +1181,8 @@ const Operations = {
             }
             this._closeModal('modal-long-text');
             await Promise.all([this.loadLongTexts(), this.loadOperations()]);
-            if (this.refreshSapOrderAfterLtSave) {
-                const targetItemId = this.refreshSapOrderAfterLtSave;
+            if (this.refreshSapOrderAfterLtSave || this.sapItemId) {
+                const targetItemId = this.refreshSapOrderAfterLtSave || this.sapItemId;
                 this.refreshSapOrderAfterLtSave = null;
                 await this.openSapOrder(targetItemId);
             }
@@ -1301,7 +1301,7 @@ const Operations = {
         this._openModal('modal-sap-order');
         document.getElementById('sap-order-document').innerHTML = '<div class="empty-state">Carregando ordem de manutenção...</div>';
         try {
-            this.sapOrder = await API.get(`/api/items/${itemId}/sap-order`);
+            this.sapOrder = await API.get(`/api/items/${itemId}/sap-order`, { _t: Date.now() });
             if (!this.sapOrder?.item || !Array.isArray(this.sapOrder?.operations)) {
                 this.sapOrder = await this.loadSapOrderFallback(itemId);
             }
@@ -1474,7 +1474,8 @@ const Operations = {
                     ...textRow,
                     [field]: value,
                     structure_mode: 'FREE',
-                    structure_json: null
+                    structure_json: null,
+                    source_text_original: value
                 });
             } else if (entity === 'item') {
                 const item = this.sapOrder.item;

@@ -348,7 +348,8 @@ window.LongTextEditor = {
     getPayload() {
         if (this.mode === 'FREE') {
             const text = document.getElementById('form-lt-text')?.value || '';
-            return { text, structure_mode: 'FREE', structure_json: null, source_text_original: this.sourceOriginal || text };
+            this.sourceOriginal = text;
+            return { text, structure_mode: 'FREE', structure_json: null, source_text_original: text };
         }
         this.syncAllFromDom();
         const hasFree = this.nodes.some(n => n.type === 'free' && String(n.text || '').trim());
@@ -356,12 +357,14 @@ window.LongTextEditor = {
         const mode = hasTopic ? (hasFree ? 'MIXED' : 'STRUCTURED') : 'FREE';
         if (mode === 'FREE') {
             const text = this.nodes.map(n => n.text || '').join('\n');
-            return { text, structure_mode: 'FREE', structure_json: null, source_text_original: this.sourceOriginal || text };
+            this.sourceOriginal = text;
+            return { text, structure_mode: 'FREE', structure_json: null, source_text_original: text };
         }
         const text = this.renderedText();
+        this.sourceOriginal = text;
         const ta = document.getElementById('form-lt-text');
         if (ta) ta.value = text;
-        return { text, structure_mode: mode, structure_json: JSON.stringify(this.nodes), source_text_original: this.sourceOriginal || text };
+        return { text, structure_mode: mode, structure_json: JSON.stringify(this.nodes), source_text_original: text };
     },
 
     render() {

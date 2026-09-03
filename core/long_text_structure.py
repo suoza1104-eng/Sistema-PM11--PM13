@@ -378,13 +378,12 @@ def prepare_for_save(text: Any = "", structure_mode: Optional[str] = None,
         mode = MODE_MIXED if has_topic and has_free else MODE_STRUCTURED if has_topic else MODE_FREE
         if mode != MODE_FREE:
             rendered = render_nodes(nodes)
-            if not raw.strip() or rendered.strip() == raw.strip():
-                return {
-                    "text": rendered,
-                    "structure_mode": mode,
-                    "structure_json": json.dumps(nodes, ensure_ascii=False),
-                    "source_text_original": _normalize_eol(source_text_original) if source_text_original is not None else None,
-                }
+            return {
+                "text": rendered if rendered.strip() else raw,
+                "structure_mode": mode,
+                "structure_json": json.dumps(nodes, ensure_ascii=False),
+                "source_text_original": raw,
+            }
 
     raw = _normalize_eol(text)
     if requested_mode == MODE_FREE:
@@ -392,7 +391,7 @@ def prepare_for_save(text: Any = "", structure_mode: Optional[str] = None,
             "text": raw,
             "structure_mode": MODE_FREE,
             "structure_json": None,
-            "source_text_original": _normalize_eol(source_text_original) if source_text_original is not None else None,
+            "source_text_original": raw,
         }
 
     parsed = detect_structure(raw)
@@ -400,7 +399,7 @@ def prepare_for_save(text: Any = "", structure_mode: Optional[str] = None,
         "text": parsed["rendered_text"],
         "structure_mode": parsed["mode"],
         "structure_json": parsed["structure_json"],
-        "source_text_original": _normalize_eol(source_text_original) if source_text_original is not None else raw,
+        "source_text_original": raw,
     }
 
 
