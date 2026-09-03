@@ -148,20 +148,36 @@ window.ExportManager = {
                 : '📤 Exportar Dados do Projeto PM13';
         }
 
-        document.getElementById('modal-export-choose-scope').classList.remove('hidden');
+        const scopeModal = document.getElementById('modal-export-choose-scope');
+        if (scopeModal) {
+            scopeModal.classList.remove('hidden');
+            scopeModal.style.display = 'flex';
+        }
     },
 
     closeScopeModal() {
-        document.getElementById('modal-export-choose-scope')?.classList.add('hidden');
+        const scopeModal = document.getElementById('modal-export-choose-scope');
+        if (scopeModal) {
+            scopeModal.classList.add('hidden');
+            scopeModal.style.display = 'none';
+        }
     },
 
     closeSelectModal() {
-        document.getElementById('modal-export-select-items')?.classList.add('hidden');
+        const selectModal = document.getElementById('modal-export-select-items');
+        if (selectModal) {
+            selectModal.classList.add('hidden');
+            selectModal.style.display = 'none';
+        }
     },
 
     backToScopeChoice() {
         this.closeSelectModal();
-        document.getElementById('modal-export-choose-scope')?.classList.remove('hidden');
+        const scopeModal = document.getElementById('modal-export-choose-scope');
+        if (scopeModal) {
+            scopeModal.classList.remove('hidden');
+            scopeModal.style.display = 'flex';
+        }
     },
 
     downloadFullProject() {
@@ -180,7 +196,11 @@ window.ExportManager = {
     async openItemSelectionModal() {
         this.closeScopeModal();
         this.ensureModals();
-        document.getElementById('modal-export-select-items').classList.remove('hidden');
+        const selectModal = document.getElementById('modal-export-select-items');
+        if (selectModal) {
+            selectModal.classList.remove('hidden');
+            selectModal.style.display = 'flex';
+        }
         this.selectedItemIds.clear();
         
         try {
@@ -342,7 +362,9 @@ window.ExportManager = {
     }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => window.ExportManager.init());
+} else {
     window.ExportManager.init();
-});
+}
 
