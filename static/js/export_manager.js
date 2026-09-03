@@ -35,29 +35,29 @@ window.ExportManager = {
 
     bindClickOutside() {
         document.addEventListener('click', (e) => {
-            if (!e.target.closest('.export-multiselect-container')) {
+            if (!e.target.closest('.export-ms-group')) {
                 this.closeAllMultiSelectDropdowns();
             }
         });
     },
 
     closeAllMultiSelectDropdowns() {
-        document.querySelectorAll('.export-ms-dropdown').forEach(d => d.classList.add('hidden'));
+        document.querySelectorAll('.export-ms-popover').forEach(d => d.classList.add('hidden'));
         document.querySelectorAll('.export-ms-trigger').forEach(t => t.classList.remove('open'));
     },
 
     toggleMultiSelectDropdown(type, event) {
         if (event) event.stopPropagation();
-        const dropdown = document.getElementById(`export-ms-dropdown-${type}`);
-        const trigger = dropdown?.previousElementSibling;
-        const willOpen = dropdown?.classList.contains('hidden');
+        const popover = document.getElementById(`export-ms-popover-${type}`);
+        const trigger = popover?.previousElementSibling;
+        const willOpen = popover?.classList.contains('hidden');
 
         this.closeAllMultiSelectDropdowns();
 
-        if (willOpen && dropdown && trigger) {
-            dropdown.classList.remove('hidden');
+        if (willOpen && popover && trigger) {
+            popover.classList.remove('hidden');
             trigger.classList.add('open');
-            const searchInput = dropdown.querySelector('.export-ms-search-input');
+            const searchInput = popover.querySelector('.export-ms-search-input');
             if (searchInput) searchInput.focus();
         }
     },
@@ -122,103 +122,107 @@ window.ExportManager = {
                             <button class="btn-icon" onclick="ExportManager.closeSelectModal()">✕</button>
                         </div>
                         <div class="modal-body" style="padding:16px 20px; overflow:visible;">
-                            <!-- BARRA DE FILTROS COM MULTI-SELECT E PARADA -->
-                            <div style="background:#F1F5F9; border:1px solid #CBD5E1; border-radius:8px; padding:12px; margin-bottom:14px; display:grid; grid-template-columns: 1.8fr 1fr 1fr 1fr 1.4fr auto; gap:10px; align-items:flex-end; overflow:visible; position:relative; z-index:10;">
+                            <!-- BARRA DE FILTROS COM MENUS SUSPENSOS FLUTUANTES -->
+                            <div class="export-filters-bar">
                                 <div>
-                                    <label class="export-filter-label">Busca rápida</label>
-                                    <input type="text" id="export-filter-search" placeholder="Buscar por descrição, equipamento, ID ou plano..." style="width:100%; padding:7px 10px; font-size:12px; border-radius:6px; border:1px solid #CBD5E1;" oninput="ExportManager.renderItemList()">
+                                    <label class="export-ms-label">Busca rápida</label>
+                                    <input type="text" id="export-filter-search" placeholder="Buscar por descrição, equipamento, ID ou plano..." style="width:100%; height:36px; padding:0 12px; font-size:12.5px; border-radius:8px; border:1px solid #CBD5E1; box-sizing:border-box;" oninput="ExportManager.renderItemList()">
                                 </div>
 
                                 <!-- CT Multi-Select -->
-                                <div class="export-multiselect-container" id="export-ms-container-wc">
-                                    <label class="export-filter-label">Centro de Trabalho (CT)</label>
+                                <div class="export-ms-group">
+                                    <label class="export-ms-label">Centro de Trabalho (CT)</label>
                                     <button type="button" class="export-ms-trigger" onclick="ExportManager.toggleMultiSelectDropdown('wc', event)">
-                                        <span class="export-ms-label" id="export-ms-label-wc">Todos os CTs</span>
-                                        <span class="export-ms-arrow">▼</span>
+                                        <span class="export-ms-trigger-text" id="export-ms-text-wc">Todos os CTs</span>
+                                        <svg class="export-ms-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
                                     </button>
-                                    <div class="export-ms-dropdown hidden" id="export-ms-dropdown-wc">
-                                        <div class="export-ms-search-wrap">
-                                            <input type="text" class="export-ms-search-input" placeholder="🔍 Digite para buscar CT..." oninput="ExportManager.filterMultiSelectOptions('wc', this.value)">
+                                    <div class="export-ms-popover hidden" id="export-ms-popover-wc">
+                                        <div class="export-ms-search-box">
+                                            <span class="export-ms-search-icon">🔍</span>
+                                            <input type="text" class="export-ms-search-input" placeholder="Buscar CT..." oninput="ExportManager.filterMultiSelectOptions('wc', this.value)">
                                         </div>
-                                        <div class="export-ms-actions">
-                                            <label class="export-ms-select-all">
+                                        <div class="export-ms-header-actions">
+                                            <label class="export-ms-check-all">
                                                 <input type="checkbox" id="export-ms-chk-all-wc" onchange="ExportManager.toggleMultiSelectAll('wc', this.checked)">
                                                 <span>Selecionar Todos</span>
                                             </label>
-                                            <span class="export-ms-count" id="export-ms-count-wc">0 selec.</span>
+                                            <span class="export-ms-badge" id="export-ms-badge-wc">0 selec.</span>
                                         </div>
-                                        <div class="export-ms-options-list" id="export-ms-options-wc"></div>
+                                        <div class="export-ms-list" id="export-ms-list-wc"></div>
                                     </div>
                                 </div>
 
                                 <!-- GPM Multi-Select -->
-                                <div class="export-multiselect-container" id="export-ms-container-gpm">
-                                    <label class="export-filter-label">GPM</label>
+                                <div class="export-ms-group">
+                                    <label class="export-ms-label">GPM</label>
                                     <button type="button" class="export-ms-trigger" onclick="ExportManager.toggleMultiSelectDropdown('gpm', event)">
-                                        <span class="export-ms-label" id="export-ms-label-gpm">Todos os GPMs</span>
-                                        <span class="export-ms-arrow">▼</span>
+                                        <span class="export-ms-trigger-text" id="export-ms-text-gpm">Todos os GPMs</span>
+                                        <svg class="export-ms-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
                                     </button>
-                                    <div class="export-ms-dropdown hidden" id="export-ms-dropdown-gpm">
-                                        <div class="export-ms-search-wrap">
-                                            <input type="text" class="export-ms-search-input" placeholder="🔍 Digite para buscar GPM..." oninput="ExportManager.filterMultiSelectOptions('gpm', this.value)">
+                                    <div class="export-ms-popover hidden" id="export-ms-popover-gpm">
+                                        <div class="export-ms-search-box">
+                                            <span class="export-ms-search-icon">🔍</span>
+                                            <input type="text" class="export-ms-search-input" placeholder="Buscar GPM..." oninput="ExportManager.filterMultiSelectOptions('gpm', this.value)">
                                         </div>
-                                        <div class="export-ms-actions">
-                                            <label class="export-ms-select-all">
+                                        <div class="export-ms-header-actions">
+                                            <label class="export-ms-check-all">
                                                 <input type="checkbox" id="export-ms-chk-all-gpm" onchange="ExportManager.toggleMultiSelectAll('gpm', this.checked)">
                                                 <span>Selecionar Todos</span>
                                             </label>
-                                            <span class="export-ms-count" id="export-ms-count-gpm">0 selec.</span>
+                                            <span class="export-ms-badge" id="export-ms-badge-gpm">0 selec.</span>
                                         </div>
-                                        <div class="export-ms-options-list" id="export-ms-options-gpm"></div>
+                                        <div class="export-ms-list" id="export-ms-list-gpm"></div>
                                     </div>
                                 </div>
 
-                                <!-- Parada Multi-Select (NOVO!) -->
-                                <div class="export-multiselect-container" id="export-ms-container-parada">
-                                    <label class="export-filter-label">Parada (Fase)</label>
+                                <!-- Parada Multi-Select -->
+                                <div class="export-ms-group">
+                                    <label class="export-ms-label">Parada (Fase)</label>
                                     <button type="button" class="export-ms-trigger" onclick="ExportManager.toggleMultiSelectDropdown('parada', event)">
-                                        <span class="export-ms-label" id="export-ms-label-parada">Todas as Paradas</span>
-                                        <span class="export-ms-arrow">▼</span>
+                                        <span class="export-ms-trigger-text" id="export-ms-text-parada">Todas as Paradas</span>
+                                        <svg class="export-ms-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
                                     </button>
-                                    <div class="export-ms-dropdown hidden" id="export-ms-dropdown-parada">
-                                        <div class="export-ms-search-wrap">
-                                            <input type="text" class="export-ms-search-input" placeholder="🔍 Buscar P1, P2, P3..." oninput="ExportManager.filterMultiSelectOptions('parada', this.value)">
+                                    <div class="export-ms-popover hidden" id="export-ms-popover-parada">
+                                        <div class="export-ms-search-box">
+                                            <span class="export-ms-search-icon">🔍</span>
+                                            <input type="text" class="export-ms-search-input" placeholder="Buscar P1, P2, P3..." oninput="ExportManager.filterMultiSelectOptions('parada', this.value)">
                                         </div>
-                                        <div class="export-ms-actions">
-                                            <label class="export-ms-select-all">
+                                        <div class="export-ms-header-actions">
+                                            <label class="export-ms-check-all">
                                                 <input type="checkbox" id="export-ms-chk-all-parada" onchange="ExportManager.toggleMultiSelectAll('parada', this.checked)">
                                                 <span>Selecionar Todos</span>
                                             </label>
-                                            <span class="export-ms-count" id="export-ms-count-parada">0 selec.</span>
+                                            <span class="export-ms-badge" id="export-ms-badge-parada">0 selec.</span>
                                         </div>
-                                        <div class="export-ms-options-list" id="export-ms-options-parada"></div>
+                                        <div class="export-ms-list" id="export-ms-list-parada"></div>
                                     </div>
                                 </div>
 
                                 <!-- Plano Multi-Select -->
-                                <div class="export-multiselect-container" id="export-ms-container-plan">
-                                    <label class="export-filter-label">Plano Vinculado</label>
+                                <div class="export-ms-group">
+                                    <label class="export-ms-label">Plano Vinculado</label>
                                     <button type="button" class="export-ms-trigger" onclick="ExportManager.toggleMultiSelectDropdown('plan', event)">
-                                        <span class="export-ms-label" id="export-ms-label-plan">Todos os Planos</span>
-                                        <span class="export-ms-arrow">▼</span>
+                                        <span class="export-ms-trigger-text" id="export-ms-text-plan">Todos os Planos</span>
+                                        <svg class="export-ms-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
                                     </button>
-                                    <div class="export-ms-dropdown hidden" id="export-ms-dropdown-plan">
-                                        <div class="export-ms-search-wrap">
-                                            <input type="text" class="export-ms-search-input" placeholder="🔍 Buscar por código/nome do plano..." oninput="ExportManager.filterMultiSelectOptions('plan', this.value)">
+                                    <div class="export-ms-popover hidden" id="export-ms-popover-plan">
+                                        <div class="export-ms-search-box">
+                                            <span class="export-ms-search-icon">🔍</span>
+                                            <input type="text" class="export-ms-search-input" placeholder="Buscar plano..." oninput="ExportManager.filterMultiSelectOptions('plan', this.value)">
                                         </div>
-                                        <div class="export-ms-actions">
-                                            <label class="export-ms-select-all">
+                                        <div class="export-ms-header-actions">
+                                            <label class="export-ms-check-all">
                                                 <input type="checkbox" id="export-ms-chk-all-plan" onchange="ExportManager.toggleMultiSelectAll('plan', this.checked)">
                                                 <span>Selecionar Todos</span>
                                             </label>
-                                            <span class="export-ms-count" id="export-ms-count-plan">0 selec.</span>
+                                            <span class="export-ms-badge" id="export-ms-badge-plan">0 selec.</span>
                                         </div>
-                                        <div class="export-ms-options-list" id="export-ms-options-plan"></div>
+                                        <div class="export-ms-list" id="export-ms-list-plan"></div>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <button class="btn btn-xs btn-outline" style="white-space:nowrap; padding:7px 10px; font-weight:600;" onclick="ExportManager.clearFilters()">Limpar Filtros</button>
+                                    <button class="btn btn-xs btn-outline" style="white-space:nowrap; height:36px; padding:0 12px; font-weight:600; border-radius:8px;" onclick="ExportManager.clearFilters()">Limpar Filtros</button>
                                 </div>
                             </div>
 
@@ -397,7 +401,7 @@ window.ExportManager = {
         this.searchQueries = { wc: '', gpm: '', parada: '', plan: '' };
 
         ['wc', 'gpm', 'parada', 'plan'].forEach(type => {
-            const searchInput = document.querySelector(`#export-ms-dropdown-${type} .export-ms-search-input`);
+            const searchInput = document.querySelector(`#export-ms-popover-${type} .export-ms-search-input`);
             if (searchInput) searchInput.value = '';
             this.renderMultiSelectOptions(type);
         });
@@ -406,7 +410,7 @@ window.ExportManager = {
     },
 
     renderMultiSelectOptions(type) {
-        const container = document.getElementById(`export-ms-options-${type}`);
+        const container = document.getElementById(`export-ms-list-${type}`);
         if (!container) return;
 
         const options = this.optionsData[type] || [];
@@ -416,7 +420,7 @@ window.ExportManager = {
         const filteredOpts = options.filter(opt => opt.label.toLowerCase().includes(query));
 
         if (filteredOpts.length === 0) {
-            container.innerHTML = '<div style="padding:10px; font-size:11.5px; color:#94A3B8; text-align:center;">Nenhuma opção encontrada</div>';
+            container.innerHTML = '<div style="padding:12px; font-size:11.5px; color:#94A3B8; text-align:center;">Nenhuma opção encontrada</div>';
         } else {
             container.innerHTML = filteredOpts.map(opt => {
                 const isChecked = selectedSet.has(opt.id);
@@ -436,17 +440,17 @@ window.ExportManager = {
         }
 
         // Update count badge & trigger label
-        const countBadge = document.getElementById(`export-ms-count-${type}`);
-        if (countBadge) {
-            countBadge.textContent = `${selectedSet.size} selec.`;
+        const badge = document.getElementById(`export-ms-badge-${type}`);
+        if (badge) {
+            badge.textContent = `${selectedSet.size} selec.`;
         }
 
         this.updateTriggerLabel(type);
     },
 
     updateTriggerLabel(type) {
-        const labelEl = document.getElementById(`export-ms-label-${type}`);
-        if (!labelEl) return;
+        const textEl = document.getElementById(`export-ms-text-${type}`);
+        if (!textEl) return;
 
         const selectedSet = this.selectedFilters[type];
         const count = selectedSet.size;
@@ -467,13 +471,13 @@ window.ExportManager = {
         };
 
         if (count === 0 || count === total) {
-            labelEl.textContent = titles[type] || 'Todos';
+            textEl.textContent = titles[type] || 'Todos';
         } else if (count === 1) {
             const singleId = Array.from(selectedSet)[0];
             const opt = (this.optionsData[type] || []).find(o => String(o.id) === String(singleId));
-            labelEl.textContent = opt ? opt.label : `1 ${unitNames[type]}`;
+            textEl.textContent = opt ? opt.label : `1 ${unitNames[type]}`;
         } else {
-            labelEl.textContent = `${count} ${unitNames[type]} selec.`;
+            textEl.textContent = `${count} ${unitNames[type]} selec.`;
         }
     },
 
@@ -519,7 +523,7 @@ window.ExportManager = {
 
         ['wc', 'gpm', 'parada', 'plan'].forEach(type => {
             this.searchQueries[type] = '';
-            const searchInput = document.querySelector(`#export-ms-dropdown-${type} .export-ms-search-input`);
+            const searchInput = document.querySelector(`#export-ms-popover-${type} .export-ms-search-input`);
             if (searchInput) searchInput.value = '';
             this.renderMultiSelectOptions(type);
         });
