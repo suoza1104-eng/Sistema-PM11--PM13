@@ -1559,18 +1559,51 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                                       o.operation_code, o.suboperation_code, t.line_sequence""", (proj_id,))
                     long_texts = [models.to_dict(x) for x in cursor.fetchall()]
                     conn.close()
+
+                    # Filtering for specific items if item_ids or item_identifiers is specified in query parameters
+                    has_item_filter = False
+                    raw_item_ids = q_params.get('item_ids') or filters.get('item_ids')
+                    raw_item_idents = q_params.get('item_identifiers') or filters.get('item_identifiers')
+
+                    if raw_item_ids:
+                        target_ids = set()
+                        for part in str(raw_item_ids).split(','):
+                            if part.strip().isdigit():
+                                target_ids.add(int(part.strip()))
+                        if target_ids:
+                            items = [i for i in items if i['id'] in target_ids]
+                            has_item_filter = True
+                    elif raw_item_idents:
+                        target_idents = {x.strip() for x in str(raw_item_idents).split(',') if x.strip()}
+                        if target_idents:
+                            items = [i for i in items if str(i.get('legacy_identifier', '')).strip() in target_idents]
+                            has_item_filter = True
+
+                    if has_item_filter:
+                        selected_item_ids = {i['id'] for i in items}
+                        bound_plan_ids = {i['plan_id'] for i in items if i.get('plan_id')}
+                        plans = [p for p in plans if p['id'] in bound_plan_ids]
+                        operations = [o for o in operations if o['item_id'] in selected_item_ids]
+                        selected_op_ids = {o['id'] for o in operations}
+                        long_texts = [t for t in long_texts if t['operation_id'] in selected_op_ids]
+
                     balance = calculations.project_balance(proj_id, {}) if scope == 'full' else {'stops': []}
                     # The available-HH line is the project's current managerial target.
                     target_hh = balance.get('kpis', {}).get('avg_hh', 0)
                     for stop in balance.get('stops', []):
                         stop['available_hh'] = target_hh
                     priorimeter_rows = models.list_priorimeter(proj_id, status='') if scope == 'full' else []
+                    if has_item_filter and priorimeter_rows:
+                        selected_item_ids = {i['id'] for i in items}
+                        priorimeter_rows = [r for r in priorimeter_rows if r.get('item_id') in selected_item_ids]
+
                     content = export_service.export_sap_workbook(
                         plans, items, operations, long_texts, balance,
                         models.get_project(proj_id), scope=scope,
                         template=(export_type == 'template'), priorimeter_rows=priorimeter_rows)
                     stamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
                     filename = (f"modelo_{scope}_SAP.xlsx" if export_type == 'template'
+                                else f"export_itens_selecionados_SAP_{stamp}.xlsx" if has_item_filter
                                 else f"projeto_completo_SAP_{stamp}.xlsx" if scope == 'full'
                                 else f"export_{scope}_SAP_{stamp}.xlsx")
                 

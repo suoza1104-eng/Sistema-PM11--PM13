@@ -33,9 +33,13 @@ const ImportWizard = {
     },
 
     exportScope(scope = 'full') {
-        const projectId = window.App.getValidProjectId();
+        const projectId = window.App ? window.App.getValidProjectId() : null;
         if (!projectId) return UI.showToast('Selecione um projeto.', 'warning');
-        window.open(`/api/export?type=full&scope=${encodeURIComponent(scope)}&project_id=${projectId}`, '_blank');
+        if (window.ExportManager) {
+            window.ExportManager.openModal(scope);
+        } else {
+            window.open(`/api/export?type=full&scope=${encodeURIComponent(scope)}&project_id=${projectId}`, '_blank');
+        }
     },
 
     exportSystems() {
