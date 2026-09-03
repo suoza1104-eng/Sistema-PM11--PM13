@@ -38,7 +38,8 @@ const ImportWizard = {
         if (window.ExportManager) {
             window.ExportManager.openModal(scope);
         } else {
-            window.open(`/api/export?type=full&scope=${encodeURIComponent(scope)}&project_id=${projectId}`, '_blank');
+            UI.showToast('Carregando gerenciador de exportação...', 'info');
+            setTimeout(() => window.ExportManager && window.ExportManager.openModal(scope), 300);
         }
     },
 
@@ -48,7 +49,8 @@ const ImportWizard = {
         if (window.ExportManager) {
             window.ExportManager.openModal('systems');
         } else {
-            window.open(`/api/export/systems?project_id=${projectId}`, '_blank');
+            UI.showToast('Carregando gerenciador de exportação...', 'info');
+            setTimeout(() => window.ExportManager && window.ExportManager.openModal('systems'), 300);
         }
     },
 
