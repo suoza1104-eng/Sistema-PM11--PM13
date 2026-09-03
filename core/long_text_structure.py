@@ -296,7 +296,9 @@ def number_nodes(nodes: Any) -> List[Dict[str, Any]]:
             level = len(counters)
             counters[-1] += 1
         elif not counters:
-            if len(all_nodes) == 1 and isinstance(path, list) and len(path) == level:
+            if level > 1 and isinstance(path, list) and len(path) == level:
+                counters = list(path)
+            elif len(all_nodes) == 1 and isinstance(path, list) and len(path) == level:
                 counters = list(path)
             else:
                 counters = [1] * level
