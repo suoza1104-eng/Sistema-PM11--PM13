@@ -637,6 +637,38 @@ def _work_center_trade(work_center):
     return None
 
 
+def is_equipment_object(object_code, object_type=None):
+    code = str(object_code or '').strip()
+    if not code:
+        return False
+    tp = str(object_type or '').strip().upper()
+    if tp in {'EQUIPAMENTO', 'EQUIP', 'EQUIPMENT'}:
+        if ('-' in code or '/' in code) and not code.isdigit():
+            return False
+        return True
+    if tp in {'LOCAL_INSTALACAO', 'LOCAL DE INSTALAÇÃO', 'LOCAL', 'FLOC', 'FUNCTIONAL_LOCATION'}:
+        return False
+    if code.isdigit() and len(code) >= 6:
+        return True
+    if '-' in code or '/' in code:
+        return False
+    return False
+
+
+def _blank_if_zero(val):
+    if val is None or val == '':
+        return ''
+    try:
+        num = float(val)
+        if num == 0:
+            return ''
+        if num.is_integer():
+            return int(num)
+        return num
+    except (ValueError, TypeError):
+        return val if str(val).strip() else ''
+
+
 def _sap_operation_workload(operation, item):
     """Resolve EFETIVO/HORAS for the SAP operation export.
 
@@ -652,7 +684,7 @@ def _sap_operation_workload(operation, item):
     current_hc = operation.get('headcount')
     current_hours = operation.get('hours')
     if not item:
-        return current_hc, current_hours
+        return _blank_if_zero(current_hc), _blank_if_zero(current_hours)
 
     code = str(operation.get('operation_code') or '').strip().zfill(4)
     raw_sub = str(operation.get('suboperation_code') or '').strip()
@@ -673,20 +705,20 @@ def _sap_operation_workload(operation, item):
 
     if code == '0010' and sub == '0010':
         sol_hc, sol_hours = pair('sol')
-        return sol_hc, sol_hours
+        return _blank_if_zero(sol_hc), _blank_if_zero(sol_hours)
 
     if code == '0010' and not sub:
         ele = pair('ele')
         mec = pair('mec')
         trade = _work_center_trade(operation.get('work_center') or item.get('work_center'))
         if trade == 'ele' and (ele[0] > 0 or ele[1] > 0):
-            return ele
+            return _blank_if_zero(ele[0]), _blank_if_zero(ele[1])
         if trade == 'mec' and (mec[0] > 0 or mec[1] > 0):
-            return mec
+            return _blank_if_zero(mec[0]), _blank_if_zero(mec[1])
         populated = [value for value in (ele, mec) if value[0] > 0 or value[1] > 0]
         if len(populated) == 1:
-            return populated[0]
-    return current_hc, current_hours
+            return _blank_if_zero(populated[0][0]), _blank_if_zero(populated[0][1])
+    return _blank_if_zero(current_hc), _blank_if_zero(current_hours)
 
 
 def export_sap_workbook(plans, items, operations=None, long_texts=None,
@@ -725,34 +757,45 @@ def export_sap_workbook(plans, items, operations=None, long_texts=None,
                   str(p.get('phase') or '').zfill(3) if p.get('phase') else ''] for p in plans]
     item_rows = []
     for i in items:
-        is_equip = str(i.get('object_type', '')).upper().startswith('EQUIP')
-        item_rows.append([None if is_equip else i.get('object_code'), i.get('object_code') if is_equip else None,
+        code = i.get('object_code')
+        is_equip = is_equipment_object(code, i.get('object_type'))
+        item_rows.append([None if is_equip else code, code if is_equip else None,
             i.get('gpm'), i.get('work_center'), i.get('condition_code'), i.get('priority'),
             i.get('plan_code') or '', i.get('legacy_identifier'), i.get('legacy_start'),
             i.get('description'), i.get('character_count'), i.get('plan_description') or '',
             i.get('plan_cycle') or '', i.get('plan_unit') or '', i.get('plan_cycle_text') or '',
-            i.get('plan_opening_horizon') or '', i.get('duration_hours') or 0,
+            i.get('plan_opening_horizon') or '', _blank_if_zero(i.get('duration_hours')),
             i.get('description'), 'CR01',
-            i.get('ele_headcount') or 0, i.get('ele_hours') or 0,
-            i.get('mec_headcount') or 0, i.get('mec_hours') or 0,
-            i.get('sol_headcount') or 0, i.get('sol_hours') or 0,
+            _blank_if_zero(i.get('ele_headcount')), _blank_if_zero(i.get('ele_hours')),
+            _blank_if_zero(i.get('mec_headcount')), _blank_if_zero(i.get('mec_hours')),
+            _blank_if_zero(i.get('sol_headcount')), _blank_if_zero(i.get('sol_hours')),
             'INATIVO' if str(i.get('status') or 'ACTIVE').upper() == 'INACTIVE' else 'ATIVO'])
     item_by_id = {i.get('id'): i for i in items if i.get('id') is not None}
     op_rows = []
     for o in operations:
         export_headcount, export_hours = _sap_operation_workload(o, item_by_id.get(o.get('item_id')))
+        code = o.get('object_code')
+        is_equip = is_equipment_object(code, o.get('object_type'))
         op_rows.append([
             o.get('legacy_identifier'),
-            None if o.get('object_type') == 'EQUIPAMENTO' else o.get('object_code'),
-            o.get('object_code') if o.get('object_type') == 'EQUIPAMENTO' else None,
+            None if is_equip else code,
+            code if is_equip else None,
             o.get('operation_code'), o.get('suboperation_code'), o.get('work_center'),
             o.get('short_text'), len(o.get('short_text') or ''), o.get('unit') or 'H',
-            export_headcount, export_hours
+            _blank_if_zero(export_headcount), _blank_if_zero(export_hours)
         ])
-    text_rows = [[t.get('legacy_identifier'), None if t.get('object_type') == 'EQUIPAMENTO' else t.get('object_code'),
-                  t.get('object_code') if t.get('object_type') == 'EQUIPAMENTO' else None, None,
-                  t.get('group_code'), t.get('group_counter'), t.get('operation_code'),
-                  t.get('suboperation_code'), materialize_record(t)] for t in long_texts]
+    text_rows = []
+    for t in long_texts:
+        code = t.get('object_code')
+        is_equip = is_equipment_object(code, t.get('object_type'))
+        text_rows.append([
+            t.get('legacy_identifier'),
+            None if is_equip else code,
+            code if is_equip else None,
+            None,
+            t.get('group_code'), t.get('group_counter'), t.get('operation_code'),
+            t.get('suboperation_code'), materialize_record(t)
+        ])
 
     all_specs = [('Cod Planos', plan_headers, plan_rows), ('ITENS', item_headers, item_rows),
                  ('OPERAÇÕES - REPARO', op_headers, op_rows), ('TEXTO LONGO REPARO.CSV', text_headers, text_rows)]
@@ -1221,8 +1264,8 @@ def export_pm13_systems_xlsx(project_id, item_ids=None):
                 'PM01',
                 op.get('short_text') or it.get('description', ''),
                 'H',
-                headcount,
-                hours,
+                _blank_if_zero(headcount),
+                _blank_if_zero(hours),
                 'H',
                 2,
                 100,
@@ -1234,7 +1277,7 @@ def export_pm13_systems_xlsx(project_id, item_ids=None):
         texts_by_operation = {}
         for tx in long_texts:texts_by_operation.setdefault(tx.get('operation_id'),[]).append(tx)
         for op in operations:
-            it=item_by_id.get(op.get('item_id'),{});object_code=clean_object_code(it.get('object_code'));is_equipment=bool(object_code) and str(it.get('object_type') or '').upper().startswith('EQUIP')
+            it=item_by_id.get(op.get('item_id'),{});object_code=clean_object_code(it.get('object_code'));is_equipment=is_equipment_object(object_code, it.get('object_type'))
             code=str(op.get('operation_code') or '').zfill(4);raw_sub=str(op.get('suboperation_code') or '').strip();sub=raw_sub.zfill(4) if raw_sub else ''
             if code=='0010' and sub=='0010':
                 sol_hc=int(it.get('sol_headcount') or 0);sol_hours=float(it.get('sol_hours') or 0)
