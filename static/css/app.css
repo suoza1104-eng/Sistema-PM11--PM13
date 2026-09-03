@@ -3273,10 +3273,14 @@ body.resizing-table-column {
    PM13 Export Modal - Modern Floating Multi-Select Dropdowns (Menus Suspensos)
    ========================================================================== */
 
+/* ==========================================================================
+   PM13 Export Modal - Modern Floating Multi-Select Dropdowns (Style Matching Image 1)
+   ========================================================================== */
+
 .export-filters-bar {
     background: #F8FAFC;
     border: 1px solid #E2E8F0;
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 14px 16px;
     margin-bottom: 16px;
     display: grid;
@@ -3299,18 +3303,18 @@ body.resizing-table-column {
     font-weight: 700;
     color: #475569;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.4px;
     display: block;
     margin-bottom: 5px;
 }
 
 .export-ms-trigger {
     width: 100%;
-    height: 36px;
+    height: 38px;
     padding: 0 12px;
-    font-size: 12.5px;
+    font-size: 13px;
     font-weight: 500;
-    background: #ffffff;
+    background: #FFFFFF;
     border: 1px solid #CBD5E1;
     border-radius: 8px;
     cursor: pointer;
@@ -3330,9 +3334,9 @@ body.resizing-table-column {
 }
 
 .export-ms-trigger.open {
-    border-color: #15803D;
-    box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.15);
-    background: #ffffff;
+    border: 1.5px solid #84BD00 !important;
+    box-shadow: 0 0 0 3px rgba(132, 189, 0, 0.15) !important;
+    background: #FFFFFF !important;
 }
 
 .export-ms-trigger-text {
@@ -3342,8 +3346,8 @@ body.resizing-table-column {
 }
 
 .export-ms-chevron {
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
     color: #64748B;
     flex-shrink: 0;
     transition: transform 0.2s ease;
@@ -3353,22 +3357,24 @@ body.resizing-table-column {
     transform: rotate(180deg);
 }
 
-/* FLOATING POPOVER (MENU SUSPENSO) */
+/* FLOATING POPOVER (MENU SUSPENSO - ESTILO IMAGEM 1) */
 .export-ms-popover {
     position: absolute !important;
     top: calc(100% + 6px) !important;
     left: 0 !important;
-    min-width: 260px !important;
-    width: max(100%, 280px) !important;
-    max-width: 440px !important;
+    min-width: 280px !important;
+    width: max(100%, 320px) !important;
+    max-width: 480px !important;
     z-index: 999999 !important;
-    background: #ffffff !important;
-    border: 1px solid #CBD5E1 !important;
-    border-radius: 10px !important;
-    box-shadow: 0 12px 32px -4px rgba(15, 23, 42, 0.18), 0 4px 12px -2px rgba(15, 23, 42, 0.08) !important;
+    background: #FFFFFF !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 14px 35px -5px rgba(0, 0, 0, 0.16), 0 4px 12px -2px rgba(0, 0, 0, 0.08) !important;
+    padding: 10px !important;
     overflow: hidden !important;
     display: flex !important;
     flex-direction: column !important;
+    box-sizing: border-box !important;
 }
 
 .export-ms-popover.hidden {
@@ -3377,52 +3383,124 @@ body.resizing-table-column {
 
 .export-ms-search-box {
     position: relative;
-    padding: 10px;
-    background: #F8FAFC;
-    border-bottom: 1px solid #E2E8F0;
+    width: 100%;
+    margin-bottom: 8px;
+    box-sizing: border-box;
 }
 
 .export-ms-search-icon {
     position: absolute;
-    left: 18px;
+    left: 12px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 12px;
-    color: #94A3B8;
+    font-size: 13px;
+    color: #64748B;
     pointer-events: none;
 }
 
 .export-ms-search-input {
     width: 100%;
-    padding: 7px 10px 7px 30px;
-    font-size: 12px;
-    border: 1px solid #CBD5E1;
-    border-radius: 6px;
-    outline: none;
-    background: #ffffff;
-    padding: 8px 12px;
-    font-size: 12.5px;
-    cursor: pointer;
-    color: #1E293B;
+    height: 38px;
+    padding: 7px 12px 7px 34px;
+    font-size: 13px;
+    border: 1.5px solid #84BD00 !important;
+    border-radius: 8px !important;
+    outline: none !important;
+    background: #FFFFFF !important;
+    box-sizing: border-box !important;
+    color: #1E293B !important;
+}
+
+.export-ms-search-input:focus {
+    box-shadow: 0 0 0 3px rgba(132, 189, 0, 0.15) !important;
+}
+
+.export-ms-header-actions {
+    padding: 6px 4px 8px 4px;
     border-bottom: 1px solid #F1F5F9;
-    transition: background 0.12s ease, color 0.12s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    margin-bottom: 4px;
 }
 
-.custom-select-option:last-child {
-    border-bottom: none;
-}
-
-.custom-select-option:hover,
-.custom-select-option.selected {
-    background: #F0FDF4;
-    color: #0F766E;
+.export-ms-check-all {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    cursor: pointer;
     font-weight: 600;
+    color: #334155;
+    user-select: none;
+    margin: 0;
 }
 
-.custom-select-option.no-results {
-    color: #94A3B8;
-    cursor: default;
-    font-style: italic;
+.export-ms-check-all input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    accent-color: #84BD00;
+    cursor: pointer;
+    margin: 0;
+}
+
+.export-ms-badge {
+    color: #166534;
+    background: #F0FDF4;
+    border: 1px solid #BBF7D0;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 11px;
+}
+
+.export-ms-list {
+    max-height: 240px;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+.export-ms-option {
+    padding: 9px 12px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 10px !important;
+    font-size: 13px !important;
+    color: #334155 !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    transition: background 0.12s ease !important;
+    user-select: none !important;
+    margin: 2px 0 !important;
+    box-sizing: border-box !important;
+}
+
+.export-ms-option:hover {
+    background: #F8FAFC !important;
+}
+
+.export-ms-option.selected {
+    background: #F4FAEF !important;
+    color: #166534 !important;
+    font-weight: 600 !important;
+}
+
+.export-ms-option input[type="checkbox"] {
+    width: 15px !important;
+    height: 15px !important;
+    accent-color: #84BD00 !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+}
+
+.export-ms-option span {
+    flex: 1 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
 }
 
 /* ==========================================================================
