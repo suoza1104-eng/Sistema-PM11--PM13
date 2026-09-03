@@ -1507,10 +1507,13 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
 
             if path == '/api/export/systems':
                 proj_id = int(q_params.get('project_id', 0))
-                content = export_service.export_pm13_systems_xlsx(proj_id)
+                raw_item_ids = q_params.get('item_ids')
+                item_ids = [int(x.strip()) for x in str(raw_item_ids).split(',') if x.strip().isdigit()] if raw_item_ids else None
+                content = export_service.export_pm13_systems_xlsx(proj_id, item_ids=item_ids)
                 project = models.get_project(proj_id) or {'name': 'PM13'}
                 safe_name = re.sub(r'[^A-Za-z0-9_-]+', '_', project.get('name') or 'PM13')
-                filename = f"CARGA_SISTEMAS_PM13_{safe_name}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+                stamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+                filename = f"CARGA_SISTEMAS_PM13_SELECIONADOS_{stamp}.xlsx" if item_ids else f"CARGA_SISTEMAS_PM13_{safe_name}_{stamp}.xlsx"
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
                 self.send_header('Content-Disposition', f'attachment; filename="{filename}"')

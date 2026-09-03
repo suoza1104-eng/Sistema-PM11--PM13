@@ -43,9 +43,13 @@ const ImportWizard = {
     },
 
     exportSystems() {
-        const projectId = window.App.getValidProjectId();
+        const projectId = window.App ? window.App.getValidProjectId() : null;
         if (!projectId) return UI.showToast('Selecione um projeto.', 'warning');
-        window.open(`/api/export/systems?project_id=${projectId}`, '_blank');
+        if (window.ExportManager) {
+            window.ExportManager.openModal('systems');
+        } else {
+            window.open(`/api/export/systems?project_id=${projectId}`, '_blank');
+        }
     },
 
     downloadTemplate(scope = 'full') {

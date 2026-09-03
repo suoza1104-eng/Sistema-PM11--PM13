@@ -135,11 +135,19 @@ window.ExportManager = {
         }
     },
 
-    openModal(scope = 'full') {
-        this.scope = scope;
+    openModal(exportKind = 'full') {
+        this.exportKind = exportKind || 'full';
         const projectId = window.App ? App.getValidProjectId() : null;
         if (!projectId) return UI.showToast('Selecione um projeto para exportar.', 'warning');
         this.ensureModals();
+        
+        const titleEl = document.querySelector('#modal-export-choose-scope h2');
+        if (titleEl) {
+            titleEl.textContent = this.exportKind === 'systems' 
+                ? '📤 Exportar Planilha Sistemas (SAP 5 Abas)' 
+                : '📤 Exportar Dados do Projeto PM13';
+        }
+
         document.getElementById('modal-export-choose-scope').classList.remove('hidden');
     },
 
@@ -160,8 +168,13 @@ window.ExportManager = {
         const projectId = window.App ? App.getValidProjectId() : null;
         if (!projectId) return UI.showToast('Selecione um projeto para exportar.', 'warning');
         this.closeScopeModal();
-        window.open(`/api/export?type=full&scope=full&project_id=${projectId}`, '_blank');
-        UI.showToast('Gerando download do projeto completo...', 'info');
+        if (this.exportKind === 'systems') {
+            window.open(`/api/export/systems?project_id=${projectId}`, '_blank');
+            UI.showToast('Gerando download da planilha Sistemas completa...', 'info');
+        } else {
+            window.open(`/api/export?type=full&scope=full&project_id=${projectId}`, '_blank');
+            UI.showToast('Gerando download do projeto completo...', 'info');
+        }
     },
 
     async openItemSelectionModal() {
@@ -320,7 +333,11 @@ window.ExportManager = {
 
         const itemIdsArray = Array.from(this.selectedItemIds).join(',');
         this.closeSelectModal();
-        window.open(`/api/export?type=full&scope=full&project_id=${projectId}&item_ids=${encodeURIComponent(itemIdsArray)}`, '_blank');
+        if (this.exportKind === 'systems') {
+            window.open(`/api/export/systems?project_id=${projectId}&item_ids=${encodeURIComponent(itemIdsArray)}`, '_blank');
+        } else {
+            window.open(`/api/export?type=full&scope=full&project_id=${projectId}&item_ids=${encodeURIComponent(itemIdsArray)}`, '_blank');
+        }
         UI.showToast(`Gerando exportação de ${this.selectedItemIds.size} item(ns) selecionado(s)...`, 'info');
     }
 };
@@ -328,3 +345,4 @@ window.ExportManager = {
 document.addEventListener('DOMContentLoaded', () => {
     window.ExportManager.init();
 });
+

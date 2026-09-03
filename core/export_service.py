@@ -1037,7 +1037,7 @@ def export_priorimeter_xlsx(rows):
     return output.getvalue()
 
 
-def export_pm13_systems_xlsx(project_id):
+def export_pm13_systems_xlsx(project_id, item_ids=None):
     from core.database import get_db_connection
     from core.models import list_priorimeter
     from core_pm11.sap_standards import get_sap_cycle_info, generate_nponto_hash
@@ -1065,6 +1065,16 @@ def export_pm13_systems_xlsx(project_id):
         long_texts = [dict(r) for r in conn.execute("""SELECT t.*,o.item_id,o.operation_code,o.suboperation_code,i.legacy_identifier,i.object_type,i.object_code
             FROM operation_long_texts t JOIN item_operations o ON o.id=t.operation_id JOIN maintenance_items i ON i.id=o.item_id
             WHERE t.project_id=? ORDER BY i.legacy_identifier,o.id,COALESCE(t.display_order,t.line_sequence),t.id""",(project_id,)).fetchall()]
+
+        if item_ids:
+            target_ids = set(item_ids) if isinstance(item_ids, (list, set, tuple)) else set()
+            if target_ids:
+                items = [i for i in items if i['id'] in target_ids]
+                bound_plan_ids = {i['plan_id'] for i in items if i.get('plan_id')}
+                plans = [p for p in plans if p['id'] in bound_plan_ids]
+                operations = [o for o in operations if o['item_id'] in target_ids]
+                bound_op_ids = {o['id'] for o in operations}
+                long_texts = [t for t in long_texts if t['operation_id'] in bound_op_ids]
 
         def clean_object_code(value):
             value = str(value or '').strip()
