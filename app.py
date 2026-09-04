@@ -1016,6 +1016,8 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                     s_term = f"%{search}%"
                     params.extend([s_term] * 11)
 
+                where_str = " AND ".join(where)
+
                 cursor.execute(f"""SELECT COUNT(*) FROM item_operations o
                                   LEFT JOIN operation_long_texts t ON t.operation_id=o.id
                                   WHERE {where_str}""", params)
@@ -1526,7 +1528,6 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
             if path == '/api/export':
                 export_started = time.perf_counter()
                 export_type = q_params.get('type')
-                export_format = q_params.get('format', 'csv').lower()
                 proj_id = int(q_params.get('project_id', 0))
                 _server_trace('EXPORT INICIO', projeto=proj_id, tipo=export_type, formato=export_format, escopo=q_params.get('scope'))
                 
@@ -1582,7 +1583,6 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
 
                     if has_item_filter:
                         selected_item_ids = {i['id'] for i in items if i.get('id') is not None}
-                        selected_idents = {str(i.get('legacy_identifier') or '').strip() for i in items if i.get('legacy_identifier')}
                         
                         bound_plan_ids = {i['plan_id'] for i in items if i.get('plan_id')}
                         plans = [p for p in plans if p.get('id') in bound_plan_ids]
