@@ -641,16 +641,16 @@ def is_equipment_object(object_code, object_type=None):
     code = str(object_code or '').strip()
     if not code:
         return False
-    tp = str(object_type or '').strip().upper()
-    if tp in {'EQUIPAMENTO', 'EQUIP', 'EQUIPMENT'}:
-        if ('-' in code or '/' in code) and not code.isdigit():
-            return False
-        return True
-    if tp in {'LOCAL_INSTALACAO', 'LOCAL DE INSTALAÇÃO', 'LOCAL', 'FLOC', 'FUNCTIONAL_LOCATION'}:
-        return False
-    if code.isdigit() and len(code) >= 6:
-        return True
+    # Local de Instalação (Tag/Floc) sempre possui hífen ou barra (ex: USO1-RD-SINT3-SISTC-ARMAZ-SIL01-SCT)
     if '-' in code or '/' in code:
+        return False
+    # Código de equipamento sempre é estritamente numérico (ex: 10350462, 10384772)
+    if code.isdigit():
+        return True
+    tp = str(object_type or '').strip().upper()
+    if 'EQUIP' in tp:
+        return True
+    if 'LOCAL' in tp or 'FLOC' in tp:
         return False
     return False
 
@@ -759,7 +759,7 @@ def export_sap_workbook(plans, items, operations=None, long_texts=None,
     for i in items:
         code = i.get('object_code')
         is_equip = is_equipment_object(code, i.get('object_type'))
-        item_rows.append([None if is_equip else code, code if is_equip else None,
+        item_rows.append(['' if is_equip else (code or ''), code if is_equip else '',
             i.get('gpm'), i.get('work_center'), i.get('condition_code'), i.get('priority'),
             i.get('plan_code') or '', i.get('legacy_identifier'), i.get('legacy_start'),
             i.get('description'), i.get('character_count'), i.get('plan_description') or '',
@@ -778,8 +778,8 @@ def export_sap_workbook(plans, items, operations=None, long_texts=None,
         is_equip = is_equipment_object(code, o.get('object_type'))
         op_rows.append([
             o.get('legacy_identifier'),
-            None if is_equip else code,
-            code if is_equip else None,
+            '' if is_equip else (code or ''),
+            code if is_equip else '',
             o.get('operation_code'), o.get('suboperation_code'), o.get('work_center'),
             o.get('short_text'), len(o.get('short_text') or ''), o.get('unit') or 'H',
             _blank_if_zero(export_headcount), _blank_if_zero(export_hours)
@@ -790,8 +790,8 @@ def export_sap_workbook(plans, items, operations=None, long_texts=None,
         is_equip = is_equipment_object(code, t.get('object_type'))
         text_rows.append([
             t.get('legacy_identifier'),
-            None if is_equip else code,
-            code if is_equip else None,
+            '' if is_equip else (code or ''),
+            code if is_equip else '',
             None,
             t.get('group_code'), t.get('group_counter'), t.get('operation_code'),
             t.get('suboperation_code'), materialize_record(t)
@@ -1125,26 +1125,8 @@ def export_pm13_systems_xlsx(project_id, item_ids=None):
                 plans = [p for p in plans if p.get('id') in bound_plan_ids]
                 selected_item_ids = {i['id'] for i in items if i.get('id') is not None}
                 selected_idents = {str(i.get('legacy_identifier') or '').strip() for i in items if i.get('legacy_identifier')}
-                
-                operations = [
-                    o for o in operations 
-                    if (o.get('item_id') in selected_item_ids) 
-                    or (str(o.get('legacy_identifier') or '').strip() in selected_idents)
-                ]
-                
-                bound_op_ids = {o['id'] for o in operations if o.get('id') is not None}
-                long_texts = [
-                    t for t in long_texts 
-                    if (t.get('operation_id') in bound_op_ids) 
-                    or (t.get('item_id') in selected_item_ids) 
-                    or (str(t.get('legacy_identifier') or '').strip() in selected_idents)
-                ]
-
-        def clean_object_code(value):
-            value = str(value or '').strip()
-            if value.upper() in {'SEM_EQUIPAMENTO', 'SEM EQUIPAMENTO', 'N/A', 'NONE', 'NULL'}:
-                return ''
-            return value
+                operations = [o for o in operations if (o.get('item_id') in selected_item_ids) or (str(o.get('legacy_identifier') or '').strip() in selected_idents)]
+                long_texts = [t for t in long_texts if (t.get('item_id') in selected_item_ids) or (str(t.get('legacy_identifier') or '').strip() in selected_idents)]
 
         def route_description(item):
             route = str(item.get('legacy_start') or '').strip()
@@ -1317,14 +1299,16 @@ def export_pm13_systems_xlsx(project_id, item_ids=None):
             selected_idents = {str(i.get('legacy_identifier') or '').strip() for i in items if i.get('legacy_identifier')}
             prio_all = [
                 r for r in prio_all 
-                if (r.get('item_id') in selected_item_ids) 
-                or (str(r.get('legacy_identifier') or '').strip() in selected_idents)
+                if (r.get('item_id') in selected_item_ids) or (str(r.get('legacy_identifier') or '').strip() in selected_idents)
             ]
-        for row in prio_all:
-            priorimeter_rows.append([row.get(field, '') for field in priorimeter_fields])
+
+        priorimeter_rows = [priorimeter_headers]
+        for r in prio_all:
+            row = [r.get(f, '') for f in priorimeter_fields]
+            priorimeter_rows.append(row)
 
         sheets = [
-            {'name': 'PLANO', 'rows': plano_rows},
+            {'name': 'Plano', 'rows': plano_rows},
             {'name': 'ITEM', 'rows': item_rows},
             {'name': 'CABEÇALHO', 'rows': cab_rows},
             {'name': 'OPERAÇÃO', 'rows': oper_rows},
