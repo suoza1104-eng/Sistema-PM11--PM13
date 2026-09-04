@@ -246,24 +246,12 @@ window.PM11.Characteristics = {
         UI.toast(error.message || 'Nao foi possivel salvar.', 'error');
       }
     };
-    let isReadyForBlur = false;
-    setTimeout(() => { isReadyForBlur = true; }, 350);
-
     editor.onkeydown = e => {
       if (e.key === 'Escape') { e.preventDefault(); cancel(); }
       if (e.key === 'Enter') { e.preventDefault(); save(); }
     };
     if (selectFields.includes(field)) {
       editor.onchange = () => save();
-      editor.onblur = () => {
-        if (!isReadyForBlur) return;
-        setTimeout(() => { if (!finished) save(); }, 150);
-      };
-    } else {
-      editor.onblur = () => save();
-    }
-  },
-  edit(id = null) {
     const UI = window.PM11.UI, API = window.PM11.API, App = window.PM11.App;
     const c = id ? this.rows.find(x => x.id === id) : { characteristic_type: 'QUALITAT', status: 'ACTIVE' }, item = this.items.find(i => i.id === c.item_id);
     const lblStyle = 'display:block; width:100%; font-size:12px; font-weight:600; color:#374151; margin:0 0 6px 0;';

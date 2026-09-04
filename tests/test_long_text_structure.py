@@ -36,6 +36,15 @@ class TestLongTextStructure(unittest.TestCase):
         self.assertEqual(result['rendered_text'], text)
         self.assertIsNone(result['structure_json'])
 
+    def test_materialize_uses_original_text_when_legacy_rendered_text_is_empty(self):
+        record = {
+            'text': '',
+            'structure_mode': MODE_FREE,
+            'structure_json': None,
+            'source_text_original': 'NÃO SE APLICA',
+        }
+        self.assertEqual(materialize_record(record), 'NÃO SE APLICA')
+
     def test_measurements_at_line_start_are_not_false_topics(self):
         text = '1.1 KW\n2.5 MM\n3.5 BAR'
         self.assertEqual(detect_structure(text)['mode'], MODE_FREE)

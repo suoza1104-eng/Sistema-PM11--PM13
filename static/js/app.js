@@ -1436,7 +1436,6 @@ window.makeSearchableSelect = function(selectEl) {
 window.enhanceAllSelects = function(parentEl) {
     const root = parentEl || document;
     root.querySelectorAll('select.control, .filters-grid select, .filter-card select, .form-group select, .filter-bar select, .card select').forEach(sel => {
-      if (sel.classList.contains('no-searchable') || sel.closest('.export-ms-group') || sel.closest('#modal-export-select-items')) return;
       window.makeSearchableSelect(sel);
     });
 };

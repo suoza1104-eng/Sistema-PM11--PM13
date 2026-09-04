@@ -1308,11 +1308,11 @@ def export_pm13_systems_xlsx(project_id, item_ids=None):
             priorimeter_rows.append(row)
 
         sheets = [
-            {'name': 'Plano', 'rows': plano_rows},
+            {'name': 'PLANO', 'rows': plano_rows},
             {'name': 'ITEM', 'rows': item_rows},
             {'name': 'CABEÇALHO', 'rows': cab_rows},
             {'name': 'OPERAÇÃO', 'rows': oper_rows},
-            {'name': 'TEXTO LONGO', 'rows': text_rows},
+            {'name': 'CARACTERISTICAS', 'rows': text_rows},
             {'name': 'Priorímetro', 'rows': priorimeter_rows}
         ]
 

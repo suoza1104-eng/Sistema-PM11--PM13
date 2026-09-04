@@ -5,6 +5,7 @@ Aprimora o sistema de alertas e armações do PM13 com as regras técnicas compl
 
 import json
 from core.database import get_db_connection
+from core.long_text_structure import materialize_record
 from core.technical_classes import check_technical_class_compatibility
 
 def clean_op_code(val):
@@ -162,17 +163,19 @@ def validate_pm13_project(project_id):
         op_lts = [lt for lt in lts if lt.get('operation_id') == opid]
         is_first_0010 = (op_code == '0010' and is_sub_empty(subop_code))
 
+        non_empty = [lt for lt in op_lts if str(materialize_record(lt) or '').strip()]
         if is_first_0010:
-            # 0010 sem suboperação: DEVE SER VAZIA. Se estiver sem texto ou com texto vazio, está 100% OK!
-            non_empty = [lt for lt in op_lts if str(lt.get('text') or '').strip() != '']
+            # 0010 sem suboperação é somente o cabeçalho/título da ordem.
             if non_empty:
-                msg = 'Regra Texto Longo PM13: A operação 0010 (sem suboperação) deve possuir Texto Longo VAZIO (encontrado conteúdo preenchido).'
-                op_issues[opid].append({'code': 'header_has_long_text', 'severity': 'ERROR', 'field': 'long_text', 'message': msg})
+                msg = ('Regra Texto Longo PM13: A operação 0010 (sem suboperação) '
+                       'deve permanecer sem Texto Longo preenchido.')
+                op_issues[opid].append({'code': 'header_has_long_text', 'severity': 'ERROR',
+                                        'field': 'long_text', 'message': msg})
                 if item_id and item_id in item_issues:
-                    item_issues[item_id].append({'code': 'header_has_long_text', 'severity': 'ERROR', 'field': 'long_text', 'message': msg})
+                    item_issues[item_id].append({'code': 'header_has_long_text', 'severity': 'ERROR',
+                                                 'field': 'long_text', 'message': msg})
         else:
-            # Demais operações: DEVEM ter texto longo preenchido.
-            non_empty = [lt for lt in op_lts if str(lt.get('text') or '').strip() != '']
+            # Todas as demais operações/suboperações devem ter conteúdo real.
             if not non_empty:
                 op_label = f"{op_code} {subop_code}".strip()
                 msg = f'Regra Texto Longo PM13: A operação {op_label} exige Texto Longo preenchido e não pode ficar em branco.'
@@ -188,7 +191,7 @@ def validate_pm13_project(project_id):
             op_code = clean_op_code(op_match.get('operation_code'))
             sub_code = str(op_match.get('suboperation_code') or '').strip()
             is_first = (op_code == '0010' and is_sub_empty(sub_code))
-            txt = str(lt.get('text') or '').strip()
+            txt = str(materialize_record(lt) or '').strip()
             if is_first and txt != '':
                 lt_issues[ltid].append({'code': 'header_has_long_text', 'severity': 'ERROR', 'field': 'text', 'message': 'Operação 0010 principal não deve possuir texto longo.'})
             elif not is_first and txt == '':
