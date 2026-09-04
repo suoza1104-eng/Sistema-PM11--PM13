@@ -846,10 +846,8 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                     params.append(work_center)
                 if search:
                     where.append("(CAST(i.legacy_identifier AS TEXT) LIKE ? OR CAST(i.id AS TEXT) LIKE ? OR CAST(o.id AS TEXT) LIKE ? OR CAST(o.item_id AS TEXT) LIKE ? OR COALESCE(o.operation_code, '') LIKE ? OR COALESCE(o.suboperation_code, '') LIKE ? OR COALESCE(o.work_center, '') LIKE ? OR COALESCE(o.short_text, '') LIKE ? OR COALESCE(i.object_code, '') LIKE ? OR COALESCE(i.description, '') LIKE ?)")
-                    s_term = f"%{search}%"
                     params.extend([s_term] * 10)
                 where_str = " AND ".join(where)
-
                 cursor.execute(f"SELECT COUNT(*) FROM item_operations o LEFT JOIN maintenance_items i ON i.id=o.item_id AND i.deleted_at IS NULL WHERE {where_str}", params)
                 total = cursor.fetchone()[0]
 
@@ -1017,10 +1015,8 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                     where.append("(CAST(i.legacy_identifier AS TEXT) LIKE ? OR CAST(i.id AS TEXT) LIKE ? OR CAST(o.id AS TEXT) LIKE ? OR CAST(o.item_id AS TEXT) LIKE ? OR CAST(t.id AS TEXT) LIKE ? OR COALESCE(o.operation_code, '') LIKE ? OR COALESCE(o.suboperation_code, '') LIKE ? OR COALESCE(o.short_text, '') LIKE ? OR COALESCE(t.text, '') LIKE ? OR COALESCE(i.object_code, '') LIKE ? OR COALESCE(i.description, '') LIKE ?)")
                     s_term = f"%{search}%"
                     params.extend([s_term] * 11)
-                where_str = " AND ".join(where)
 
                 cursor.execute(f"""SELECT COUNT(*) FROM item_operations o
-                                  LEFT JOIN maintenance_items i ON i.id=o.item_id AND i.deleted_at IS NULL
                                   LEFT JOIN operation_long_texts t ON t.operation_id=o.id
                                   WHERE {where_str}""", params)
                 total = cursor.fetchone()[0]
@@ -1507,12 +1503,88 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
 
             if path == '/api/export/systems':
                 proj_id = int(q_params.get('project_id', 0))
-                raw_item_ids = q_params.get('item_ids')
+                if not proj_id:
+                    self.send_error_json("ID do projeto é obrigatório.")
+                    return
+                project = models.get_project(proj_id) or {}
+                raw_item_ids = q_params.get('item_ids') or q_params.get('item_identifiers')
+
+                plans = models.list_plans(proj_id, {}, limit=None, offset=0)
+                items = models.list_items(proj_id, {}, limit=None, offset=0)
+                conn = get_db_connection()
+                cursor = conn.cursor()
+                cursor.execute("""SELECT o.*, i.legacy_identifier, i.object_type, i.object_code
+                                  FROM item_operations o JOIN maintenance_items i ON i.id=o.item_id
+                                  WHERE o.project_id=? AND o.status='ACTIVE' AND i.deleted_at IS NULL
+                                  ORDER BY CAST(i.legacy_identifier AS INTEGER), o.operation_code, o.suboperation_code""", (proj_id,))
+                operations = [models.to_dict(x) for x in cursor.fetchall()]
+                cursor.execute("""SELECT t.*, o.item_id, o.operation_code, o.suboperation_code,
+                                         i.legacy_identifier, i.object_type, i.object_code
+                                  FROM operation_long_texts t JOIN item_operations o ON o.id=t.operation_id
+                                  JOIN maintenance_items i ON i.id=o.item_id
+                                  WHERE t.project_id=? ORDER BY CAST(i.legacy_identifier AS INTEGER),
+                                  o.operation_code, o.suboperation_code, t.line_sequence""", (proj_id,))
+                long_texts = [models.to_dict(x) for x in cursor.fetchall()]
+                conn.close()
+
+                has_item_filter = False
+                if raw_item_ids:
+                    target_ids = set()
+                    target_idents = set()
+                    for part in str(raw_item_ids).split(','):
+                        p = part.strip()
+                        if p:
+                            target_idents.add(p)
+                            if p.isdigit():
+                                target_ids.add(int(p))
+                    if target_ids or target_idents:
+                        items = [i for i in items if (i.get('id') in target_ids) or (str(i.get('legacy_identifier') or '').strip() in target_idents)]
+                        has_item_filter = True
+
+                if has_item_filter:
+                    selected_item_ids = {i['id'] for i in items if i.get('id') is not None}
+                    selected_idents = {str(i.get('legacy_identifier') or '').strip() for i in items if i.get('legacy_identifier')}
+                    bound_plan_ids = {i['plan_id'] for i in items if i.get('plan_id')}
+                    plans = [p for p in plans if p.get('id') in bound_plan_ids]
+                    operations = [
+                        o for o in operations 
+                        if (o.get('item_id') in selected_item_ids) 
+                        or (str(o.get('legacy_identifier') or '').strip() in selected_idents)
+                    ]
+                    selected_op_ids = {o['id'] for o in operations if o.get('id') is not None}
+                    long_texts = [
+                        t for t in long_texts 
+                        if (t.get('operation_id') in selected_op_ids) 
+                        or (t.get('item_id') in selected_item_ids) 
+                        or (str(t.get('legacy_identifier') or '').strip() in selected_idents)
+                    ]
+
+                balance = calculations.project_balance(proj_id, {})
+                target_hh = balance.get('kpis', {}).get('avg_hh', 0)
+                for stop in balance.get('stops', []):
+                    stop['available_hh'] = target_hh
+                priorimeter_rows = models.list_priorimeter(proj_id, status='')
+                if has_item_filter and priorimeter_rows:
+                    selected_item_ids = {i['id'] for i in items if i.get('id') is not None}
+                    selected_idents = {str(i.get('legacy_identifier') or '').strip() for i in items if i.get('legacy_identifier')}
+                    priorimeter_rows = [
+                        r for r in priorimeter_rows 
+                        if (r.get('item_id') in selected_item_ids) 
+                        or (str(r.get('legacy_identifier') or '').strip() in selected_idents)
+                    ]
+
+                content = export_service.export_sap_workbook(
+                    plans, items, operations, long_texts, balance,
+                    project, scope='full', template=False, priorimeter_rows=priorimeter_rows
+                )
+
                 safe_name = re.sub(r'[^A-Za-z0-9_-]+', '_', project.get('name') or 'PM13')
                 stamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-                filename = f"CARGA_SISTEMAS_PM13_SELECIONADOS_{stamp}.xlsx" if item_ids else f"CARGA_SISTEMAS_PM13_{safe_name}_{stamp}.xlsx"
+                filename = f"CARGA_SISTEMAS_PM13_SELECIONADOS_{stamp}.xlsx" if has_item_filter else f"CARGA_SISTEMAS_PM13_{safe_name}_{stamp}.xlsx"
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
                 self.send_header('Content-Disposition', f'attachment; filename="{filename}"')
-                self.send_header('Content-Length', len(content))
+                self.send_header('Content-Length', str(len(content)))
                 self.end_headers()
                 self.wfile.write(content)
                 return
