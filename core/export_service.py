@@ -4,6 +4,14 @@ import zipfile
 from xml.sax.saxutils import escape
 from core.long_text_structure import materialize_record
 
+def clean_object_code(val):
+    if val is None:
+        return ''
+    s = str(val).strip()
+    if s.endswith('.0') and s[:-2].isdigit():
+        return s[:-2]
+    return s
+
 def format_excel_csv_value(val):
     """Formats a value for Portuguese Excel CSV.
     - Semicolon is the separator.
