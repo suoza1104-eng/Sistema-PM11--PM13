@@ -785,17 +785,39 @@ def export_sap_workbook(plans, items, operations=None, long_texts=None,
             _blank_if_zero(export_headcount), _blank_if_zero(export_hours)
         ])
     text_rows = []
-    for t in long_texts:
-        code = t.get('object_code')
-        is_equip = is_equipment_object(code, t.get('object_type'))
-        text_rows.append([
-            t.get('legacy_identifier'),
-            '' if is_equip else (code or ''),
-            code if is_equip else '',
-            None,
-            t.get('group_code'), t.get('group_counter'), t.get('operation_code'),
-            t.get('suboperation_code'), materialize_record(t)
-        ])
+    if operations:
+        texts_by_op = {}
+        for t in long_texts:
+            if t.get('operation_id'):
+                texts_by_op.setdefault(t.get('operation_id'), []).append(t)
+        for o in operations:
+            code = o.get('object_code')
+            is_equip = is_equipment_object(code, o.get('object_type'))
+            op_texts = [materialize_record(t) for t in texts_by_op.get(o.get('id'), [])]
+            valid_texts = [t for t in op_texts if t and str(t).strip()]
+            if not valid_texts:
+                valid_texts = ['']
+            for txt_val in valid_texts:
+                text_rows.append([
+                    o.get('legacy_identifier'),
+                    '' if is_equip else (code or ''),
+                    code if is_equip else '',
+                    None,
+                    o.get('group_code', ''), o.get('group_counter', ''), o.get('operation_code'),
+                    o.get('suboperation_code'), txt_val
+                ])
+    else:
+        for t in long_texts:
+            code = t.get('object_code')
+            is_equip = is_equipment_object(code, t.get('object_type'))
+            text_rows.append([
+                t.get('legacy_identifier'),
+                '' if is_equip else (code or ''),
+                code if is_equip else '',
+                None,
+                t.get('group_code'), t.get('group_counter'), t.get('operation_code'),
+                t.get('suboperation_code'), materialize_record(t)
+            ])
 
     all_specs = [('Cod Planos', plan_headers, plan_rows), ('ITENS', item_headers, item_rows),
                  ('OPERAÇÕES - REPARO', op_headers, op_rows), ('TEXTO LONGO REPARO.CSV', text_headers, text_rows)]
@@ -1269,15 +1291,38 @@ def export_pm13_systems_xlsx(project_id, item_ids=None):
         text_headers = ['Identificador', 'Local de instalação', 'Equipamento', 'Geral', 'GrpLisTar.', 'NumGrpRot', 'OPER', 'SUB OPER', 'Descrição da operação']
         text_rows = [text_headers]
         texts_by_operation = {}
-        for tx in long_texts:texts_by_operation.setdefault(tx.get('operation_id'),[]).append(tx)
+        for tx in long_texts:
+            op_id = tx.get('operation_id')
+            if op_id:
+                texts_by_operation.setdefault(op_id, []).append(tx)
+
         for op in operations:
-            it=item_by_id.get(op.get('item_id'),{});object_code=clean_object_code(it.get('object_code'));is_equipment=is_equipment_object(object_code, it.get('object_type'))
-            code=str(op.get('operation_code') or '').zfill(4);raw_sub=str(op.get('suboperation_code') or '').strip();sub=raw_sub.zfill(4) if raw_sub else ''
-            if code=='0010' and sub=='0010':
-                sol_hc=int(it.get('sol_headcount') or 0);sol_hours=float(it.get('sol_hours') or 0)
-                texts=[f'{sol_hc} MECÂNICOS {sol_hours:g} HORAS' if (sol_hc or sol_hours) else '']
-            else:texts=[materialize_record(tx) for tx in texts_by_operation.get(op.get('id'),[])]
-            for text_value in texts:text_rows.append([nponto_map.get(op.get('item_id'),''),'' if is_equipment else object_code,object_code if is_equipment else '','','','',code,sub,text_value])
+            it = item_by_id.get(op.get('item_id'), {})
+            object_code = clean_object_code(it.get('object_code'))
+            is_equipment = is_equipment_object(object_code, it.get('object_type'))
+            code = str(op.get('operation_code') or '').zfill(4)
+            raw_sub = str(op.get('suboperation_code') or '').strip()
+            sub = raw_sub.zfill(4) if (raw_sub and raw_sub not in ('-', '0', '0000')) else ''
+
+            op_texts = [materialize_record(tx) for tx in texts_by_operation.get(op.get('id'), [])]
+            valid_op_texts = [t for t in op_texts if t and str(t).strip()]
+
+            if valid_op_texts:
+                texts = valid_op_texts
+            elif code == '0010' and sub == '0010':
+                sol_hc = int(it.get('sol_headcount') or 0)
+                sol_hours = float(it.get('sol_hours') or 0)
+                texts = [f'{sol_hc} MECÂNICOS {sol_hours:g} HORAS' if (sol_hc or sol_hours) else '']
+            else:
+                texts = ['']
+
+            for text_value in texts:
+                text_rows.append([
+                    nponto_map.get(op.get('item_id'), ''),
+                    '' if is_equipment else object_code,
+                    object_code if is_equipment else '',
+                    '', '', '', code, sub, text_value
+                ])
 
         # 5. ABA PRIORÍMETRO
         priorimeter_headers = [
