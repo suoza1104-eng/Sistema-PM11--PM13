@@ -1160,7 +1160,7 @@ def export_pm13_systems_xlsx(project_id, item_ids=None):
 
         def route_description(item):
             route = str(item.get('legacy_start') or '').strip()
-            description = str(item.get('plan_description') or item.get('description') or '').strip()
+            description = str(item.get('description') or item.get('plan_description') or '').strip()
             return ' '.join(part for part in (route, description) if part)
 
         now = datetime.datetime.now()
