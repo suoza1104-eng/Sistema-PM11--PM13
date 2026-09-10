@@ -356,6 +356,7 @@ window.PM11.UI = {
 
   makeSearchableSelect(selectEl) {
     if (!selectEl || selectEl.dataset.searchableEnhanced === 'true') return;
+    if (selectEl.classList.contains('no-searchable')) return;
     selectEl.dataset.searchableEnhanced = 'true';
 
     // Hide native select visually

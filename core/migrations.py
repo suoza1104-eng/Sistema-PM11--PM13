@@ -1051,4 +1051,16 @@ def run_migrations(conn):
             VALUES (?, ?, ?, ?, ?)
         """, ('admin@usiminas.com', 'Administrador PM13/PM11', pwd_hash, 'ADMIN', 'ACTIVE'))
 
+    # Compatible audit migration and one-time repair of empty PM13 catalogs.
+    columns = {row[1] for row in cursor.execute('PRAGMA table_info(audit_log)')}
+    for field in ('actor_name', 'actor_account', 'actor_sid', 'actor_computer'):
+        if field not in columns:
+            cursor.execute(f'ALTER TABLE audit_log ADD COLUMN {field} TEXT')
+    cursor.execute('CREATE TABLE IF NOT EXISTS app_migrations (name TEXT PRIMARY KEY)')
+    if not cursor.execute("SELECT 1 FROM app_migrations WHERE name='pm13_default_cycles_v1'").fetchone():
+        from core.default_cycles import ensure_default_cycles
+        for row in cursor.execute('SELECT id FROM projects WHERE deleted_at IS NULL').fetchall():
+            ensure_default_cycles(conn, row[0])
+        cursor.execute("INSERT INTO app_migrations(name) VALUES('pm13_default_cycles_v1')")
+
     conn.commit()

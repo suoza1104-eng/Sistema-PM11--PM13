@@ -1,14 +1,14 @@
 @echo off
 chcp 65001 > nul
-title Sistema PM13 / PM11 - Inicializador
-
 cd /d "%~dp0"
-
-python launcher.py
-
-if errorlevel 1 (
-    echo.
-    echo [AVISO] Iniciar via launcher.py direto...
+where py >nul 2>nul
+if not errorlevel 1 (
+    py -3 app.py
+) else (
     python app.py
 )
-
+if errorlevel 1 (
+    echo Falha ao executar. Verifique se Python 3 esta instalado.
+    pause
+    exit /b 1
+)

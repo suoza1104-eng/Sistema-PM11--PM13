@@ -4,7 +4,8 @@ import unicodedata
 
 # Base directory is the parent of core/ (i.e. PM13_LOCAL root)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DB_DIR = os.path.join(BASE_DIR, 'data')
+from runtime_paths import DATA_DIR
+DB_DIR = str(DATA_DIR)
 DB_PATH = os.path.join(DB_DIR, 'pm13.db')
 
 _migrations_run = False

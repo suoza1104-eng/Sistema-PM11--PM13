@@ -30,7 +30,7 @@ from core.long_text_structure import detect_structure, prepare_for_save, materia
 import core_pm11.handler as pm11_handler
 import core_pm11.migrations as pm11_migrations
 
-APP_BUILD = '2026.08.19-v6-priorimetro-compacto-multicola'
+from runtime_paths import BUILD as APP_BUILD, prepare_migrations
 
 
 def _server_trace(event, **fields):
@@ -615,10 +615,8 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
         return None
 
     def get_authenticated_user(self):
-        token = self.get_cookie('pm13_session') or self.headers.get('X-Session-Token')
-        if not token:
-            return None
-        return models.get_user_by_session(token)
+        from windows_identity import get_identity
+        return get_identity()
 
     def do_GET(self):
         url_parsed = urllib.parse.urlparse(self.path)
@@ -3000,7 +2998,11 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                     import time
                     time.sleep(1.0)
                     print("Shutdown requested. Exiting application...")
-                    os._exit(0)
+                    callback = getattr(self.server, 'shutdown_callback', None)
+                    if callback:
+                        callback()
+                    else:
+                        self.server.shutdown()
                     
                 import threading
                 threading.Thread(target=shutdown_server).start()
@@ -3486,6 +3488,7 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
             traceback.print_exc()
 
 def run_server():
+    prepare_migrations()
     # 1. Run migrations first
     print("Iniciando banco de dados PM13...")
     conn = get_db_connection()
@@ -3498,20 +3501,9 @@ def run_server():
     # import previews. Refuse startup until the previous instance is closed.
     port = 8765
     try:
-        # Listen on every local interface so authorized computers on the same
-        # LAN can access the application. The browser on this machine still
-        # uses loopback below.
-        httpd = ExclusiveThreadingHTTPServer(('0.0.0.0', port), PM13RequestHandler)
+        httpd = ExclusiveThreadingHTTPServer(('127.0.0.1', port), PM13RequestHandler)
         httpd.daemon_threads = True
         print(f"Servidor iniciado com sucesso: http://127.0.0.1:{port}")
-        try:
-            probe = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            probe.connect(('8.8.8.8', 80))
-            local_ip = probe.getsockname()[0]
-            probe.close()
-            print(f"Acesso pela rede local: http://{local_ip}:{port}")
-        except OSError:
-            print(f"Acesso pela rede local: use o IP deste computador na porta {port}")
         print(f"Versão em execução: {APP_BUILD}")
     except socket.error as e:
         if e.errno in (10013, 10048, 98):

@@ -1,7 +1,8 @@
 import os, json, zipfile, datetime, shutil
 from .database import DB_PATH, get_conn
 BASE_DIR=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BACKUP_DIR=os.path.join(BASE_DIR,'backups')
+from runtime_paths import BACKUP_DIR as USER_BACKUP_DIR
+BACKUP_DIR=str(USER_BACKUP_DIR)
 
 def create_backup(label='manual'):
     os.makedirs(BACKUP_DIR,exist_ok=True)

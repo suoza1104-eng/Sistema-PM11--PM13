@@ -147,6 +147,10 @@ window.Auth = {
       }
     }
     if (wrap && user) {
+      if (user.local_identity) {
+        wrap.innerHTML = `<span class="windows-avatar">${user.photo ? `<img src="${this.esc(user.photo)}" alt="" width="32" height="32">` : this.esc(user.initials || 'UL')}</span><span><b>${this.esc(user.name)}</b><br><small>${this.esc(user.account)}</small></span>`;
+        return;
+      }
       wrap.innerHTML = `
         <span>👤 <b>${this.esc(user.name || user.login)}</b></span>
         <button class="btn-logout" id="btn-user-logout" title="Encerrar sessão">Sair</button>
@@ -235,4 +239,3 @@ if (document.readyState === 'loading') {
 } else {
   window.Auth.init();
 }
-

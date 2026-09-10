@@ -18,3 +18,11 @@ scratch/
 *.sqlite3
 data/
 backups/
+
+.venv-desktop/
+build/
+dist/
+offline_packages/
+offline_runtime/*.exe
+dados_usuario/
+backups_usuario/

@@ -1,7 +1,8 @@
 import os, sqlite3, unicodedata
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_DIR = os.path.join(BASE_DIR, 'data')
+from runtime_paths import DATA_DIR as USER_DATA_DIR
+DATA_DIR = str(USER_DATA_DIR)
 DB_PATH = os.path.join(DATA_DIR, 'pm11.db')
 
 

@@ -7,8 +7,9 @@ import shutil
 from core.migrations import run_migrations
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DB_PATH = os.path.join(BASE_DIR, 'data', 'pm13.db')
-BACKUP_DIR = os.path.join(BASE_DIR, 'backups')
+from runtime_paths import DATA_DIR, BACKUP_DIR as USER_BACKUP_DIR
+DB_PATH = str(DATA_DIR / 'pm13.db')
+BACKUP_DIR = str(USER_BACKUP_DIR)
 
 def get_projects_summary():
     """Gets a list of projects and counts for metadata inclusion."""
@@ -78,7 +79,7 @@ def create_backup(name_suffix=None):
         json.dump(metadata, f, indent=4, ensure_ascii=False)
         
     # 3. Create zip file
-    pm11_db_path = os.path.join(BASE_DIR, 'data', 'pm11.db')
+    pm11_db_path = str(DATA_DIR / 'pm11.db')
     temp_pm11_db_path = None
     if os.path.exists(pm11_db_path):
         temp_pm11_db_path = os.path.join(BACKUP_DIR, f"temp_pm11_{timestamp}.db")

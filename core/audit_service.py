@@ -11,11 +11,15 @@ def log_action(project_id, entity_type, entity_id, action, previous_data=None, n
         
         prev_json = json.dumps(previous_data, ensure_ascii=False) if previous_data is not None else None
         new_json = json.dumps(new_data, ensure_ascii=False) if new_data is not None else None
+        from windows_identity import get_identity
+        actor = get_identity()
         
         cursor.execute("""
-        INSERT INTO audit_log (project_id, entity_type, entity_id, action, previous_data_json, new_data_json)
-        VALUES (?, ?, ?, ?, ?, ?);
-        """, (project_id, entity_type, entity_id, action, prev_json, new_json))
+        INSERT INTO audit_log (project_id, entity_type, entity_id, action, previous_data_json, new_data_json,
+                               actor_name, actor_account, actor_sid, actor_computer)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        """, (project_id, entity_type, entity_id, action, prev_json, new_json,
+              actor['name'], actor['account'], actor['sid'], actor['computer']))
         
         conn.commit()
     except Exception as e:

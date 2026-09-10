@@ -215,6 +215,8 @@ def create_project(name, description, area, system_name=None, current_counter=0,
         VALUES (?, ?, ?, ?, ?, ?, ?, 'ACTIVE');
         """, (name, description, area, system_name, current_counter, default_horizon, utilization_factor))
         project_id = cursor.lastrowid
+        from core.default_cycles import ensure_default_cycles
+        ensure_default_cycles(conn, project_id)
         
         # Capacity is project-level (hours/person + Tool Time).
         # Legacy shift rows are no longer created for new projects.

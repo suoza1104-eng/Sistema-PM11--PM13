@@ -24,6 +24,11 @@ def build_update_package():
         'INICIAR_PM13.bat',
         'TESTAR_PM13.bat',
         'app.py',
+        'runtime_paths.py',
+        'windows_identity.py',
+        'build_clean_package.py',
+        'package_desktop.py',
+        'README_PORTABLE.md',
         'core',
         'core_pm11',
         'catalogs',
@@ -66,4 +71,3 @@ def build_update_package():
 
 if __name__ == "__main__":
     build_update_package()
-

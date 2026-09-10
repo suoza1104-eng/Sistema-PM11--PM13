@@ -1,25 +1,14 @@
 @echo off
-title PM13 Siderurgia - Iniciar Sistema
 chcp 65001 > nul
-
-echo ========================================================
-echo   INICIANDO SISTEMA DE CONTROLE PM13 (SIDERURGIA)
-echo ========================================================
-
-:: Detect python
-set PYTHON_CMD=python
-py -3 --version >nul 2>&1
-if %errorlevel% equ 0 (
-    set PYTHON_CMD=py -3
+cd /d "%~dp0"
+where py >nul 2>nul
+if not errorlevel 1 (
+    py -3 app.py
+) else (
+    python app.py
 )
-
-echo Usando interpretador: %PYTHON_CMD%
-echo.
-echo Inicializando o servidor local e abrindo o navegador...
-echo Pressione Ctrl+C ou clique em "Encerrar Sistema" na barra lateral para desligar.
-echo ========================================================
-echo.
-
-%PYTHON_CMD% app.py
-
-pause
+if errorlevel 1 (
+    echo Falha ao executar. Verifique se Python 3 esta instalado.
+    pause
+    exit /b 1
+)

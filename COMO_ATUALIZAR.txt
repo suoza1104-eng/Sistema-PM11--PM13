@@ -1,0 +1,11 @@
+ATUALIZACAO DESKTOP PM11 / PM13
+
+1. Feche o sistema completamente.
+2. Extraia ATUALIZACAO_PM11_PM13.zip.
+3. Copie os arquivos extraidos por cima da pasta do aplicativo.
+4. Confirme a substituicao dos arquivos do programa.
+5. Abra Sistema_PM11_PM13.exe.
+
+Nunca apague dados_usuario ou backups_usuario.
+O ZIP de atualizacao nao contem essas pastas nem bancos de dados.
+Distribua a pasta completa na primeira instalacao, incluindo _internal e offline_runtime.
