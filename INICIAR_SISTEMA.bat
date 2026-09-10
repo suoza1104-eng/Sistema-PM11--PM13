@@ -11,3 +11,4 @@ if errorlevel 1 (
     echo [AVISO] Iniciar via launcher.py direto...
     python app.py
 )
+

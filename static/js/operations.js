@@ -17,6 +17,8 @@ const Operations = {
         ,row_color: ''
     },
     currentOperations: [],
+    operationWorkCenters: [],
+    opSearchTimer: null,
     selectedOperationIds: new Set(),
 
     // --- Long Texts State ---
@@ -108,6 +110,10 @@ const Operations = {
             const opSearchInput = document.getElementById('filter-ops-search');
             if (opSearchInput) {
                 opSearchInput.onkeydown = (e) => { if (e.key === 'Enter') this.applyOpFilters(); };
+                opSearchInput.oninput = () => {
+                    window.clearTimeout(this.opSearchTimer);
+                    this.opSearchTimer = window.setTimeout(() => this.applyOpFilters(), 350);
+                };
             }
             const opApplyBtn = document.getElementById('btn-apply-ops-filters');
             if (opApplyBtn) opApplyBtn.onclick = () => this.applyOpFilters();
@@ -193,7 +199,8 @@ const Operations = {
             const btnDeleteLts = document.getElementById('btn-bulk-delete-long-texts');
             if (btnDeleteLts) btnDeleteLts.onclick = () => this.bulkDelete('long-texts');
             document.getElementById('btn-bulk-edit-operations-confirm').onclick = () => this.bulkEditOperationsConfirm();
-            document.getElementById('btn-bulk-edit-long-texts-confirm').onclick = () => this.bulkEditLongTextsConfirm();
+            const confirmLongTexts = document.getElementById('btn-bulk-edit-long-texts-confirm');
+            if (confirmLongTexts) confirmLongTexts.onclick = () => this.bulkEditLongTextsConfirm();
             ['operations', 'long-texts'].forEach(kind => {
                 document.querySelectorAll(`[data-close="modal-bulk-edit-${kind}"]`).forEach(btn => {
                     btn.onclick = () => this._closeModal(`modal-bulk-edit-${kind}`);
@@ -333,7 +340,7 @@ const Operations = {
                     else if (st === 'OK') ops = ops.filter(o => !o.validation_issues || o.validation_issues.length === 0);
                 }
 
-                const total = res.total || ops.length;
+                const total = Number(res.total ?? ops.length);
                 this.currentOperations = ops;
 
                 // Apply column filters client-side
@@ -341,17 +348,26 @@ const Operations = {
                     ops = window.ColumnFilter.applyFiltersToDataset('operations-table', ops);
                 }
 
-                if (countLbl) {
-                    countLbl.textContent = `${total} ${total === 1 ? 'operação cadastrada' : 'operações cadastradas'}`;
-                }
-
                 // Update WC filter options dynamically
                 const wcSel = document.getElementById('filter-ops-wc');
                 if (wcSel) {
-                    const allWcs = [...new Set(this.currentOperations.map(o => o.work_center).filter(Boolean))].sort();
+                    if (!this.opFilters.search && !this.opFilters.work_center) {
+                        this.operationWorkCenters = [...new Set(
+                            this.currentOperations.map(o => o.work_center).filter(Boolean)
+                        )].sort((a, b) => String(a).localeCompare(String(b), 'pt-BR'));
+                    }
+                    const allWcs = this.operationWorkCenters;
                     const curVal = wcSel.value;
                     wcSel.innerHTML = '<option value="">Todos os C.T.</option>' +
                         allWcs.map(wc => `<option value="${this.esc(wc)}" ${wc === curVal ? 'selected' : ''}>${this.esc(wc)}</option>`).join('');
+                }
+
+                if (countLbl) {
+                    const visible = ops.length;
+                    const hasClientFilter = Boolean(this.opFilters.row_color || this.opFilters.issue_status);
+                    countLbl.textContent = hasClientFilter
+                        ? `${visible} de ${total} operações encontradas`
+                        : `${total} ${total === 1 ? 'operação encontrada' : 'operações encontradas'}`;
                 }
 
                 if (ops.length === 0) {

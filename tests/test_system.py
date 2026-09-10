@@ -562,6 +562,31 @@ class TestHttpApiIntegration(unittest.TestCase):
         self.assertGreater(len(data), 0)
         self.assertEqual(data[0]['name'], "Servidor Integrado")
 
+    def test_operations_search_filters_without_server_error(self):
+        conn = database.get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""INSERT INTO maintenance_items
+            (project_id,legacy_identifier,object_type,object_code,gpm,work_center,condition_code,
+             priority,description,character_count,duration_hours,headcount,hh,status)
+            VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,'ACTIVE')""",
+            (self.proj_id,'C20-ITEM','EQUIPAMENTO','OBJ-C20','042','C20','P',1,
+             'ITEM PARA TESTE DE FILTRO',24,2.0,2,4.0))
+        item_id = cursor.lastrowid
+        cursor.execute("""INSERT INTO item_operations
+            (project_id,item_id,operation_code,suboperation_code,work_center,short_text,unit,headcount,hours)
+            VALUES(?,?,?,?,?,?,?,?,?)""",
+            (self.proj_id,item_id,'0020','','C20','INSPECIONAR FILTRO','H',2,2.0))
+        conn.commit(); conn.close()
+
+        query = urllib.parse.urlencode({'project_id': self.proj_id, 'search': 'C20'})
+        response = urllib.request.urlopen(
+            f"http://127.0.0.1:{self.port}/api/operations?{query}")
+        data = json.loads(response.read().decode('utf-8'))
+
+        self.assertEqual(response.status, 200)
+        self.assertGreaterEqual(data['total'], 1)
+        self.assertTrue(any(row['work_center'] == 'C20' for row in data['operations']))
+
     def test_project_lock_blocks_mutations_and_import_but_allows_reads(self):
         base = f"http://127.0.0.1:{self.port}"
         def post(path, payload, headers=None):

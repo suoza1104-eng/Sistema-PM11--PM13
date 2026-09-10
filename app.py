@@ -845,6 +845,7 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                     where.append("o.work_center = ?")
                     params.append(work_center)
                 if search:
+                    s_term = f"%{search}%"
                     where.append("(CAST(i.legacy_identifier AS TEXT) LIKE ? OR CAST(i.id AS TEXT) LIKE ? OR CAST(o.id AS TEXT) LIKE ? OR CAST(o.item_id AS TEXT) LIKE ? OR COALESCE(o.operation_code, '') LIKE ? OR COALESCE(o.suboperation_code, '') LIKE ? OR COALESCE(o.work_center, '') LIKE ? OR COALESCE(o.short_text, '') LIKE ? OR COALESCE(i.object_code, '') LIKE ? OR COALESCE(i.description, '') LIKE ?)")
                     params.extend([s_term] * 10)
                 where_str = " AND ".join(where)
@@ -1015,8 +1016,6 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
                     where.append("(CAST(i.legacy_identifier AS TEXT) LIKE ? OR CAST(i.id AS TEXT) LIKE ? OR CAST(o.id AS TEXT) LIKE ? OR CAST(o.item_id AS TEXT) LIKE ? OR CAST(t.id AS TEXT) LIKE ? OR COALESCE(o.operation_code, '') LIKE ? OR COALESCE(o.suboperation_code, '') LIKE ? OR COALESCE(o.short_text, '') LIKE ? OR COALESCE(t.text, '') LIKE ? OR COALESCE(i.object_code, '') LIKE ? OR COALESCE(i.description, '') LIKE ?)")
                     s_term = f"%{search}%"
                     params.extend([s_term] * 11)
-
-                where_str = " AND ".join(where)
 
                 cursor.execute(f"""SELECT COUNT(*) FROM item_operations o
                                   LEFT JOIN operation_long_texts t ON t.operation_id=o.id
@@ -1528,6 +1527,7 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
             if path == '/api/export':
                 export_started = time.perf_counter()
                 export_type = q_params.get('type')
+                export_format = str(q_params.get('format') or 'xlsx').strip().lower()
                 proj_id = int(q_params.get('project_id', 0))
                 _server_trace('EXPORT INICIO', projeto=proj_id, tipo=export_type, formato=export_format, escopo=q_params.get('scope'))
                 
@@ -1583,6 +1583,10 @@ class PM13RequestHandler(BaseHTTPRequestHandler):
 
                     if has_item_filter:
                         selected_item_ids = {i['id'] for i in items if i.get('id') is not None}
+                        selected_idents = {
+                            str(i.get('legacy_identifier') or '').strip()
+                            for i in items if i.get('legacy_identifier')
+                        }
                         
                         bound_plan_ids = {i['plan_id'] for i in items if i.get('plan_id')}
                         plans = [p for p in plans if p.get('id') in bound_plan_ids]

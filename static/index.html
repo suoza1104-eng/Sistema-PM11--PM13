@@ -763,7 +763,7 @@
                     <!-- Filtros gerais - Operações -->
                     <div class="card filters-card" style="margin-bottom: 16px; padding: 10px 16px;">
                         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                            <input type="search" id="filter-ops-search" placeholder="Pesquisar por ID, operação, C.T. ou texto breve..." style="flex: 2; min-width: 220px; height: 34px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-primary); font-size: 13px;" onkeydown="if(event.key==='Enter'){ event.preventDefault(); Operations.applyOpFilters(); }" onsearch="Operations.applyOpFilters()">
+                            <input type="search" id="filter-ops-search" placeholder="Pesquisar por ID, operação, suboperação, C.T., objeto ou descrição..." aria-label="Pesquisar operações" style="flex: 2; min-width: 220px; height: 34px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-primary); font-size: 13px;" onsearch="Operations.applyOpFilters()">
                             <select id="filter-ops-wc" style="height: 34px; min-width: 150px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-primary); font-size: 13px;" onchange="Operations.applyOpFilters()"><option value="">Todos os C.T.</option></select>
                             <select id="filter-ops-issues" style="height: 34px; min-width: 170px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-primary); font-size: 13px;" onchange="Operations.applyOpFilters()">
                                 <option value="">Todas as Operações</option>
@@ -3554,8 +3554,8 @@
     <script src="js/items.js?v=2.1.0"></script>
     <script src="js/spellchecker.js?v=1.0.0"></script>
     <script src="js/standards.js?v=2.2.0"></script>
-    <script src="js/long_text_editor.js?v=1.2.5"></script>
-    <script src="js/operations.js?v=2.0.2"></script>
+    <script src="js/long_text_editor.js?v=1.2.6"></script>
+    <script src="js/operations.js?v=2.0.3"></script>
     <script src="js/balance.js?v=2.4.0"></script>
     <script src="js/priorimeter.js?v=1.0.0"></script>
     <script src="js/export_manager.js?v=1.0.1"></script>
@@ -3569,7 +3569,7 @@
     <script src="js/pm11/dashboard.js?v=4.0.0"></script>
     <script src="js/pm11/plans.js?v=4.0.0"></script>
     <script src="js/pm11/items.js?v=9.0.0"></script>
-    <script src="js/pm11/characteristics.js?v=6.0.0"></script>
+    <script src="js/pm11/characteristics.js?v=6.0.1"></script>
     <script src="js/pm11/balance.js?v=11.0.0"></script>
     <script src="js/pm11/templates.js?v=7.0.0"></script>
     <script src="js/pm11/io.js?v=3.0.0"></script>

@@ -190,8 +190,8 @@ window.LongTextEditor = {
                 }
             });
         }
-        if (!document.dataset.ltGlobalKeyBound) {
-            document.dataset.ltGlobalKeyBound = '1';
+        if (!document.documentElement.dataset.ltGlobalKeyBound) {
+            document.documentElement.dataset.ltGlobalKeyBound = '1';
             document.addEventListener('keydown', event => {
                 const modal = document.getElementById('modal-long-text');
                 if (!modal || modal.classList.contains('hidden') || modal.style.display === 'none') return;

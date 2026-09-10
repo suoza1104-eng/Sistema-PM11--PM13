@@ -515,7 +515,7 @@ def parse_operation_sheets(reader, sheet_names, column_mapping=None, selected_en
                     if numeric_code is not None and str(numeric_code).strip().replace('.0', '').isdigit():
                         code = numeric_code
                 has_mapped_code = isinstance(lt_map.get('operation_code'), int)
-                has_code_header = has_header(h, *code_candidates, exact=True)
+                has_code_header = has_header(h, *code_candidates_numeric, exact=True)
                 if not has_mapped_code and not has_code_header and (not str(code).strip().isdigit()) and len(row) > 4:
                     legacy_code = normalize_value(row[4])
                     if legacy_code is not None:
