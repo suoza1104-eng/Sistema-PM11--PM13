@@ -1355,9 +1355,17 @@ def export_pm13_systems_xlsx(project_id, item_ids=None):
                 if (r.get('item_id') in selected_item_ids) or (str(r.get('legacy_identifier') or '').strip() in selected_idents)
             ]
 
+        nponto_by_item_id = {it['id']: nponto_map.get(it['id'], '') for it in items if it.get('id') is not None}
+        nponto_by_legacy_id = {str(it['legacy_identifier']).strip(): nponto_map.get(it['id'], '') for it in items if it.get('legacy_identifier')}
+
         priorimeter_rows = [priorimeter_headers]
         for r in prio_all:
-            row = [r.get(f, '') for f in priorimeter_fields]
+            item_nponto = (
+                nponto_by_item_id.get(r.get('item_id'))
+                or nponto_by_legacy_id.get(str(r.get('legacy_identifier') or '').strip())
+                or r.get('legacy_identifier', '')
+            )
+            row = [item_nponto if f == 'legacy_identifier' else r.get(f, '') for f in priorimeter_fields]
             priorimeter_rows.append(row)
 
         sheets = [
